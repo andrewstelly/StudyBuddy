@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global styles */
+body {
+  margin: 0;
+  font-family: sans-serif;
+}
+
+/* Sidebar container: fixed on the left, full height, content centered horizontally and aligned to the top */
+.sidebar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 16rem; /* 16rem equals Tailwind's w-64 */
+  background-color: #2d3748; /* dark gray */
+  color: #fff;
+  padding: 1.25rem;
+  padding-top: 2rem; /* extra spacing at top */
+  overflow-y: auto;
+
+  /* Use flex to center content horizontally and align it to the top */
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* centers items horizontally */
+  justify-content: flex-start; /* aligns items at the top */
+}
+
+/* Enlarge buttons inside the sidebar */
+.sidebar-container button {
+  font-size: 1.125rem;  /* larger text */
+  padding: 0.75rem 1.25rem; /* bigger clickable area */
+}
+
+/* Main container: offset by the sidebar width */
+.main-container {
+  margin-left: 16rem; /* same as sidebar width */
+  height: 100vh;
+  padding: 1rem;
+}
+
+/* Centering the content in the main area */
+.center-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: #edf2f7; /* light gray */
+}
+
+/* Box around the file upload component */
+/* This targets the direct child div inside .center-page */
+.center-page > div {
+  background-color: #9296ca; /* white background */
+  padding: 2rem; /* similar to Tailwind's p-8 */
+  border-radius: 0.5rem; /* rounded corners */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+              0 4px 6px -2px rgba(0, 0, 0, 0.1); /* subtle shadow */
+}
