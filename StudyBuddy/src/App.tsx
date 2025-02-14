@@ -1,4 +1,3 @@
-import React from "react";
 import Sidebar from "./components/Sidebar";
 import FileUpload from "./components/FileUpload";
 import "./styles.css";
