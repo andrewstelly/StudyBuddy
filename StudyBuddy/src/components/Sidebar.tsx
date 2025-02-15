@@ -1,24 +1,31 @@
 import React from "react";
 import { Button } from "./UI/Button"; // Adjust the import path as needed
+import { Home, Settings, Notebook, ClipboardList, Layers } from "lucide-react"; // Import icons
 
 const Sidebar: React.FC = () => {
   return (
-    <div className="fixed inset-y-0 left-0 w-64 bg-gray-800 text-white p-5 shadow-lg">
-      <h2 className="text-2xl font-bold mb-6">StudyBuddyAI</h2>
-      <div className="flex flex-col space-y-4">
-        <Button variant="outline" className="w-full justify-start cursor-pointer" onClick={() => console.log("Profile button clicked")}>
+    <div>
+      <h2>StudyBuddyAI</h2>
+      
+      <div className="flex flex-col space-y-2">
+        <Button className="w-full justify-start" onClick={() => console.log("Profile button clicked")}>
+          <Home className="mr-2" size={20} />
           Profile
         </Button>
-        <Button variant="outline" className="w-full justify-start cursor-pointer" onClick={() => console.log("Settings button clicked")}>
+        <Button className="w-full justify-start" onClick={() => console.log("Settings button clicked")}>
+          <Settings className="mr-2" size={20} />
           Settings
         </Button>
-        <Button variant="outline" className="w-full justify-start cursor-pointer" onClick={() => console.log("Notes button clicked")}>
+        <Button className="w-full justify-start" onClick={() => console.log("Notes button clicked")}>
+          <Notebook className="mr-2" size={20} />
           Notes
         </Button>
-        <Button variant="outline" className="w-full justify-start cursor-pointer" onClick={() => console.log("Practice Tests button clicked")}>
+        <Button className="w-full justify-start" onClick={() => console.log("Practice Tests button clicked")}>
+          <ClipboardList className="mr-2" size={20} />
           Practice Tests
         </Button>
-        <Button variant="outline" className="w-full justify-start cursor-pointer" onClick={() => console.log("Flash Cards button clicked")}>
+        <Button className="w-full justify-start" onClick={() => console.log("Flash Cards button clicked")}>
+          <Layers className="mr-2" size={20} />
           Flash Cards
         </Button>
       </div>

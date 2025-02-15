@@ -5,11 +5,7 @@ interface CenterPageProps {
 }
 
 const CenterPage: React.FC<CenterPageProps> = ({ children }) => {
-  return (
-    <div className="flex h-screen items-center justify-center bg-gray-200">
-      {children}
-    </div>
-  );
+  return <div>{children}</div>;
 };
 
 export default CenterPage;
