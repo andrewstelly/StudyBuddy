@@ -2,7 +2,7 @@ import openai
 import whisper
 
 # Initialize the OpenAI client with the API key
-client = openai.OpenAI(api_key="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")  # Replace with your actual API key
+client = openai.OpenAI(api_key="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")  # Replace with your actual API key
 
 selection = True
 user_choice = 25 #will be used later for while loop
