@@ -1,8 +1,15 @@
+import os
+from dotenv import load_dotenv
 import openai
 import whisper
 
+load_dotenv()
+
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("No API key found. Please set the OPENAI_API_KEY environment variable in your .env file.")
 # Initialize the OpenAI client with the API key
-client = openai.OpenAI(api_key="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")  # Replace with your actual API key
+client = openai.OpenAI(api_key=api_key)
 
 selection = True
 user_choice = 25 #will be used later for while loop
