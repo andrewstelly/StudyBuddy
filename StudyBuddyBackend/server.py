@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify
 # Add the directory containing WhisperDev.py to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'StudyBuddyBackend')))
 
-from WhisperDev import transcribe_mp3, generate_summary, create_study_guide, create_practice_test  # Import the functions from WhisperDev.py
+from WhisperDev import transcribe_mp3, generate_summary, create_study_guide, create_practice_test, translate_transcription  # Import the functions from WhisperDev.py
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
@@ -29,6 +29,8 @@ def upload_file():
     generate_summary_flag = request.form.get("summary") == "true"
     create_study_guide_flag = request.form.get("studyGuide") == "true"
     create_practice_test_flag = request.form.get("practiceTest") == "true"
+    translate_flag = request.form.get("translate") == "true"
+    target_language = request.form.get("targetLanguage")
 
     results = {}
 
@@ -51,6 +53,11 @@ def upload_file():
     if create_practice_test_flag:
         results["practice_test"] = create_practice_test(transcription_text)
         print("Practice Test completed")
+
+    # Translate transcription if selected
+    if translate_flag and target_language:
+        results["translation"] = translate_transcription(transcription_text, target_language)
+        print(f"Translation to {target_language} completed")
 
     # Delete the file after processing
     os.remove(file_path)
