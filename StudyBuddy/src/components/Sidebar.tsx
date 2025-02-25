@@ -1,34 +1,75 @@
 import React from "react";
-import { Button } from "./UI/Button"; // Adjust the import path as needed
-import { Home, Settings, Notebook, ClipboardList, Layers } from "lucide-react"; // Import icons
+import { Button } from "./ui/Button";
+import { Home, Settings, Notebook, ClipboardList, Layers, ChevronRight } from "lucide-react"; // Import icons
 
-const Sidebar: React.FC = () => {
+import { useState } from "react";
+import "./SidebarStyle.css";
+
+// Dynamically import the external CSS file
+const loadExternalCSS = (url: string) => {
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = url;
+  document.head.appendChild(link);
+};
+
+// Load the boxicons CSS
+loadExternalCSS("https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css");
+
+const Sidebar = () => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const toggleSidebar = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    setIsExpanded((prev) => !prev);
+  };
+
   return (
-    <div>
-      <h2>StudyBuddyAI</h2>
-      
-      <div className="flex flex-col space-y-2">
-        <Button className="w-full justify-start" onClick={() => console.log("Profile button clicked")}>
-          <Home className="mr-2" size={20} />
-          Profile
-        </Button>
-        <Button className="w-full justify-start" onClick={() => console.log("Settings button clicked")}>
-          <Settings className="mr-2" size={20} />
-          Settings
-        </Button>
-        <Button className="w-full justify-start" onClick={() => console.log("Notes button clicked")}>
-          <Notebook className="mr-2" size={20} />
-          Notes
-        </Button>
-        <Button className="w-full justify-start" onClick={() => console.log("Practice Tests button clicked")}>
-          <ClipboardList className="mr-2" size={20} />
-          Practice Tests
-        </Button>
-        <Button className="w-full justify-start" onClick={() => console.log("Flash Cards button clicked")}>
-          <Layers className="mr-2" size={20} />
-          Flash Cards
-        </Button>
-      </div>
+    <div className={isExpanded ? "sb-expanded" : ""}>
+      <aside>
+        <nav>
+          <ul>
+            <li>
+              <a href="#">
+                <i className="bx bx-home-circle"></i>
+                <span>Profile</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i className="bx bx-cog"></i>
+                <span>Settings</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i className="bx bx-book"></i>
+                <span>Notes</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i className="bx bx-test-tube"></i>
+                <span>Practice Tests</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i className="bx bx-note"></i>
+                <span>Flashcards</span>
+              </a>
+            </li>
+            
+            <li>
+              <a href="#" onClick={toggleSidebar}>
+                <i className="bx bxs-chevron-right"></i>
+                <span>Collapse</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+      <main></main>
     </div>
   );
 };

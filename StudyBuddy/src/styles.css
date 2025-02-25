@@ -15,7 +15,7 @@ body {
   left: 0;
   bottom: 0;
   width: 16rem; /* 16rem equals Tailwind's w-64 */
-  background-color: #2d3748; /* dark gray */
+  background-color: #28edff; /* dark gray */
   color: #fff;
   padding: 1.25rem;
   padding-top: 2rem; /* extra spacing at top */
