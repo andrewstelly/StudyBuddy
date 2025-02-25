@@ -1,8 +1,0 @@
-# Ignore Python bytecode files
-*.pyc
-__pycache__/
-
-
-# Ignore other files and directories as needed
-uploads/
-.env

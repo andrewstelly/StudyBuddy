@@ -15,7 +15,7 @@ body {
   left: 0;
   bottom: 0;
   width: 16rem; /* 16rem equals Tailwind's w-64 */
-  background-color: #2d3748; /* dark gray */
+  background-color: #4c6694; /* dark gray */
   color: #fff;
   padding: 1.25rem;
   padding-top: 2rem; /* extra spacing at top */
@@ -36,26 +36,107 @@ body {
 
 /* Main container: offset by the sidebar width */
 .main-container {
-  margin-left: 16rem; /* same as sidebar width */
+  margin-left: 16rem; /* Matches sidebar width */
   height: 100vh;
-  padding: 1rem;
+  display: flex;
+  width: calc(100vw - 16rem); /* Full width minus sidebar */
 }
 
-/* Centering the content in the main area */
-.center-page {
+/* Make file-upload-layout take up all remaining space */
+.file-upload-layout {
+  flex-grow: 1; /* Expands fully */
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  background-color: #edf2f7; /* light gray */
+  background-color: #edf2f7; /* Light gray */
+  width: 100%; /* Ensure it stretches fully */
+  height: 100%; /* Ensure it fills height too */
 }
 
 /* Box around the file upload component */
-/* This targets the direct child div inside .center-page */
-.center-page > div {
+.file-upload-container {
   background-color: #9296ca; /* white background */
   padding: 2rem; /* similar to Tailwind's p-8 */
   border-radius: 0.5rem; /* rounded corners */
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
               0 4px 6px -2px rgba(0, 0, 0, 0.1); /* subtle shadow */
+  width: 400px; /* Adjust this value as needed */
+  height: 400px; /* Make it a square */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+}
+
+/* Style for the file input and upload button */
+.file-upload-container input[type="file"],
+.file-upload-container button {
+  font-size: 1.125rem; /* Larger text */
+  padding: 0.75rem 1.25rem; /* Bigger clickable area */
+  margin: 0.5rem 0; /* Spacing between elements */
+}
+
+/* Style for the file upload title */
+.file-upload-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  position: absolute;
+  top: 1rem;
+}
+
+/* Style for the loading screen */
+.loading-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 0.5rem; /* Match the border radius of the box */
+}
+
+.loading-screen p {
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Styles for the PageLayout component */
+.page-layout {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.header {
+  background-color: #9aa1ab; /* dark gray */
+  color: #fff;
+  padding: 1rem;
+  text-align: center;
+}
+
+.content {
+  flex-grow: 1;
+  padding: 2rem;
+  background-color: #edf2f7; /* light gray */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.content > div {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+              0 4px 6px -2px rgba(0, 0, 0, 0.1); /* subtle shadow */
+  width: 100%;
+  max-width: 1000px; /* Adjust this value as needed */
+  height: calc(100vh - 6rem); /* Adjust height to cover nearly all of the screen */
+  margin: 1rem; /* Add margin to create a border around the box */
 }
