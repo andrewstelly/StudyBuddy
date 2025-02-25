@@ -62,7 +62,21 @@ def create_practice_test(transcription):
     print(practice_test)
     return practice_test
 
-def main(file_path, generate_summary_flag, create_study_guide_flag, create_practice_test_flag):
+def translate_transcription(transcription, target_language):
+    # Translate the transcription
+    translation_response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "You are an AI that translates text."},
+            {"role": "user", "content": f"Translate this text to {target_language}:\n\n{transcription}"}
+        ],
+    )
+    translation = translation_response.choices[0].message.content
+    print(f"\nTranslation to {target_language}:")
+    print(translation)
+    return translation
+
+def main(file_path, generate_summary_flag, create_study_guide_flag, create_practice_test_flag, translate_flag, target_language):
     transcription = transcribe_mp3(file_path)
     print("Transcription has finished!")
     
@@ -77,6 +91,9 @@ def main(file_path, generate_summary_flag, create_study_guide_flag, create_pract
     if create_practice_test_flag:
         results["practice_test"] = create_practice_test(transcription)
     
+    if translate_flag:
+        results["translation"] = translate_transcription(transcription, target_language)
+    
     return results
 
 if __name__ == "__main__":
@@ -84,5 +101,7 @@ if __name__ == "__main__":
     generate_summary_flag = input("Generate summary? (yes/no): ").lower() == "yes"
     create_study_guide_flag = input("Create study guide? (yes/no): ").lower() == "yes"
     create_practice_test_flag = input("Create practice test? (yes/no): ").lower() == "yes"
-    main(file_path, generate_summary_flag, create_study_guide_flag, create_practice_test_flag)
+    translate_flag = input("Translate transcription? (yes/no): ").lower() == "yes"
+    target_language = input("Enter the target language: ") if translate_flag else None
+    main(file_path, generate_summary_flag, create_study_guide_flag, create_practice_test_flag, translate_flag, target_language)
 

@@ -6,6 +6,8 @@ const FileUpload: React.FC = () => {
   const [summary, setSummary] = useState(false);
   const [studyGuide, setStudyGuide] = useState(false);
   const [practiceTest, setPracticeTest] = useState(false);
+  const [translate, setTranslate] = useState(false);
+  const [targetLanguage, setTargetLanguage] = useState("");
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -20,11 +22,18 @@ const FileUpload: React.FC = () => {
       return;
     }
 
+    if (translate && !targetLanguage) {
+      alert("Please select a language for translation.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("file", selectedFile);
     formData.append("summary", summary.toString());
     formData.append("studyGuide", studyGuide.toString());
     formData.append("practiceTest", practiceTest.toString());
+    formData.append("translate", translate.toString());
+    formData.append("targetLanguage", targetLanguage);
 
     setIsLoading(true);
 
@@ -82,6 +91,27 @@ const FileUpload: React.FC = () => {
               />
               Practice Test
             </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={translate}
+                onChange={() => setTranslate(!translate)}
+              />
+              Translate
+            </label>
+            {translate && (
+              <select
+                value={targetLanguage}
+                onChange={(e) => setTargetLanguage(e.target.value)}
+              >
+                <option value="">Select Language</option>
+                <option value="Spanish">Spanish</option>
+                <option value="French">French</option>
+                <option value="German">German</option>
+                <option value="Chinese">Chinese</option>
+                {/* Add more languages as needed */}
+              </select>
+            )}
           </div>
           <button onClick={handleUpload}>Upload</button>
         </>
