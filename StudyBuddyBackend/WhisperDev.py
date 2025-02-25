@@ -20,7 +20,7 @@ def transcribe_mp3(file_path):
     transcription = result["text"]
     return transcription
 
-def process_transcription(transcription):
+def generate_summary(transcription):
     # Summarize the text
     summary_response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -32,7 +32,9 @@ def process_transcription(transcription):
     summary = summary_response.choices[0].message.content
     print("\nSummary:")
     print(summary)
+    return summary
 
+def create_study_guide(transcription):
     # Create a study guide
     study_guide_response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -44,28 +46,43 @@ def process_transcription(transcription):
     study_guide = study_guide_response.choices[0].message.content
     print("\nStudy Guide:")
     print(study_guide)
+    return study_guide
 
+def create_practice_test(transcription):
     # Create a practice test
     practice_test_response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You are an AI that summarizes text and creates study guides and practice tests."},
-            {"role": "user", "content": f"Create a practice test using this information. Make sure that the multiple choice answers have range of different options and are not always one choice (for example making them all B). also include some true and false and at least one discussion question:\n\n{transcription}"}
+            {"role": "user", "content": f"Create a practice test using this information. Make sure that the multiple choice answers have a range of different options and are not always one choice (for example making them all B). Also include some true and false and at least one discussion question:\n\n{transcription}"}
         ],
     )
     practice_test = practice_test_response.choices[0].message.content
     print("\nPractice Test:")
     print(practice_test)
+    return practice_test
 
-    return summary, study_guide, practice_test
-
-def main(file_path):
+def main(file_path, generate_summary_flag, create_study_guide_flag, create_practice_test_flag):
     transcription = transcribe_mp3(file_path)
     print("Transcription has finished!")
-    summary, study_guide, practice_test = process_transcription(transcription)
-    return summary, study_guide, practice_test
+    
+    results = {"transcription": transcription}
+    
+    if generate_summary_flag:
+        results["summary"] = generate_summary(transcription)
+    
+    if create_study_guide_flag:
+        results["study_guide"] = create_study_guide(transcription)
+    
+    if create_practice_test_flag:
+        results["practice_test"] = create_practice_test(transcription)
+    
+    return results
 
 if __name__ == "__main__":
     file_path = input("Enter the path to the MP3 file: ")
-    main(file_path)
+    generate_summary_flag = input("Generate summary? (yes/no): ").lower() == "yes"
+    create_study_guide_flag = input("Create study guide? (yes/no): ").lower() == "yes"
+    create_practice_test_flag = input("Create practice test? (yes/no): ").lower() == "yes"
+    main(file_path, generate_summary_flag, create_study_guide_flag, create_practice_test_flag)
 

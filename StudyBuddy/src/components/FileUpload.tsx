@@ -3,6 +3,9 @@ import React, { useState } from "react";
 const FileUpload: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [summary, setSummary] = useState(false);
+  const [studyGuide, setStudyGuide] = useState(false);
+  const [practiceTest, setPracticeTest] = useState(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -19,6 +22,9 @@ const FileUpload: React.FC = () => {
 
     const formData = new FormData();
     formData.append("file", selectedFile);
+    formData.append("summary", summary.toString());
+    formData.append("studyGuide", studyGuide.toString());
+    formData.append("practiceTest", practiceTest.toString());
 
     setIsLoading(true);
 
@@ -51,6 +57,32 @@ const FileUpload: React.FC = () => {
           <h1 className="file-upload-title">File Upload</h1>
           <input type="file" onChange={handleFileChange} />
           {selectedFile && <p>{selectedFile.name}</p>}
+          <div>
+            <label>
+              <input
+                type="checkbox"
+                checked={summary}
+                onChange={() => setSummary(!summary)}
+              />
+              Summary
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={studyGuide}
+                onChange={() => setStudyGuide(!studyGuide)}
+              />
+              Study Guide
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={practiceTest}
+                onChange={() => setPracticeTest(!practiceTest)}
+              />
+              Practice Test
+            </label>
+          </div>
           <button onClick={handleUpload}>Upload</button>
         </>
       )}
