@@ -1,8 +1,4 @@
-import React from "react";
-import { Button } from "./ui/Button";
-import { Home, Settings, Notebook, ClipboardList, Layers, ChevronRight } from "lucide-react"; // Import icons
-
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./SidebarStyle.css";
 
 // Dynamically import the external CSS file
@@ -24,8 +20,16 @@ const Sidebar = () => {
     setIsExpanded((prev) => !prev);
   };
 
+  useEffect(() => {
+    if (isExpanded) {
+      document.body.classList.add("sb-expanded");
+    } else {
+      document.body.classList.remove("sb-expanded");
+    }
+  }, [isExpanded]);
+
   return (
-    <div className={isExpanded ? "sb-expanded" : ""}>
+    <div>
       <aside>
         <nav>
           <ul>
@@ -50,7 +54,7 @@ const Sidebar = () => {
             <li>
               <a href="#">
                 <i className="bx bx-test-tube"></i>
-                <span>Practice Tests</span>
+                <span>Tests</span>
               </a>
             </li>
             <li>
@@ -59,17 +63,15 @@ const Sidebar = () => {
                 <span>Flashcards</span>
               </a>
             </li>
-            
             <li>
               <a href="#" onClick={toggleSidebar}>
-                <i className="bx bxs-chevron-right"></i>
+                <i className="bx bx-chevron-right"></i>
                 <span>Collapse</span>
               </a>
             </li>
           </ul>
         </nav>
       </aside>
-      <main></main>
     </div>
   );
 };
