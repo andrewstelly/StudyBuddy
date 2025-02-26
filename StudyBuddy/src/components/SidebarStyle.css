@@ -30,7 +30,7 @@
     padding: 1rem;
     /* width: 80px; */
     width: var(--sb-width);
-    background-image: linear-gradient(#a6d0ff, #7fb9ff, #7f8aff);
+    background-image: linear-gradient(#a6d0ff, #7fb9ff, #927fff);
     transition: width 0.5s ease-in-out;
   }
   
