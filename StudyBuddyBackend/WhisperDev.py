@@ -39,7 +39,7 @@ def create_study_guide(transcription):
     study_guide_response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "You are an AI that summarizes text and creates study guides."},
+            {"role": "system", "content": "You are an AI that summarizes text and creates study guides. If the text states that something will be on the test or is repeated multiple times then make sure it is included in the study guide."},
             {"role": "user", "content": f"Create a study guide:\n\n{transcription}"}
         ],
     )
@@ -54,7 +54,7 @@ def create_practice_test(transcription):
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You are an AI that summarizes text and creates study guides and practice tests."},
-            {"role": "user", "content": f"Create a practice test using this information. Make sure that the multiple choice answers have a range of different options and are not always one choice (for example making them all B). Also include some true and false and at least one discussion question:\n\n{transcription}"}
+            {"role": "user", "content": f"Create a practice test using this information. Ensure that the multiple-choice questions have a variety of different answer choices (e.g., not all answers should be 'B'). Distribute the correct answers evenly among 'A', 'B', 'C', and 'D'. Include some true/false questions and at least one discussion question. Provide an answer key for the multiple-choice and true/false questions:\n\n{transcription}"}
         ],
     )
     practice_test = practice_test_response.choices[0].message.content
@@ -62,13 +62,13 @@ def create_practice_test(transcription):
     print(practice_test)
     return practice_test
 
-def translate_transcription(transcription, target_language):
-    # Translate the transcription
+def translate_text(text, target_language):
+    # Translate the text
     translation_response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You are an AI that translates text."},
-            {"role": "user", "content": f"Translate this text to {target_language}:\n\n{transcription}"}
+            {"role": "user", "content": f"Translate this text to {target_language}:\n\n{text}"}
         ],
     )
     translation = translation_response.choices[0].message.content
@@ -83,16 +83,25 @@ def main(file_path, generate_summary_flag, create_study_guide_flag, create_pract
     results = {"transcription": transcription}
     
     if generate_summary_flag:
-        results["summary"] = generate_summary(transcription)
+        summary = generate_summary(transcription)
+        if translate_flag:
+            summary = translate_text(summary, target_language)
+        results["summary"] = summary
     
     if create_study_guide_flag:
-        results["study_guide"] = create_study_guide(transcription)
+        study_guide = create_study_guide(transcription)
+        if translate_flag:
+            study_guide = translate_text(study_guide, target_language)
+        results["study_guide"] = study_guide
     
     if create_practice_test_flag:
-        results["practice_test"] = create_practice_test(transcription)
+        practice_test = create_practice_test(transcription)
+        if translate_flag:
+            practice_test = translate_text(practice_test, target_language)
+        results["practice_test"] = practice_test
     
     if translate_flag:
-        results["translation"] = translate_transcription(transcription, target_language)
+        results["translation"] = translate_text(transcription, target_language)
     
     return results
 
@@ -104,4 +113,3 @@ if __name__ == "__main__":
     translate_flag = input("Translate transcription? (yes/no): ").lower() == "yes"
     target_language = input("Enter the target language: ") if translate_flag else None
     main(file_path, generate_summary_flag, create_study_guide_flag, create_practice_test_flag, translate_flag, target_language)
-

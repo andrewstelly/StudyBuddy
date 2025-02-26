@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify
 # Add the directory containing WhisperDev.py to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'StudyBuddyBackend')))
 
-from WhisperDev import transcribe_mp3, generate_summary, create_study_guide, create_practice_test, translate_transcription  # Import the functions from WhisperDev.py
+from WhisperDev import transcribe_mp3, generate_summary, create_study_guide, create_practice_test, translate_text  # Import the functions from WhisperDev.py
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
@@ -41,22 +41,31 @@ def upload_file():
 
     # Generate summary if selected
     if generate_summary_flag:
-        results["summary"] = generate_summary(transcription_text)
+        summary = generate_summary(transcription_text)
+        if translate_flag:
+            summary = translate_text(summary, target_language)
+        results["summary"] = summary
         print("Summary completed")
 
     # Create study guide if selected
     if create_study_guide_flag:
-        results["study_guide"] = create_study_guide(transcription_text)
+        study_guide = create_study_guide(transcription_text)
+        if translate_flag:
+            study_guide = translate_text(study_guide, target_language)
+        results["study_guide"] = study_guide
         print("Study Guide completed")
 
     # Create practice test if selected
     if create_practice_test_flag:
-        results["practice_test"] = create_practice_test(transcription_text)
+        practice_test = create_practice_test(transcription_text)
+        if translate_flag:
+            practice_test = translate_text(practice_test, target_language)
+        results["practice_test"] = practice_test
         print("Practice Test completed")
 
     # Translate transcription if selected
     if translate_flag and target_language:
-        results["translation"] = translate_transcription(transcription_text, target_language)
+        results["translation"] = translate_text(transcription_text, target_language)
         print(f"Translation to {target_language} completed")
 
     # Delete the file after processing
