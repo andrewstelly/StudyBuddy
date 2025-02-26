@@ -9,7 +9,7 @@ const Sidebar: React.FC = () => {
       <h2>StudyBuddyAI</h2>
       
       <div className="flex flex-col space-y-2">
-        <Link to="/">
+        <Link to="/home">
           <Button className="w-full justify-start">
             <Home className="mr-2" size={20} />
             Home
