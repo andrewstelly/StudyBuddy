@@ -1,45 +1,77 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Button } from "./UI/Button";
-import { Home, Settings, Notebook, ClipboardList, Layers } from "lucide-react"; // Import icons
+import React, { useState, useEffect } from "react";
+import "./SidebarStyle.css";
 
-const Sidebar: React.FC = () => {
+// Dynamically import the external CSS file
+const loadExternalCSS = (url: string) => {
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = url;
+  document.head.appendChild(link);
+};
+
+// Load the boxicons CSS
+loadExternalCSS("https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css");
+
+const Sidebar = () => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const toggleSidebar = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    setIsExpanded((prev) => !prev);
+  };
+
+  useEffect(() => {
+    if (isExpanded) {
+      document.body.classList.add("sb-expanded");
+    } else {
+      document.body.classList.remove("sb-expanded");
+    }
+  }, [isExpanded]);
+
   return (
-    <div className="sidebar-container">
-      <h2>StudyBuddyAI</h2>
-      
-      <div className="flex flex-col space-y-2">
-        <Link to="/home">
-          <Button className="w-full justify-start">
-            <Home className="mr-2" size={20} />
-            Home
-          </Button>
-        </Link>
-        <Link to="/notes">
-          <Button className="w-full justify-start">
-            <Notebook className="mr-2" size={20} />
-            Notes
-          </Button>
-        </Link>
-        <Link to="/practice-tests">
-          <Button className="w-full justify-start">
-            <ClipboardList className="mr-2" size={20} />
-            Practice Tests
-          </Button>
-        </Link>
-        <Link to="/flash-cards">
-          <Button className="w-full justify-start">
-            <Layers className="mr-2" size={20} />
-            Flash Cards
-          </Button>
-        </Link>
-        <Link to="/settings">
-          <Button className="w-full justify-start">
-            <Settings className="mr-2" size={20} />
-            Settings
-          </Button>
-        </Link>
-      </div>
+    <div>
+      <aside>
+        <nav>
+          <ul>
+            <li>
+              <a href="#">
+                <i className="bx bx-home-circle"></i>
+                <span>Profile</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i className="bx bx-cog"></i>
+                <span>Settings</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i className="bx bx-book"></i>
+                <span>Notes</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i className="bx bx-test-tube"></i>
+                <span>Tests</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i className="bx bx-note"></i>
+                <span>Flashcards</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" onClick={toggleSidebar}>
+                <i className="bx bx-chevron-right"></i>
+                <span>Collapse</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
     </div>
   );
 };
