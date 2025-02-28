@@ -1,9 +1,12 @@
-# Ignore Python bytecode files
+# Ignore Python bytecode files and cache directories
 *.pyc
 __pycache__/
 
+# Ignore environment variable files
+.env
 
 # Ignore other files and directories as needed
+<<<<<<< HEAD
 uploads/
 .env
 package-lock.json
@@ -188,3 +191,6 @@ node_modules/undici/types/util.d.ts
 node_modules/undici/types/utility.d.ts
 node_modules/undici/types/webidl.d.ts
 node_modules/undici/types/websocket.d.ts
+=======
+uploads/
+>>>>>>> 1becfc09dbb54e054774b4007858644e32e53a96
