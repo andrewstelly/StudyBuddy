@@ -6,36 +6,149 @@
 body {
   margin: 0;
   font-family: sans-serif;
+  display: flex;
 }
 
-/* Sidebar container: fixed on the left, full height, content centered horizontally and aligned to the top */
+/* Sidebar: Fixed on the left, full height */
 .sidebar-container {
   position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
+<<<<<<< HEAD
+  width: 16rem; /* Equivalent to Tailwind w-64 */
+  padding: 2rem 1.25rem;
+=======
   width: 16rem; /* 16rem equals Tailwind's w-64 */
   background-color: #4c6694; /* dark gray */
   color: #fff;
   padding: 1.25rem;
   padding-top: 2rem; /* extra spacing at top */
+>>>>>>> 1becfc09dbb54e054774b4007858644e32e53a96
   overflow-y: auto;
-
-  /* Use flex to center content horizontally and align it to the top */
   display: flex;
   flex-direction: column;
-  align-items: center;   /* centers items horizontally */
-  justify-content: flex-start; /* aligns items at the top */
+  align-items: center;
 }
 
-/* Enlarge buttons inside the sidebar */
+/* Sidebar button styles */
 .sidebar-container button {
-  font-size: 1.125rem;  /* larger text */
-  padding: 0.75rem 1.25rem; /* bigger clickable area */
+  font-size: 1.125rem;
+  padding: 0.75rem 1.25rem;
 }
 
-/* Main container: offset by the sidebar width */
+/* Main content area: Takes up remaining space after sidebar */
 .main-container {
+<<<<<<< HEAD
+  margin-left: 16rem; /* Same as sidebar width */
+  width: calc(100vw - 16rem); /* Remaining width */
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* File upload layout: Centers within the adjusted main area */
+.file-upload-layout {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+}
+
+/* File upload container box */
+.file-upload-container {
+  background-color: #9296ca;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+              0 4px 6px -2px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+}
+
+/* File upload inputs and buttons */
+.file-upload-container input[type="file"],
+.file-upload-container button {
+  font-size: 1.125rem;
+  padding: 0.75rem 1.25rem;
+  margin: 0.5rem 0;
+}
+
+/* File upload title */
+.file-upload-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  position: absolute;
+  top: 1rem;
+}
+
+/* Loading screen */
+.loading-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 0.5rem;
+}
+
+.loading-screen p {
+  font-size: 1.5rem;
+  color: #333;
+}
+
+
+/* Page layout: Full-screen container */
+.page-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Full viewport height */
+  width: 100vw; /* Full viewport width */
+  background-color: #f9fafb; /* Light background */
+  color: #111827; /* Dark text */
+}
+
+/* Header: Fixed at the top, spans full width */
+.header {
+  background-color: #1f2937; /* Dark gray (ChatGPT-like) */
+  color: white;
+  padding: 1rem 1.5rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-bottom: 2px solid #374151;
+  width: 100%; /* Ensure it stretches fully */
+}
+
+/* Content: Expands to fill remaining space */
+.content {
+  flex-grow: 1; /* Take up all available space */
+  display: flex;
+  flex-direction: column;
+  width: 100%; /* Stretch full width */
+  padding: 2rem; /* Adjust padding as needed */
+  overflow-y: auto; /* Scrollable if content is too long */
+}
+
+/* Text styling */
+.content p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  max-width: 100%; /* Allows full-width text */
+  text-align: left;
+  color: #374151;
+=======
   margin-left: 16rem; /* Matches sidebar width */
   height: 100vh;
   display: flex;
@@ -139,4 +252,5 @@ body {
   max-width: 1000px; /* Adjust this value as needed */
   height: calc(100vh - 6rem); /* Adjust height to cover nearly all of the screen */
   margin: 1rem; /* Add margin to create a border around the box */
+>>>>>>> 1becfc09dbb54e054774b4007858644e32e53a96
 }
