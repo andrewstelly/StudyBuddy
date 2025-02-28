@@ -34,7 +34,6 @@ const Sidebar = () => {
         <nav>
           <ul>
             <li>
-<<<<<<< HEAD
               <a href="/home">
                 <i className="bx bx-home-circle"></i>
                 <span>Home</span>
@@ -49,54 +48,23 @@ const Sidebar = () => {
             <li>
               <a href="/practice-tests">
                 <i className="bx bx-test-tube"></i>
-                <span>Tests</span>
+                <span>Practice Tests</span>
               </a>
             </li>
             <li>
-              <a href="flash-cards">
+              <a href="/flash-cards">
                 <i className="bx bx-note"></i>
                 <span>Flashcards</span>
               </a>
             </li>
             <li>
               <a href="/settings">
-=======
-              <a href="#">
-                <i className="bx bx-home-circle"></i>
-                <span>Profile</span>
-              </a>
-            </li>
-            <li>
-              <a href="#">
->>>>>>> 1becfc09dbb54e054774b4007858644e32e53a96
                 <i className="bx bx-cog"></i>
                 <span>Settings</span>
               </a>
             </li>
             <li>
-<<<<<<< HEAD
               <a onClick={toggleSidebar}>
-=======
-              <a href="#">
-                <i className="bx bx-book"></i>
-                <span>Notes</span>
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="bx bx-test-tube"></i>
-                <span>Tests</span>
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="bx bx-note"></i>
-                <span>Flashcards</span>
-              </a>
-            </li>
-            <li>
-              <a href="#" onClick={toggleSidebar}>
->>>>>>> 1becfc09dbb54e054774b4007858644e32e53a96
                 <i className="bx bx-chevron-right"></i>
                 <span>Collapse</span>
               </a>
