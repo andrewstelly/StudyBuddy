@@ -34,37 +34,37 @@ const Sidebar = () => {
         <nav>
           <ul>
             <li>
-              <a href="#">
+              <a href="/home">
                 <i className="bx bx-home-circle"></i>
-                <span>Profile</span>
+                <span>Home</span>
               </a>
             </li>
             <li>
-              <a href="#">
-                <i className="bx bx-cog"></i>
-                <span>Settings</span>
-              </a>
-            </li>
-            <li>
-              <a href="#">
+              <a href="/notes">
                 <i className="bx bx-book"></i>
                 <span>Notes</span>
               </a>
             </li>
             <li>
-              <a href="#">
+              <a href="/practice-tests">
                 <i className="bx bx-test-tube"></i>
                 <span>Tests</span>
               </a>
             </li>
             <li>
-              <a href="#">
+              <a href="flash-cards">
                 <i className="bx bx-note"></i>
                 <span>Flashcards</span>
               </a>
             </li>
             <li>
-              <a href="#" onClick={toggleSidebar}>
+              <a href="/settings">
+                <i className="bx bx-cog"></i>
+                <span>Settings</span>
+              </a>
+            </li>
+            <li>
+              <a onClick={toggleSidebar}>
                 <i className="bx bx-chevron-right"></i>
                 <span>Collapse</span>
               </a>

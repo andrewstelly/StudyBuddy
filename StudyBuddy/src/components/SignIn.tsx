@@ -1,75 +1,67 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
+
 export default function SignIn() {
-  const handleSubmit = (e: { preventDefault: () => void; }) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Form submitted!");
+    // Set a cookie to indicate the user is logged in
+    Cookies.set("auth", "true", { expires: 7 }); // Cookie expires in 7 days
+    // Redirect to home page after successful sign-in
+    navigate("/home");
   };
 
   return (
-    <div className="h-full bg-white">
-      <div className="flex min-h-full flex-1 flex-col flex justify-center px-6 py-12 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <img
-          alt="StudyBuddy Logo"
-          src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-          style={{ height: "300px", width: "auto" }}
-        />
-
-          <h2 className="mt-10 text-center text-2xl leading-9 font-bold tracking-tight text-gray-900">
-            Sign in to your account
-          </h2>
+    <div className="flex h-screen bg-gray-100 items-center justify-center">
+      <div className="max-w-md w-full bg-white shadow-lg rounded-2xl p-8">
+        <div className="flex justify-center">
+          <img
+            src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
+            alt="Logo"
+            className="h-20 w-auto"
+          />
         </div>
+        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+          Sign in to your account
+        </h2>
 
-        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-900">
-                Email address
-              </label>
-              <div className="mt-2">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  className="block w-full rounded-md border border-gray-300 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 sm:text-sm"
-                />
-              </div>
-            </div>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Email address
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500"
+            />
+          </div>
 
-            <div>
-              <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-900">
-                  Password
-                </label>
-                <div className="text-sm">
-                  <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
-                    Forgot password?
-                  </a>
-                </div>
-              </div>
-              <div className="mt-2">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  autoComplete="current-password"
-                  className="block w-full rounded-md border border-gray-300 px-3 py-1.5 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 sm:text-sm"
-                />
-              </div>
-            </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-900">
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500"
+            />
+          </div>
 
-            <div>
-              <button
-                type="submit"
-                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-600"
-              >
-                Sign in
-              </button>
-            </div>
-          </form>
-        </div>
+          <button
+            type="submit"
+            className="w-full py-2 px-4 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 focus:outline-none"
+          >
+            Sign in
+          </button>
+        </form>
       </div>
     </div>
   );
