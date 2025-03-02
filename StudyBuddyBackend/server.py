@@ -1,6 +1,7 @@
 import sys
 import os
 from flask import Flask, request, jsonify
+from flaskext.mysql import MySQL
 
 # Add the directory containing WhisperDev.py to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'StudyBuddyBackend')))
@@ -11,6 +12,20 @@ app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+app.config['MYSQL_DATABASE_HOST'] = 'studybuddydatabase.c2dgiiq4g2h6.us-east-1.rds.amazonaws.com' # Specify Endpoint
+app.config['MYSQL_DATABASE_USER'] = 'admin' # Specify Master username
+app.config['MYSQL_DATABASE_PASSWORD'] = 'StudyBuddy!' # Specify Master password
+app.config['MYSQL_DATABASE_DB'] = 'StudyBuddy' # Specify database name
+mysql = MySQL(app)
+try:
+    conn = mysql.connect()
+    cursor =conn.cursor()
+    cursor.execute("SHOW TABLES")
+    data = cursor.fetchall()
+    for row in data:
+        print(row)
+except Exception as e:
+    print(e)
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
