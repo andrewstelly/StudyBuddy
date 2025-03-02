@@ -1,26 +1,40 @@
+import { useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
-import FileUpload from "./components/FileUpload";
+import Navigation from "./components/Pages/Navigation";
+import Cookies from "js-cookie";
 import "./styles.css";
 
 function App() {
-  return (
-    <div>
-      {/* Sidebar container */}
-      <div className="sidebar-container">
-        <Sidebar />
-      </div>
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isLoginPage = location.pathname === "/";
 
-      {/* Main container offset by the sidebar width */}
-      <div className="main-container">
-        <div className="center-page">
-          <div>
-            <h1>File Upload</h1>
-            <FileUpload />
-          </div>
-        </div>
+  useEffect(() => {
+    const auth = Cookies.get("auth");
+    if (auth && isLoginPage) {
+      navigate("/home");
+    }
+  }, [isLoginPage, navigate]);
+
+  return (
+    <div className="flex">
+      {!isLoginPage && <Sidebar />}
+      <div className={`main-container ${isLoginPage ? "w-full" : "ml-64"}`}>
+        <Navigation />
       </div>
     </div>
   );
 }
 
-export default App;
+function AppWrapper() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/*" element={<App />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default AppWrapper;
