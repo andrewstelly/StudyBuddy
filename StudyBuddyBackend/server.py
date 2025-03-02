@@ -24,6 +24,7 @@ try:
     data = cursor.fetchall()
     for row in data:
         print(row)
+    conn.close()
 except Exception as e:
     print(e)
 @app.route('/upload', methods=['POST'])
