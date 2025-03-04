@@ -92,6 +92,7 @@ const FileUpload: React.FC = () => {
               Practice Test
             </label>
             <label>
+              <br></br>
               <input
                 type="checkbox"
                 checked={translate}
@@ -113,6 +114,7 @@ const FileUpload: React.FC = () => {
               </select>
             )}
           </div>
+          <br></br>
           <button onClick={handleUpload}>Upload</button>
         </>
       )}

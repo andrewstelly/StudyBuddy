@@ -135,3 +135,16 @@ body {
   height: calc(100vh - 6rem); /* Adjust height to cover nearly all of the screen */
   margin: 1rem; /* Add margin to create a border around the box */
 }
+
+.file-upload-container input[type="file"] {
+  margin: 0.5rem 0; /* Spacing between elements */
+  align-self: center; /* Center the input element */
+}
+
+.file-upload-container label {
+  margin-right: 0.5rem; /* Adjust the value as needed */
+}
+
+.file-upload-container label input[type="checkbox"] {
+  margin-right: 0.1rem; /* Adjust the value as needed */
+}
