@@ -31,10 +31,10 @@ body {
 
 /* Main content area: Takes up remaining space after sidebar */
 .main-container {
-  margin-left: 16rem; /* Matches sidebar width */
+
   height: 100vh;
   display: flex;
-  width: calc(100vw - 16rem); /* Full width minus sidebar */
+  width: calc(100vw); /* Full width minus sidebar */
 }
 
 /* Make file-upload-layout take up all remaining space */
@@ -43,14 +43,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #edf2f7; /* Light gray */
+  background-color: #e3f1ff; /* Light blue */
   width: 100%; /* Ensure it stretches fully */
   height: 100%; /* Ensure it fills height too */
 }
 
 /* Box around the file upload component */
 .file-upload-container {
-  background-color: #9296ca; /* white background */
+  background-color: #82a4d8; /* blue background */
   padding: 2rem; /* similar to Tailwind's p-8 */
   border-radius: 0.5rem; /* rounded corners */
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
@@ -109,16 +109,16 @@ body {
 }
 
 .header {
-  background-color: #9aa1ab; /* dark gray */
+  background-image: linear-gradient(to right, #a6d0ff, #7fb9ff, #7f8aff);
   color: #fff;
-  padding: 1rem;
+  padding: 0.5rem;
   text-align: center;
 }
 
 .content {
   flex-grow: 1;
   padding: 2rem;
-  background-color: #edf2f7; /* light gray */
+  background-color: #d2e7ff; /* light blue */
   display: flex;
   justify-content: center;
   align-items: center;
