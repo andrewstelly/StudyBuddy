@@ -17,7 +17,7 @@ const Navigation: React.FC = () => {
       <Route path="/notes" element={<PageLayout title="Notes"><Notes /></PageLayout>} />
       <Route path="/practice-tests" element={<PageLayout title="Practice Tests"><PracticeTests /></PageLayout>} />
       <Route path="/flash-cards" element={<PageLayout title="Flash Cards"><FlashCards /></PageLayout>} />
-      <Route path="/settings" element={<PageLayout title="Settings"><Settings /></PageLayout>} />
+      <Route path="/settings" element={<FileUploadLayout><Settings /></FileUploadLayout>} />
     </Routes>
   );
 };
