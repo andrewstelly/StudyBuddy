@@ -1,0 +1,37 @@
+html, body {
+    height: 100%;
+    margin: 0;
+  }
+  
+  #root, .App {
+    height: 100%;
+  }
+
+.center-container {
+    display: flex;
+    height: 100vh;
+    background-color: rgba(115, 164, 255, 0.75); /* Light blue with slight transparency */
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+    padding: 20px; /* Add padding to widen the background */
+  }
+
+body {background-color: rgba(155, 202, 255); /* Light blue */
+        background-image:  url('https://www.thoughtco.com/thmb/-v2FYXFX17XaTjncSW759xrb1QI=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/in-the-classroom-multi-ethnic-students-listening-to-a-lecturer-and-writing-in-notebooks--smart-young-people-study-at-the-college--962475722-5c76f411c9e77c0001f57b64.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        position: relative;
+}
+
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(191, 217, 255, 0.65); /* Adjust the transparency here */
+    z-index: -1;
+  }
