@@ -18,13 +18,13 @@ const FileUpload: React.FC = () => {
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      alert("Please select a file first.");
-      return;
+        alert("Please select a file first.");
+        return;
     }
 
     if (translate && !targetLanguage) {
-      alert("Please select a language for translation.");
-      return;
+        alert("Please select a language for translation.");
+        return;
     }
 
     const formData = new FormData();
@@ -37,45 +37,44 @@ const FileUpload: React.FC = () => {
 
     console.log("🛠 FormData being sent:");
     for (const pair of formData.entries()) {
-      console.log(`${pair[0]}: ${pair[1]}`);
+        console.log(`${pair[0]}: ${pair[1]}`);
     }
 
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/upload", {
-        method: "POST",
-        body: formData,
-      });
+        const response = await fetch("http://localhost:5000/upload", {
+            method: "POST",
+            body: formData,
+        });
 
-      const data = await response.json();
-      console.log("📩 Response from backend:", data); // Debug log
+        const data = await response.json();
+        console.log("📩 Response from backend:", data); // Debug log
 
-      if (!data.study_guide && !data.practice_test) {
-        console.error("❌ Error: Backend did not return study_guide or practice_test.");
-      } else {
-        console.log("✅ Study Guide:", data.study_guide);
-        console.log("✅ Practice Test:", data.practice_test);
-      }
+        if (!data.practice_test) {
+            console.error(" Error: Backend did not return a practice test.");
+        } else {
+            console.log("Practice Test:", data.practice_test);
+        }
 
-      // Ensure values are stored correctly
-      const storedData = {
-        summary: data.summary || "No summary available.",
-        study_guide: data.study_guide || "No study guide available.",
-        practice_test: data.practice_test || "No practice test available.",
-        translation: data.translation || "No translation available.",
-      };
+        // Store in local storage
+        const storedData = {
+            summary: data.summary || "No summary available.",
+            study_guide: data.study_guide || "No study guide available.",
+            practice_test: data.practice_test || "No practice test available.",  // Ensure practice test is stored
+            translation: data.translation || "No translation available.",
+        };
 
-      // Save to local storage
-      localStorage.setItem("generatedContent", JSON.stringify(storedData));
-      console.log("📁 Saved to localStorage:", localStorage.getItem("generatedContent"));
+        localStorage.setItem("generatedContent", JSON.stringify(storedData));
+        console.log("Saved to localStorage:", localStorage.getItem("generatedContent"));
 
     } catch (error) {
-      console.error("🚨 Error uploading file:", error);
+        console.error(" Error uploading file:", error);
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
-  };
+};
+
 
   return (
     <div className="file-upload-container">

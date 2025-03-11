@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 
 const PracticeTests: React.FC = () => {
     const [practiceTest, setPracticeTest] = useState<string>("Loading...");
+    const [fontSize, setFontSize] = useState<number>(16); // Default font size
+    const [fontFamily, setFontFamily] = useState<string>("Arial"); // Default font type
 
     useEffect(() => {
         const storedContent = localStorage.getItem("generatedContent");
-        console.log("Retrieved from localStorage (Practice Tests):", storedContent); // Debug log
+        console.log("Retrieved from localStorage (Practice Tests):", storedContent);
 
         if (storedContent) {
             try {
@@ -24,10 +26,52 @@ const PracticeTests: React.FC = () => {
         }
     }, []);
 
+    // ✅ Handle user input
+    const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setPracticeTest(event.target.value);
+    };
+
     return (
-        <div>
-            <h1>Practice Tests</h1>
-            <textarea value={practiceTest} readOnly rows={15} cols={80} />
+        <div className="page-layout">
+            <div style={{ width: "90%", maxWidth: "900px", height: "80vh", display: "flex", flexDirection: "column" }}>
+
+                {/* ✅ Font Controls - Side by Side */}
+                <div style={{ display: "flex", justifyContent: "space-between", gap: "20px", marginBottom: "10px" }}>
+                    
+                    {/* Font Size Selector */}
+                    <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        Font Size:
+                        <select value={fontSize} onChange={(e) => setFontSize(parseInt(e.target.value))} style={{ padding: "5px" }}>
+                            <option value={12}>12px</option>
+                            <option value={14}>14px</option>
+                            <option value={16}>16px (Default)</option>
+                            <option value={18}>18px</option>
+                            <option value={20}>20px</option>
+                            <option value={24}>24px</option>
+                            <option value={28}>28px</option>
+                        </select>
+                    </label>
+
+                    {/* Font Type Selector */}
+                    <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        Font Type:
+                        <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} style={{ padding: "5px" }}>
+                            <option value="Arial">Arial</option>
+                            <option value="Courier New">Courier New</option>
+                            <option value="Georgia">Georgia</option>
+                            <option value="Times New Roman">Times New Roman</option>
+                            <option value="Verdana">Verdana</option>
+                        </select>
+                    </label>
+                </div>
+
+                <textarea 
+                    className="text-box"
+                    value={practiceTest}
+                    onChange={handleChange}
+                    style={{ fontSize: `${fontSize}px`, fontFamily: fontFamily }} // ✅ Apply dynamic font size & type
+                />
+            </div>
         </div>
     );
 };
