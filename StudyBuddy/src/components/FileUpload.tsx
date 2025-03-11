@@ -35,6 +35,11 @@ const FileUpload: React.FC = () => {
     formData.append("translate", translate.toString());
     formData.append("targetLanguage", targetLanguage);
 
+    console.log("🛠 FormData being sent:");
+    for (const pair of formData.entries()) {
+      console.log(`${pair[0]}: ${pair[1]}`);
+    }
+
     setIsLoading(true);
 
     try {
@@ -43,13 +48,30 @@ const FileUpload: React.FC = () => {
         body: formData,
       });
 
-      if (response.ok) {
-        console.log("File uploaded successfully");
+      const data = await response.json();
+      console.log("📩 Response from backend:", data); // Debug log
+
+      if (!data.study_guide && !data.practice_test) {
+        console.error("❌ Error: Backend did not return study_guide or practice_test.");
       } else {
-        console.error("File upload failed");
+        console.log("✅ Study Guide:", data.study_guide);
+        console.log("✅ Practice Test:", data.practice_test);
       }
+
+      // Ensure values are stored correctly
+      const storedData = {
+        summary: data.summary || "No summary available.",
+        study_guide: data.study_guide || "No study guide available.",
+        practice_test: data.practice_test || "No practice test available.",
+        translation: data.translation || "No translation available.",
+      };
+
+      // Save to local storage
+      localStorage.setItem("generatedContent", JSON.stringify(storedData));
+      console.log("📁 Saved to localStorage:", localStorage.getItem("generatedContent"));
+
     } catch (error) {
-      console.error("Error uploading file:", error);
+      console.error("🚨 Error uploading file:", error);
     } finally {
       setIsLoading(false);
     }
@@ -68,49 +90,29 @@ const FileUpload: React.FC = () => {
           {selectedFile && <p>{selectedFile.name}</p>}
           <div>
             <label>
-              <input
-                type="checkbox"
-                checked={summary}
-                onChange={() => setSummary(!summary)}
-              />
+              <input type="checkbox" checked={summary} onChange={() => setSummary(!summary)} />
               Summary
             </label>
             <label>
-              <input
-                type="checkbox"
-                checked={studyGuide}
-                onChange={() => setStudyGuide(!studyGuide)}
-              />
+              <input type="checkbox" checked={studyGuide} onChange={() => setStudyGuide(!studyGuide)} />
               Study Guide
             </label>
             <label>
-              <input
-                type="checkbox"
-                checked={practiceTest}
-                onChange={() => setPracticeTest(!practiceTest)}
-              />
+              <input type="checkbox" checked={practiceTest} onChange={() => setPracticeTest(!practiceTest)} />
               Practice Test
             </label>
             <label>
               <br></br>
-              <input
-                type="checkbox"
-                checked={translate}
-                onChange={() => setTranslate(!translate)}
-              />
+              <input type="checkbox" checked={translate} onChange={() => setTranslate(!translate)} />
               Translate
             </label>
             {translate && (
-              <select
-                value={targetLanguage}
-                onChange={(e) => setTargetLanguage(e.target.value)}
-              >
+              <select value={targetLanguage} onChange={(e) => setTargetLanguage(e.target.value)}>
                 <option value="">Select Language</option>
                 <option value="Spanish">Spanish</option>
                 <option value="French">French</option>
                 <option value="German">German</option>
                 <option value="Chinese">Chinese</option>
-                {/* Add more languages as needed */}
               </select>
             )}
           </div>
