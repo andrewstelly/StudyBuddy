@@ -9,7 +9,7 @@ html, body {
 
 .center-container {
     display: flex;
-    height: 100vh;
+    height: 82vh;
     background-color: rgba(115, 164, 255, 0.75); /* Light blue with slight transparency */
     align-items: center;
     justify-content: center;

@@ -23,6 +23,8 @@ export default function SignIn() {
             src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
             alt="Logo"
             className="h-20 w-auto -mt-1"
+            width="175" 
+            height="175"
           />
         </div>
         <h2 className="text-center text-3xl font-bold text-gray-900">
@@ -44,7 +46,7 @@ export default function SignIn() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-900">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-900 mb-2">
               Password
             </label>
             <input
@@ -58,7 +60,7 @@ export default function SignIn() {
 
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 focus:outline-none"
+            className="w-full py-2 px-4 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 focus:outline-none mt-2"
           >
             Sign in
           </button>
