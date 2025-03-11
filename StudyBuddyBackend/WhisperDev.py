@@ -2,114 +2,131 @@ import os
 from dotenv import load_dotenv
 import openai
 import whisper
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+
+# Load environment variables
 load_dotenv()
 
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     raise ValueError("No API key found. Please set the OPENAI_API_KEY environment variable in your .env file.")
-# Initialize the OpenAI client with the API key
+
+# Initialize OpenAI client
 client = openai.OpenAI(api_key=api_key)
 
 def transcribe_mp3(file_path):
-    # Load the Whisper model and transcribe the audio
+    """Transcribes audio using Whisper."""
     model = whisper.load_model("tiny")
     result = model.transcribe(file_path)
-
-    # Get the transcription text
-    transcription = result["text"]
-    return transcription
+    return result["text"]
 
 def generate_summary(transcription):
-    # Summarize the text
-    summary_response = client.chat.completions.create(
+    """Generates a summary of the transcribed text."""
+    response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You are an AI that summarizes text."},
             {"role": "user", "content": f"Summarize this text:\n\n{transcription}"}
         ],
     )
-    summary = summary_response.choices[0].message.content
-    print("\nSummary:")
-    print(summary)
-    return summary
+    return response.choices[0].message.content
 
 def create_study_guide(transcription):
-    # Create a study guide
-    study_guide_response = client.chat.completions.create(
+    """Creates a study guide from the transcribed text."""
+    response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "You are an AI that summarizes text and creates study guides. If the text states that something will be on the test or is repeated multiple times then make sure it is included in the study guide."},
+            {"role": "system", "content": "You are an AI that creates detailed study guides."},
             {"role": "user", "content": f"Create a study guide:\n\n{transcription}"}
         ],
     )
-    study_guide = study_guide_response.choices[0].message.content
-    print("\nStudy Guide:")
-    print(study_guide)
-    return study_guide
+    return response.choices[0].message.content
 
 def create_practice_test(transcription):
-    # Create a practice test
-    practice_test_response = client.chat.completions.create(
+    """Generates a practice test with multiple-choice and true/false questions."""
+    response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "You are an AI that summarizes text and creates study guides and practice tests."},
-            {"role": "user", "content": f"Create a practice test using this information. Ensure that the multiple-choice questions have a variety of different answer choices (e.g., not all answers should be 'B'). Distribute the correct answers evenly among 'A', 'B', 'C', and 'D'. Include some true/false questions and at least one discussion question. Provide an answer key for the multiple-choice and true/false questions:\n\n{transcription}"}
+            {"role": "system", "content": "You are an AI that generates practice tests."},
+            {"role": "user", "content": f"Create a practice test with at least 5 multiple-choice questions (MCQs), 3 true/false questions, and 1 discussion question. Provide an answer key:\n\n{transcription}"}
         ],
     )
-    practice_test = practice_test_response.choices[0].message.content
-    print("\nPractice Test:")
-    print(practice_test)
-    return practice_test
+    return response.choices[0].message.content
 
 def translate_text(text, target_language):
-    # Translate the text
-    translation_response = client.chat.completions.create(
+    """Translates text into the target language."""
+    response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "You are an AI that translates text."},
+            {"role": "system", "content": "You are an AI translator."},
             {"role": "user", "content": f"Translate this text to {target_language}:\n\n{text}"}
         ],
     )
-    translation = translation_response.choices[0].message.content
-    print(f"\nTranslation to {target_language}:")
-    print(translation)
-    return translation
+    return response.choices[0].message.content
 
-def main(file_path, generate_summary_flag, create_study_guide_flag, create_practice_test_flag, translate_flag, target_language):
-    transcription = transcribe_mp3(file_path)
-    print("Transcription has finished!")
-    
-    results = {"transcription": transcription}
-    
-    if generate_summary_flag:
-        summary = generate_summary(transcription)
-        if translate_flag:
-            summary = translate_text(summary, target_language)
-        results["summary"] = summary
-    
-    if create_study_guide_flag:
-        study_guide = create_study_guide(transcription)
-        if translate_flag:
-            study_guide = translate_text(study_guide, target_language)
-        results["study_guide"] = study_guide
-    
-    if create_practice_test_flag:
-        practice_test = create_practice_test(transcription)
-        if translate_flag:
-            practice_test = translate_text(practice_test, target_language)
-        results["practice_test"] = practice_test
-    
-    if translate_flag:
-        results["translation"] = translate_text(transcription, target_language)
-    
-    return results
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    """Handles file upload and content generation."""
+    try:
+        file = request.files.get("file")
+        if not file:
+            return jsonify({"error": "No file provided"}), 400
+
+        # Read user selections from form data
+        generate_summary_flag = request.form.get("summary") == "true"
+        create_study_guide_flag = request.form.get("studyGuide") == "true"
+        create_practice_test_flag = request.form.get("practiceTest") == "true"
+        translate_flag = request.form.get("translate") == "true"
+        target_language = request.form.get("targetLanguage", "")
+
+        # Log received data
+        print("\nReceived form data:")
+        print(f"Summary: {generate_summary_flag}")
+        print(f"Study Guide: {create_study_guide_flag}")
+        print(f"Practice Test: {create_practice_test_flag}")
+        print(f"Translate: {translate_flag}, Language: {target_language}")
+
+        temp_file_path = "temp_audio.mp3"
+        file.save(temp_file_path)
+
+        # Transcribe audio
+        transcription = transcribe_mp3(temp_file_path)
+        print("Transcription completed.")
+
+        results = {"transcription": transcription}
+
+        if generate_summary_flag:
+            print("Generating summary...")
+            results["summary"] = generate_summary(transcription)
+
+        if create_study_guide_flag:
+            print("Generating study guide...")
+            results["study_guide"] = create_study_guide(transcription)
+
+        if create_practice_test_flag:
+            print("Generating practice test...")
+            results["practice_test"] = create_practice_test(transcription)
+            print("Generated Practice Test:", results["practice_test"])
+
+        if translate_flag and target_language:
+            print(f"Translating to {target_language}...")
+            results["translation"] = translate_text(transcription, target_language)
+
+        # Log final results
+        print("\nFinal Generated Content:")
+        print(results)
+
+        os.remove(temp_file_path)
+
+        return jsonify(results)
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    file_path = input("Enter the path to the MP3 file: ")
-    generate_summary_flag = input("Generate summary? (yes/no): ").lower() == "yes"
-    create_study_guide_flag = input("Create study guide? (yes/no): ").lower() == "yes"
-    create_practice_test_flag = input("Create practice test? (yes/no): ").lower() == "yes"
-    translate_flag = input("Translate transcription? (yes/no): ").lower() == "yes"
-    target_language = input("Enter the target language: ") if translate_flag else None
-    main(file_path, generate_summary_flag, create_study_guide_flag, create_practice_test_flag, translate_flag, target_language)
+    app.run(debug=True, port=5000)
