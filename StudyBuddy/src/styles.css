@@ -45,6 +45,9 @@ body {
   background-color: #e3f1ff; /* Light blue */
   width: 100%;
   height: 100vh; /* Ensure it fills the screen */
+  background-image: radial-gradient(circle, #d0e8ff 10%, transparent 10%), radial-gradient(circle, #f8fbff 10%, transparent 10%);
+  background-position: 0 0, 25px 25px;
+  background-size: 50px 50px;
 }
 
 .text-box {
@@ -66,7 +69,7 @@ body {
 
 /* Box around the file upload component */
 .file-upload-container {
-  background-color: #82a4d8; /* blue background */
+  background-color: #7ea3dc; /* blue background */
   padding: 2rem; /* similar to Tailwind's p-8 */
   border-radius: 0.5rem; /* rounded corners */
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
@@ -79,6 +82,8 @@ body {
   justify-content: center;
   text-align: center;
   position: relative;
+  border: 5px dashed transparent; /* Dashed border */
+  border-image: linear-gradient(to right, #7699cf, #7699cf) 1; /* Gradient border */
 }
 
 /* Style for the file input and upload button */
@@ -104,7 +109,7 @@ body {
   justify-content: center;
   width: 100%;
   height: 100%;
-  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+  background-color: rgb(237, 247, 255); /* Semi-transparent background */
   position: absolute;
   top: 0;
   left: 0;

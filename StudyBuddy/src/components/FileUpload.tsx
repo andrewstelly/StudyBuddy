@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 
+
 const FileUpload: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -84,24 +85,27 @@ const FileUpload: React.FC = () => {
         </div>
       ) : (
         <>
-          <h1 className="file-upload-title">File Upload</h1>
+          <h1 className="file-upload-title" style={{ color: 'white' }}>File Upload</h1>
+          <br>
+          </br>
           <input type="file" onChange={handleFileChange} />
           {selectedFile && <p>{selectedFile.name}</p>}
-          <div>
+          <div style={{justifyContent: 'center', marginTop: 'auto' }}>
             <label>
               <input type="checkbox" checked={summary} onChange={() => setSummary(!summary)} />
-              Summary
+              Summary&nbsp;&nbsp;&nbsp;
             </label>
             <label>
               <input type="checkbox" checked={studyGuide} onChange={() => setStudyGuide(!studyGuide)} />
               Study Guide
             </label>
+            <br> 
+            </br>
             <label>
               <input type="checkbox" checked={practiceTest} onChange={() => setPracticeTest(!practiceTest)} />
-              Practice Test
+              Practice Test&nbsp;&nbsp;&nbsp;
             </label>
             <label>
-              <br></br>
               <input type="checkbox" checked={translate} onChange={() => setTranslate(!translate)} />
               Translate
             </label>
@@ -115,8 +119,9 @@ const FileUpload: React.FC = () => {
               </select>
             )}
           </div>
-          <br></br>
-          <button onClick={handleUpload}>Upload</button>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'auto' }}>
+            <button onClick={handleUpload}>Upload</button>
+          </div>
         </>
       )}
     </div>
