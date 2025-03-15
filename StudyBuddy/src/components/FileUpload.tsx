@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import WhackAMoleGame from "./LoadingGames/WhackAMoleGame";
 
 const FileUpload: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -73,14 +74,13 @@ const FileUpload: React.FC = () => {
     } finally {
         setIsLoading(false);
     }
-};
-
+  };
 
   return (
     <div className="file-upload-container">
       {isLoading ? (
         <div className="loading-screen">
-          <p>Loading...</p>
+          <WhackAMoleGame />
         </div>
       ) : (
         <>
