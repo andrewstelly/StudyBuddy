@@ -9,7 +9,7 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 70vh; /* Increase the height to cover more of the viewport */
+  height: 62vh; /* Increase the height to cover more of the viewport */
   background-color: #f0f0f0; /* Set the background color to match the game background */
   padding: 20px; /* Adjust padding as needed */
   box-sizing: border-box; /* Ensure padding is included in the element's total width and height */
