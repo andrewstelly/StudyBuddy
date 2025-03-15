@@ -21,3 +21,5 @@ npm install tailwindcss react-router-dom js-cookie
 pip install flask
 pip install python-dotenv openai
 pip install pygame
+pip install flask-cors
+
