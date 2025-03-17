@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import WhackAMoleGame from "./LoadingGames/WhackAMoleGame";
-
+import ProcessComplete from "./ProcessComplete";
 
 const FileUpload: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showCompleteMessage, setShowCompleteMessage] = useState(false);
   const [summary, setSummary] = useState(false);
   const [studyGuide, setStudyGuide] = useState(false);
   const [practiceTest, setPracticeTest] = useState(false);
@@ -20,13 +21,13 @@ const FileUpload: React.FC = () => {
 
   const handleUpload = async () => {
     if (!selectedFile) {
-        alert("Please select a file first.");
-        return;
+      alert("Please select a file first.");
+      return;
     }
 
     if (translate && !targetLanguage) {
-        alert("Please select a language for translation.");
-        return;
+      alert("Please select a language for translation.");
+      return;
     }
 
     const formData = new FormData();
@@ -39,41 +40,42 @@ const FileUpload: React.FC = () => {
 
     console.log("🛠 FormData being sent:");
     for (const pair of formData.entries()) {
-        console.log(`${pair[0]}: ${pair[1]}`);
+      console.log(`${pair[0]}: ${pair[1]}`);
     }
 
     setIsLoading(true);
 
     try {
-        const response = await fetch("http://localhost:5000/upload", {
-            method: "POST",
-            body: formData,
-        });
+      const response = await fetch("http://localhost:5000/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-        const data = await response.json();
-        console.log("📩 Response from backend:", data); // Debug log
+      const data = await response.json();
+      console.log("📩 Response from backend:", data); // Debug log
 
-        if (!data.practice_test) {
-            console.error(" Error: Backend did not return a practice test.");
-        } else {
-            console.log("Practice Test:", data.practice_test);
-        }
+      if (!data.practice_test) {
+        console.error("Error: Backend did not return a practice test.");
+      } else {
+        console.log("Practice Test:", data.practice_test);
+      }
 
-        // Store in local storage
-        const storedData = {
-            summary: data.summary || "No summary available.",
-            study_guide: data.study_guide || "No study guide available.",
-            practice_test: data.practice_test || "No practice test available.",  // Ensure practice test is stored
-            translation: data.translation || "No translation available.",
-        };
+      // Store in local storage
+      const storedData = {
+        summary: data.summary || "No summary available.",
+        study_guide: data.study_guide || "No study guide available.",
+        practice_test: data.practice_test || "No practice test available.", // Ensure practice test is stored
+        translation: data.translation || "No translation available.",
+      };
 
-        localStorage.setItem("generatedContent", JSON.stringify(storedData));
-        console.log("Saved to localStorage:", localStorage.getItem("generatedContent"));
+      localStorage.setItem("generatedContent", JSON.stringify(storedData));
+      console.log("Saved to localStorage:", localStorage.getItem("generatedContent"));
 
     } catch (error) {
-        console.error(" Error uploading file:", error);
+      console.error("Error uploading file:", error);
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
+      setShowCompleteMessage(true);
     }
   };
 
@@ -124,6 +126,7 @@ const FileUpload: React.FC = () => {
           </div>
         </>
       )}
+      {showCompleteMessage && <ProcessComplete onComplete={() => setShowCompleteMessage(false)} />}
     </div>
   );
 };
