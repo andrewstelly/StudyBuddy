@@ -17,6 +17,7 @@
     "@types/react-router-dom": "^5.3.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cookie": "^1.0.2",
     "dom": "^0.0.3",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.475.0",
@@ -24,8 +25,10 @@
     "react-dom": "^19.0.0",
     "react-router": "^7.2.0",
     "react-router-dom": "^7.2.0",
+    "set-cookie-parser": "^2.7.1",
     "tailwind-merge": "^3.0.1",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "turbo-stream": "^3.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",

@@ -3,47 +3,52 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flaskext.mysql import MySQL
 app = Flask(__name__)
+from datetime import date
 
-app.config['MYSQL_DATABASE_HOST'] = 'study-buddy-database.co3kew2gkyw2.us-east-1.rds.amazonaws.com' # Specify Endpoint
-app.config['MYSQL_DATABASE_USER'] = 'admin' # Specify Master username
-app.config['MYSQL_DATABASE_PASSWORD'] = 'StudyBuddy!' # Specify Master password
-app.config['MYSQL_DATABASE_DB'] = 'StudyBuddy' # Specify database name 
-
-mysql = MySQL(app)
-
-def createAccount():
-def readAccount():
-def updateAccount():
-def deleteAccount():
-def createFolder():
-def readFolder():
-def updateFolder():
-def deleteFolder():
-def createTranscription():
-def readTranscription():
-def updateTranscription():
-def deleteTranscription():
-def createStudyGuide():
-def readStudyGuide():
-def updateStudyGuide():
-def deleteStudyGuide():
-def createFlashcardSet():
-def readFlashcardSet():
-def updateFlashcardSet():
-def deleteFlashcardSet():
-def createFlashcard():
-def readFlashcard():
-def updateFlashcard():
-def deleteFlashcard():
-def createPracticeTest():
-def readPracticeTest():
-def updatePracticeTest():
-def deletePracticeTest():
-def createQuestion():
-def readQuestion():
-def updateQuestion():
-def deleteQuestion():
-def createAnswer():
-def readAnswer():
-def updateAnswer():
-def deleteAnswer():
+def createAccount(mysql,email, username, password):
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO Accounts (Email, Username, Password, Salt) VALUES ("+str(email)+", "+str(username)+", "+str(password)+", "+str(date.today)+");")
+    conn.close()
+def readAllAccount(mysql):
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM customers")
+    data = cursor.fetchall()
+    for row in data:
+        print(row)
+    conn.close()
+#def updateAccount(mysql):
+#def deleteAccount(mysql):
+#def createFolder(mysql):
+#def readFolder(mysql):
+#def updateFolder(mysql):
+#def deleteFolder(mysql):
+#def createTranscription(mysql):
+#def readTranscription(mysql):
+#def updateTranscription(mysql):
+#def deleteTranscription(mysql):
+#def createStudyGuide(mysql):
+#def readStudyGuide(mysql):
+#def updateStudyGuide(mysql):
+#def deleteStudyGuide(mysql):
+#def createFlashcardSet(mysql):
+#def readFlashcardSet(mysql):
+#def updateFlashcardSet(mysql):
+#def deleteFlashcardSet(mysql):
+#def createFlashcard(mysql):
+#def readFlashcard(mysql):
+#def updateFlashcard(mysql):
+#def deleteFlashcard(mysql):
+#def createPracticeTest(mysql):
+#def readPracticeTest(mysql):
+#def updatePracticeTest(mysql):
+#def deletePracticeTest(mysql):
+#def createQuestion(mysql):
+#def readQuestion(mysql):
+#def updateQuestion(mysql):
+#def deleteQuestion(mysql):
+#def createAnswer(mysql):
+#def readAnswer(mysql):
+#def updateAnswer(mysql):
+#def deleteAnswer(mysql):
