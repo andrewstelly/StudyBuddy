@@ -8,18 +8,29 @@ from datetime import date
 def createAccount(mysql,email, username, password):
     conn = mysql.connect()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO Accounts (Email, Username, Password, Salt) VALUES ("+str(email)+", "+str(username)+", "+str(password)+", "+str(date.today)+");")
+    cursor.execute("INSERT INTO Accounts (Email, Username, Password, Joindate) VALUES ("+str(email)+", "+str(username)+", "+str(password)+", "+str(date.today)+");")
     conn.close()
 def readAllAccount(mysql):
     conn = mysql.connect()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM customers")
+    cursor.execute("SELECT * FROM Accounts")
     data = cursor.fetchall()
     for row in data:
         print(row)
     conn.close()
-#def updateAccount(mysql):
-#def deleteAccount(mysql):
+def updateAccount(mysql,userName ,column, value):
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    if("password" == column or column == "Password"):
+        cursor.execute("SELECT Joindate FROM Accounts WHERE " + (userName) +" == Username;")
+        data = cursor.fetchall()
+        for row in data:
+            joinDate = row
+        print(joinDate)
+        cursor.execute("UPDATE Account SET Password = " + str(value+joinDate) + " WHERE " + (userName) +" == Username;")
+
+    conn.close()
+def deleteAccount(mysql):
 #def createFolder(mysql):
 #def readFolder(mysql):
 #def updateFolder(mysql):
