@@ -8,28 +8,25 @@ from flaskext.mysql import MySQL
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'StudyBuddyBackend')))
 
 from WhisperDev import transcribe_mp3, generate_summary, create_study_guide, create_practice_test, translate_text  # Import functions
-from Database import createAccount, readAllAccount
+from Database import createAccount, readAllAccount,deleteAccount
+
+
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)  # Enable CORS for all routes
 
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-app.config['MYSQL_DATABASE_HOST'] = 'studybuddydatabase.c2dgiiq4g2h6.us-east-1.rds.amazonaws.com' # Specify Endpoint
+app.config['MYSQL_DATABASE_HOST'] = 'study-buddy-database.co3kew2gkyw2.us-east-1.rds.amazonaws.com' # Specify Endpoint
 app.config['MYSQL_DATABASE_USER'] = 'admin' # Specify Master username
 app.config['MYSQL_DATABASE_PASSWORD'] = 'StudyBuddy!' # Specify Master password
-app.config['MYSQL_DATABASE_DB'] = 'StudyBuddy' # Specify database name
+app.config['MYSQL_DATABASE_DB'] = 'study_buddy_database' # Specify database name
 
 mysql = MySQL(app)
 
-try:
-    conn = mysql.connect()
-    cursor = conn.cursor()
-    createAccount(mysql,"test@gmail.com","test","")
-    conn.close()
-except Exception as e:
-    print(e)
-
+createAccount(mysql,"test","test","test")
+readAllAccount(mysql)
+deleteAccount(mysql,"test")
 # Handle preflight OPTIONS request for CORS
 @app.route('/upload', methods=['OPTIONS'])
 def options():
