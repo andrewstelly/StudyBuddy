@@ -46,6 +46,7 @@ def options():
 def upload_file():
     """Handles file upload and content generation."""
     try:
+        # Check if the file is in the request
         if 'file' not in request.files:
             response = jsonify({"error": "No file part"})
             response.headers.add("Access-Control-Allow-Origin", "*")  # Allow CORS
@@ -57,46 +58,94 @@ def upload_file():
             response.headers.add("Access-Control-Allow-Origin", "*")  # Allow CORS
             return response, 400
 
+        # Save the file
         file_path = os.path.join(UPLOAD_FOLDER, file.filename)
-        file.save(file_path)
-        print(f"File saved to {file_path}")
+        try:
+            file.save(file_path)
+            print(f"File successfully saved to: {file_path}")
+        except Exception as e:
+            print(f"Error saving file: {e}")
+            response = jsonify({"error": "Failed to save file"})
+            response.headers.add("Access-Control-Allow-Origin", "*")  # Allow CORS
+            return response, 500
 
+        # Verify the file exists
+        if not os.path.exists(file_path):
+            print(f"File not found after saving: {file_path}")
+            response = jsonify({"error": "File not found after saving"})
+            response.headers.add("Access-Control-Allow-Origin", "*")  # Allow CORS
+            return response, 500
+
+        # Log the file path for debugging
+        print(f"Processing file at: {file_path}")
+
+        # Read form data flags
         generate_summary_flag = request.form.get("summary") == "true"
         create_study_guide_flag = request.form.get("studyGuide") == "true"
         create_practice_test_flag = request.form.get("practiceTest") == "true"
         translate_flag = request.form.get("translate") == "true"
         target_language = request.form.get("targetLanguage")
 
+        # Log the received flags
+        print(f"Summary: {generate_summary_flag}, Study Guide: {create_study_guide_flag}, "
+              f"Practice Test: {create_practice_test_flag}, Translate: {translate_flag}, "
+              f"Target Language: {target_language}")
+
         results = {}
 
         # Always transcribe the file
-        transcription_text = transcribe_mp3(file_path)
-        results["transcription"] = transcription_text
-        print("Transcription completed")
+        try:
+            transcription_text = transcribe_mp3(file_path)
+            results["transcription"] = transcription_text
+            print("Transcription completed")
+        except Exception as e:
+            print(f"Error during transcription: {e}")
+            response = jsonify({"error": "Failed to transcribe file"})
+            response.headers.add("Access-Control-Allow-Origin", "*")  # Allow CORS
+            return response, 500
 
         # Generate summary if selected
         if generate_summary_flag:
-            results["summary"] = generate_summary(transcription_text)
-            print("Summary completed")
+            try:
+                results["summary"] = generate_summary(transcription_text)
+                print("Summary completed")
+            except Exception as e:
+                print(f"Error generating summary: {e}")
+                results["summary"] = "Error generating summary"
 
         # Create study guide if selected
         if create_study_guide_flag:
-            results["study_guide"] = create_study_guide(transcription_text)
-            print("Study Guide completed")
+            try:
+                results["study_guide"] = create_study_guide(transcription_text)
+                print("Study Guide completed")
+            except Exception as e:
+                print(f"Error creating study guide: {e}")
+                results["study_guide"] = "Error creating study guide"
 
         # Create practice test if selected
         if create_practice_test_flag:
-            results["practice_test"] = create_practice_test(transcription_text)
-            print("Practice Test completed")
+            try:
+                results["practice_test"] = create_practice_test(transcription_text)
+                print("Practice Test completed")
+            except Exception as e:
+                print(f"Error creating practice test: {e}")
+                results["practice_test"] = "Error creating practice test"
 
         # Translate if selected
         if translate_flag and target_language:
-            results["translation"] = translate_text(transcription_text, target_language)
-            print(f"Translation to {target_language} completed")
+            try:
+                results["translation"] = translate_text(transcription_text, target_language)
+                print(f"Translation to {target_language} completed")
+            except Exception as e:
+                print(f"Error during translation: {e}")
+                results["translation"] = f"Error translating to {target_language}"
 
         # Delete the file after processing
-        os.remove(file_path)
-        print(f"File {file_path} deleted")
+        try:
+            os.remove(file_path)
+            print(f"File {file_path} deleted")
+        except Exception as e:
+            print(f"Error deleting file: {e}")
 
         # Explicitly set CORS headers in response
         response = jsonify({
