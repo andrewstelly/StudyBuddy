@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
 
-const PracticeTests: React.FC = () => {
+const PracticeTest: React.FC = () => {
     const [practiceTest, setPracticeTest] = useState<string>("Loading...");
     const [fontSize, setFontSize] = useState<number>(16); // Default font size
     const [fontFamily, setFontFamily] = useState<string>("Arial"); // Default font type
+    const [isSpeaking, setIsSpeaking] = useState<boolean>(false); // Track if TTS is active
+    const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]); // Available voices
+    const [selectedVoice, setSelectedVoice] = useState<string>(""); // Selected voice
 
     useEffect(() => {
         const storedContent = localStorage.getItem("generatedContent");
-        console.log("Retrieved from localStorage (Practice Tests):", storedContent);
+        console.log("Retrieved from localStorage (Practice Test):", storedContent);
 
         if (storedContent) {
             try {
@@ -24,11 +27,40 @@ const PracticeTests: React.FC = () => {
         } else {
             setPracticeTest("No practice test found.");
         }
+
+        // Fetch available voices
+        const fetchVoices = () => {
+            const availableVoices = window.speechSynthesis.getVoices();
+            setVoices(availableVoices);
+            if (availableVoices.length > 0) {
+                setSelectedVoice(availableVoices[0].name); // Default to the first voice
+            }
+        };
+
+        // Fetch voices when they are loaded
+        fetchVoices();
+        window.speechSynthesis.onvoiceschanged = fetchVoices;
     }, []);
 
     // ✅ Handle user input
     const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         setPracticeTest(event.target.value);
+    };
+
+    // ✅ Text-to-Speech Functionality
+    const handleTextToSpeech = () => {
+        if (isSpeaking) {
+            // Stop speech if already speaking
+            window.speechSynthesis.cancel();
+            setIsSpeaking(false);
+        } else {
+            // Start speech
+            const utterance = new SpeechSynthesisUtterance(practiceTest);
+            utterance.voice = voices.find((voice) => voice.name === selectedVoice) || null; // Set selected voice
+            utterance.onend = () => setIsSpeaking(false); // Reset state when speech ends
+            window.speechSynthesis.speak(utterance);
+            setIsSpeaking(true);
+        }
     };
 
     return (
@@ -65,6 +97,38 @@ const PracticeTests: React.FC = () => {
                     </label>
                 </div>
 
+                {/* ✅ Voice Selector */}
+                <label style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    Voice:
+                    <select
+                        value={selectedVoice}
+                        onChange={(e) => setSelectedVoice(e.target.value)}
+                        style={{ padding: "5px" }}
+                    >
+                        {voices.map((voice) => (
+                            <option key={voice.name} value={voice.name}>
+                                {voice.name} ({voice.lang})
+                            </option>
+                        ))}
+                    </select>
+                </label>
+
+                {/* ✅ Text-to-Speech Button */}
+                <button
+                    onClick={handleTextToSpeech}
+                    style={{
+                        marginBottom: "10px",
+                        padding: "10px 20px",
+                        backgroundColor: isSpeaking ? "red" : "green",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                    }}
+                >
+                    {isSpeaking ? "Stop Speaking" : "Read Aloud"}
+                </button>
+
                 <textarea 
                     className="text-box"
                     value={practiceTest}
@@ -76,4 +140,4 @@ const PracticeTests: React.FC = () => {
     );
 };
 
-export default PracticeTests;
+export default PracticeTest;

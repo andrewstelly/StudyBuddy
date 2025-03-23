@@ -4,6 +4,9 @@ const Notes: React.FC = () => {
     const [studyGuide, setStudyGuide] = useState<string>("Loading...");
     const [fontSize, setFontSize] = useState<number>(16); // Default font size
     const [fontFamily, setFontFamily] = useState<string>("Arial"); // Default font type
+    const [isSpeaking, setIsSpeaking] = useState<boolean>(false); // Track if TTS is active
+    const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]); // Available voices
+    const [selectedVoice, setSelectedVoice] = useState<string>(""); // Selected voice
 
     useEffect(() => {
         const storedContent = localStorage.getItem("generatedContent");
@@ -24,11 +27,40 @@ const Notes: React.FC = () => {
         } else {
             setStudyGuide("No study guide found.");
         }
+
+        // Fetch available voices
+        const fetchVoices = () => {
+            const availableVoices = window.speechSynthesis.getVoices();
+            setVoices(availableVoices);
+            if (availableVoices.length > 0) {
+                setSelectedVoice(availableVoices[0].name); // Default to the first voice
+            }
+        };
+
+        // Fetch voices when they are loaded
+        fetchVoices();
+        window.speechSynthesis.onvoiceschanged = fetchVoices;
     }, []);
 
     // ✅ Handle user input
     const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         setStudyGuide(event.target.value);
+    };
+
+    // ✅ Text-to-Speech Functionality
+    const handleTextToSpeech = () => {
+        if (isSpeaking) {
+            // Stop speech if already speaking
+            window.speechSynthesis.cancel();
+            setIsSpeaking(false);
+        } else {
+            // Start speech
+            const utterance = new SpeechSynthesisUtterance(studyGuide);
+            utterance.voice = voices.find((voice) => voice.name === selectedVoice) || null; // Set selected voice
+            utterance.onend = () => setIsSpeaking(false); // Reset state when speech ends
+            window.speechSynthesis.speak(utterance);
+            setIsSpeaking(true);
+        }
     };
 
     return (
@@ -64,6 +96,38 @@ const Notes: React.FC = () => {
                         </select>
                     </label>
                 </div>
+
+                {/* ✅ Voice Selector */}
+                <label style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    Voice:
+                    <select
+                        value={selectedVoice}
+                        onChange={(e) => setSelectedVoice(e.target.value)}
+                        style={{ padding: "5px" }}
+                    >
+                        {voices.map((voice) => (
+                            <option key={voice.name} value={voice.name}>
+                                {voice.name} ({voice.lang})
+                            </option>
+                        ))}
+                    </select>
+                </label>
+
+                {/* ✅ Text-to-Speech Button */}
+                <button
+                    onClick={handleTextToSpeech}
+                    style={{
+                        marginBottom: "10px",
+                        padding: "10px 20px",
+                        backgroundColor: isSpeaking ? "red" : "green",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                    }}
+                >
+                    {isSpeaking ? "Stop Speaking" : "Read Aloud"}
+                </button>
 
                 <textarea 
                     className="text-box"
