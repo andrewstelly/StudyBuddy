@@ -1,5 +1,6 @@
 import sys
 import os
+import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS  # Import CORS
 from flaskext.mysql import MySQL
@@ -7,7 +8,7 @@ from flaskext.mysql import MySQL
 # Add the directory containing WhisperDev.py to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'StudyBuddyBackend')))
 
-from WhisperDev import transcribe_mp3, generate_summary, create_study_guide, create_practice_test, translate_text  # Import functions
+from WhisperDev import transcribe_mp3, generate_summary, create_study_guide, create_practice_test, translate_text, create_flashcards  # Import functions
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)  # Enable CORS for all routes
@@ -61,9 +62,11 @@ def upload_file():
         file.save(file_path)
         print(f"File saved to {file_path}")
 
+        # Read form data flags
         generate_summary_flag = request.form.get("summary") == "true"
         create_study_guide_flag = request.form.get("studyGuide") == "true"
         create_practice_test_flag = request.form.get("practiceTest") == "true"
+        create_flashcards_flag = request.form.get("flashcards") == "true"  # New flag for flashcards
         translate_flag = request.form.get("translate") == "true"
         target_language = request.form.get("targetLanguage")
 
@@ -89,6 +92,23 @@ def upload_file():
             results["practice_test"] = create_practice_test(transcription_text)
             print("Practice Test completed")
 
+        # Create flashcards if selected
+        if create_flashcards_flag:  # Generate flashcards if selected
+            raw_flashcards = create_flashcards(transcription_text)
+            print("Raw flashcards from ChatGPT:", raw_flashcards)  # Debug log
+
+            # Clean up the flashcards data
+            if raw_flashcards.startswith("```json"):
+                raw_flashcards = raw_flashcards.strip("```json").strip("```").strip()
+
+            try:
+                # Parse the cleaned flashcards string into a Python object
+                results["flashcards"] = json.loads(raw_flashcards)
+            except json.JSONDecodeError as e:
+                print(f"Error decoding flashcards JSON: {e}")
+                results["flashcards"] = []
+            print("Cleaned flashcards:", results["flashcards"])  # Debug log
+
         # Translate if selected
         if translate_flag and target_language:
             results["translation"] = translate_text(transcription_text, target_language)
@@ -99,6 +119,7 @@ def upload_file():
         print(f"File {file_path} deleted")
 
         # Explicitly set CORS headers in response
+        print("Final results being sent to frontend:", results)  # Debug log
         response = jsonify({
             "message": "File uploaded and processed successfully",
             **results
@@ -106,6 +127,8 @@ def upload_file():
         response.headers.add("Access-Control-Allow-Origin", "*")
         response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
         response.headers.add("Access-Control-Allow-Methods", "POST,GET,OPTIONS")
+
+        print("Final JSON response to frontend:", response.get_json())  # Debug log
 
         return response, 200
 

@@ -9,6 +9,7 @@ const FileUpload: React.FC = () => {
   const [summary, setSummary] = useState(false);
   const [studyGuide, setStudyGuide] = useState(false);
   const [practiceTest, setPracticeTest] = useState(false);
+  const [flashcards, setFlashcards] = useState(false); // New state for flashcards
   const [translate, setTranslate] = useState(false);
   const [targetLanguage, setTargetLanguage] = useState("");
 
@@ -35,6 +36,7 @@ const FileUpload: React.FC = () => {
     formData.append("summary", summary.toString());
     formData.append("studyGuide", studyGuide.toString());
     formData.append("practiceTest", practiceTest.toString());
+    formData.append("flashcards", flashcards.toString()); // Add flashcards flag
     formData.append("translate", translate.toString());
     formData.append("targetLanguage", targetLanguage);
 
@@ -52,25 +54,11 @@ const FileUpload: React.FC = () => {
       });
 
       const data = await response.json();
-      console.log("📩 Response from backend:", data); // Debug log
+      console.log("Response from backend:", data);  // Debug log
 
-      if (!data.practice_test) {
-        console.error("Error: Backend did not return a practice test.");
-      } else {
-        console.log("Practice Test:", data.practice_test);
-      }
-
-      // Store in local storage
-      const storedData = {
-        summary: data.summary || "No summary available.",
-        study_guide: data.study_guide || "No study guide available.",
-        practice_test: data.practice_test || "No practice test available.", // Ensure practice test is stored
-        translation: data.translation || "No translation available.",
-      };
-
-      localStorage.setItem("generatedContent", JSON.stringify(storedData));
-      console.log("Saved to localStorage:", localStorage.getItem("generatedContent"));
-
+      // Store results in localStorage
+      localStorage.setItem("generatedContent", JSON.stringify(data));
+      console.log("Stored in localStorage:", localStorage.getItem("generatedContent"));  // Debug log
     } catch (error) {
       console.error("Error uploading file:", error);
     } finally {
@@ -106,6 +94,10 @@ const FileUpload: React.FC = () => {
             <label>
               <input type="checkbox" checked={practiceTest} onChange={() => setPracticeTest(!practiceTest)} />
               Practice Test&nbsp;&nbsp;&nbsp;
+            </label>
+            <label>
+              <input type="checkbox" checked={flashcards} onChange={() => setFlashcards(!flashcards)} />
+              Flashcards
             </label>
             <label>
               <input type="checkbox" checked={translate} onChange={() => setTranslate(!translate)} />
