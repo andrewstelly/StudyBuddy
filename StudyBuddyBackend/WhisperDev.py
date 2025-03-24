@@ -68,6 +68,17 @@ def translate_text(text, target_language):
     )
     return response.choices[0].message.content
 
+def create_flashcards(transcription):
+    """Generates flashcards from the transcribed text."""
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "You are an AI that generates flashcards."},
+            {"role": "user", "content": f"Create flashcards from the following text. Each flashcard should have a question and an answer. Return the flashcards in JSON format as an array of objects, where each object has 'question' and 'answer' keys:\n\n{transcription}"}
+        ],
+    )
+    return response.choices[0].message.content
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     """Handles file upload and content generation."""
