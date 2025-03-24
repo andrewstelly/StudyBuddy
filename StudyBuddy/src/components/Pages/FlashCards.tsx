@@ -1,87 +1,93 @@
 import React, { useEffect, useState } from "react";
-import "./FlashCards.css"; // Import the CSS file for styling
-import TextDisplay from "../TextDisplay";
+import Flashcard from "../UI/Flashcard";
+import { ArrowLeftCircle, ArrowRightCircle } from "lucide-react";
 
-interface Flashcard {
-    question: string;
-    answer: string;
-}
+type FlashcardType = {
+  term: string;
+  definition: string;
+};
 
 const FlashCards: React.FC = () => {
-    const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
-    const [currentIndex, setCurrentIndex] = useState<number>(0); // Track the current flashcard index
-    const [isFlipped, setIsFlipped] = useState<boolean>(false); // Track if the card is flipped
-    const [loadingMessage, setLoadingMessage] = useState<string>("Loading...");
+  const [flashcards, setFlashcards] = useState<FlashcardType[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [loadingMessage, setLoadingMessage] = useState<string>("Loading...");
 
-    useEffect(() => {
-        // Fetch flashcards from localStorage
-        const storedContent = localStorage.getItem("generatedContent");
-        if (storedContent) {
-            try {
-                const parsedContent = JSON.parse(storedContent);
-                const flashcardsData = parsedContent.flashcards;
+  useEffect(() => {
+    const storedContent = localStorage.getItem("generatedContent");
+    if (storedContent) {
+      try {
+        const parsedContent = JSON.parse(storedContent);
+        const flashcardsData = parsedContent.flashcards;
 
-                // Check if flashcardsData is an array
-                if (Array.isArray(flashcardsData)) {
-                    setFlashcards(flashcardsData); // Valid array of flashcards
-                    setLoadingMessage(""); // Clear loading message
-                } else {
-                    setLoadingMessage("No flashcards available.");
-                }
-            } catch (error) {
-                console.error("Error parsing flashcards from localStorage:", error);
-                setLoadingMessage("Error loading flashcards.");
-            }
+        if (Array.isArray(flashcardsData)) {
+          // Convert { question, answer } into { term, definition }
+          const formattedFlashcards = flashcardsData.map((fc: any) => ({
+            term: fc.question,
+            definition: fc.answer,
+          }));
+          setFlashcards(formattedFlashcards);
+          setLoadingMessage("");
         } else {
-            setLoadingMessage("No flashcards available.");
+          setLoadingMessage("No flashcards available.");
         }
-    }, []);
+      } catch (e) {
+        console.error("Error parsing flashcards:", e);
+        setLoadingMessage("Error loading flashcards.");
+      }
+    } else {
+      setLoadingMessage("No flashcards available.");
+    }
+  }, []);
 
-    const handleFlip = () => {
-        setIsFlipped(!isFlipped); // Toggle the flipped state
-    };
+  const goToPrevious = () => {
+    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : flashcards.length - 1));
+  };
 
-    const handleNext = () => {
-        setIsFlipped(false); // Reset flip state
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % flashcards.length); // Go to the next flashcard
-    };
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev < flashcards.length - 1 ? prev + 1 : 0));
+  };
 
-    const handlePrevious = () => {
-        setIsFlipped(false); // Reset flip state
-        setCurrentIndex((prevIndex) =>
-            prevIndex === 0 ? flashcards.length - 1 : prevIndex - 1
-        ); // Go to the previous flashcard
-    };
+  const currentCard = flashcards[currentIndex];
 
-    return (
-        <div>
-            <TextDisplay title="Flash Cards" content="Below are your generated flashcards:" />
-            {loadingMessage ? (
-                <p>{loadingMessage}</p>
-            ) : (
-                <div className="flashcard-container">
-                    <div className="flashcard" onClick={handleFlip}>
-                        <div
-                            className={`flashcard-inner ${isFlipped ? "flipped" : ""}`}
-                        >
-                            <div className="flashcard-front">
-                                <strong>Question:</strong>
-                                <p>{flashcards[currentIndex].question}</p>
-                            </div>
-                            <div className="flashcard-back">
-                                <strong>Answer:</strong>
-                                <p>{flashcards[currentIndex].answer}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="navigation-buttons">
-                        <button onClick={handlePrevious}>&lt; Previous</button>
-                        <button onClick={handleNext}>Next &gt;</button>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
+  return (
+    <div className="flashcards-container" style={{ textAlign: "center", padding: "2rem" }}>
+      {loadingMessage ? (
+        <p>{loadingMessage}</p>
+      ) : (
+        <>
+          <div
+            className="flashcard-wrapper"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "2rem",
+            }}
+          >
+            <ArrowLeftCircle
+              size={48}
+              strokeWidth={2.5}
+              onClick={goToPrevious}
+              style={{ cursor: "pointer" }}
+            />
+
+            <Flashcard term={currentCard.term} definition={currentCard.definition} />
+
+            <ArrowRightCircle
+              size={48}
+              strokeWidth={2.5}
+              onClick={goToNext}
+              style={{ cursor: "pointer" }}
+            />
+          </div>
+
+          <p className="card-counter" style={{ marginTop: "1rem" }}>
+            {currentIndex + 1} / {flashcards.length}
+          </p>
+        </>
+      )}
+    </div>
+  );
 };
 
 export default FlashCards;
