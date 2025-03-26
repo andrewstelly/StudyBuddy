@@ -1,7 +1,7 @@
 import sys
 import os
 import json
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS  # Import CORS
 from flaskext.mysql import MySQL
 
@@ -77,6 +77,14 @@ def upload_file():
         results["transcription"] = transcription_text
         print("Transcription completed")
 
+        # Save transcription to a file
+        try:
+            with open("transcription.txt", "w", encoding="utf-8") as f:
+                f.write(transcription_text)
+            print("Transcription saved to transcription.txt")  # Debug log
+        except Exception as e:
+            print(f"Error saving transcription file: {e}")
+
         # Generate summary if selected
         if generate_summary_flag:
             results["summary"] = generate_summary(transcription_text)
@@ -137,6 +145,19 @@ def upload_file():
         response = jsonify({"error": str(e)})
         response.headers.add("Access-Control-Allow-Origin", "*")  # Allow CORS on error response
         return response, 500
+
+@app.route('/download-transcription', methods=['GET'])
+def download_transcription():
+    """Serve the transcription file for download."""
+    try:
+        transcription_file_path = os.path.join(os.getcwd(), "transcription.txt")  # Ensure correct path
+        if not os.path.exists(transcription_file_path):
+            print("Transcription file does not exist.")  # Debug log
+            return jsonify({"error": "Transcription file not found"}), 404
+        return send_file(transcription_file_path, as_attachment=True)
+    except Exception as e:
+        print(f"Error serving transcription file: {e}")
+        return jsonify({"error": "Failed to download transcription"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
