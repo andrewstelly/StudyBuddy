@@ -8,8 +8,7 @@ from flaskext.mysql import MySQL
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'StudyBuddyBackend')))
 
 from WhisperDev import transcribe_mp3, generate_summary, create_study_guide, create_practice_test, translate_text  # Import functions
-from Database import createAccount, readAllAccount,deleteAccount
-
+from Database import createAccount, readAllAccount,deleteAccount, createFolder, readFolder
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)  # Enable CORS for all routes
@@ -24,9 +23,8 @@ app.config['MYSQL_DATABASE_DB'] = 'study_buddy_database' # Specify database name
 
 mysql = MySQL(app)
 
-createAccount(mysql,"test","test","test")
-readAllAccount(mysql)
-deleteAccount(mysql,"test")
+readFolder(mysql,"13")
+
 # Handle preflight OPTIONS request for CORS
 @app.route('/upload', methods=['OPTIONS'])
 def options():
