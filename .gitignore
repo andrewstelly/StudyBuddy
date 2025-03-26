@@ -6,6 +6,7 @@ __pycache__/
 .env
 
 # Ignore other files and directories as needed
+transcription.txt
 uploads/
 .env
 package-lock.json

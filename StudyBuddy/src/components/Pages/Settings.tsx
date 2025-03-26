@@ -17,19 +17,21 @@ const Settings: React.FC = () => {
     try {
       const response = await fetch("http://localhost:5000/download-transcription");
       if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
+        const blob = await response.blob(); // Convert response to a Blob
+        const url = window.URL.createObjectURL(blob); // Create a URL for the Blob
+        const a = document.createElement("a"); // Create a temporary anchor element
         a.href = url;
-        a.download = "transcription.txt";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        a.download = "transcription.txt"; // Set the file name for download
+        document.body.appendChild(a); // Append the anchor to the document
+        a.click(); // Trigger the download
+        a.remove(); // Remove the anchor from the document
       } else {
-        console.error("Failed to download transcription");
+        console.error("Failed to download transcription:", response.statusText);
+        alert("Failed to download transcription. Please try again.");
       }
     } catch (error) {
       console.error("Error downloading transcription:", error);
+      alert("An error occurred while downloading the transcription.");
     }
   };
 
