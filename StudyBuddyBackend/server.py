@@ -4,11 +4,12 @@ import json
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS  # Import CORS
 from flaskext.mysql import MySQL
-
+from WhisperDev import transcribe_mp3, generate_summary, create_study_guide, create_practice_test, translate_text, create_flashcards  # Import functions
+from Database import test_create_update_read_delete, reset_database
 # Add the directory containing WhisperDev.py to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'StudyBuddyBackend')))
 
-from WhisperDev import transcribe_mp3, generate_summary, create_study_guide, create_practice_test, translate_text, create_flashcards  # Import functions
+
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)  # Enable CORS for all routes
@@ -26,10 +27,11 @@ mysql = MySQL(app)
 try:
     conn = mysql.connect()
     cursor = conn.cursor()
-    cursor.execute("SHOW TABLES")
+
     data = cursor.fetchall()
     for row in data:
         print(row)
+    cursor.close()
     conn.close()
 except Exception as e:
     print(e)
