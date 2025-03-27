@@ -17,20 +17,17 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)  # Ena
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-app.config['MYSQL_DATABASE_HOST'] = 'studybuddydatabase.c2dgiiq4g2h6.us-east-1.rds.amazonaws.com' # Specify Endpoint
+app.config['MYSQL_DATABASE_HOST'] = 'study-buddy-database.co3kew2gkyw2.us-east-1.rds.amazonaws.com' # Specify Endpoint
 app.config['MYSQL_DATABASE_USER'] = 'admin' # Specify Master username
 app.config['MYSQL_DATABASE_PASSWORD'] = 'StudyBuddy!' # Specify Master password
-app.config['MYSQL_DATABASE_DB'] = 'StudyBuddy' # Specify database name
+app.config['MYSQL_DATABASE_DB'] = 'study_buddy_database' # Specify database name
 
 mysql = MySQL(app)
 
 try:
     conn = mysql.connect()
     cursor = conn.cursor()
-
-    data = cursor.fetchall()
-    for row in data:
-        print(row)
+    test_create_update_read_delete(cursor, conn)
     cursor.close()
     conn.close()
 except Exception as e:
