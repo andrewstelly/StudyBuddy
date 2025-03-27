@@ -21,14 +21,14 @@ app.config['MYSQL_DATABASE_USER'] = 'admin' # Specify Master username
 app.config['MYSQL_DATABASE_PASSWORD'] = 'StudyBuddy!' # Specify Master password
 app.config['MYSQL_DATABASE_DB'] = 'study_buddy_database' # Specify database name
 
-mysql = MySQL(app)
-conn = mysql.connect()
-cursor = conn.cursor()
-test_create_update_read_delete(cursor,conn)
-if 'cursor' in locals():
-    cursor.close()
-if 'conn' in locals():
-    conn.close()
+#mysql = MySQL(app)
+#conn = mysql.connect()
+#cursor = conn.cursor()
+
+#if 'cursor' in locals():
+    #cursor.close()
+#if 'conn' in locals():
+    #conn.close()
 # Handle preflight OPTIONS request for CORS
 @app.route('/upload', methods=['OPTIONS'])
 def options():
