@@ -491,7 +491,20 @@ def reset_database(cursor,conn):
             print(f"All records deleted from {table}")
         except Exception as err:
             print(f"Error deleting from {table}: {err}")
-    
+def verifyPassword(cursor, Email, password):
+    try:
+        cursor.execute("SELECT AccountNum, Password, Joindate FROM Accounts WHERE Email = %s", (Email))
+        data = cursor.fetchall()
+
+        for row in data:
+            accountNum = row[0]
+            accountPassword = row[1]
+            salt = row[2]
+            if(str(password) == accountPassword):
+                return True, accountNum
+        return False
+    except Exception as err:
+        print("Error fetching Account:", err)
 
 def test_create_update_read_delete(cursor, conn):
     # CREATE ACCOUNT
@@ -636,5 +649,4 @@ def test_create_update_read_delete(cursor, conn):
     deleteAccount(cursor, conn, AccountNum)
 
     print("Test completed: Created, Updated, Read, and Deleted everything.")
-    reset_database(cursor,conn)
 

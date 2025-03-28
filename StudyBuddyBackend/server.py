@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS  # Import CORS
 from flaskext.mysql import MySQL
 from WhisperDev import transcribe_mp3, generate_summary, create_study_guide, create_practice_test, translate_text, create_flashcards  # Import functions
-from Database import test_create_update_read_delete, reset_database
+from Database import createAccount, deleteAccount, verifyPassword, test_create_update_read_delete, reset_database
 # Add the directory containing WhisperDev.py to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'StudyBuddyBackend')))
 
@@ -27,7 +27,11 @@ mysql = MySQL(app)
 try:
     conn = mysql.connect()
     cursor = conn.cursor()
-    test_create_update_read_delete(cursor, conn)
+    accountNum = createAccount(cursor,conn,"test","test","t1st")
+    accountNum2 = createAccount(cursor,conn,"t3st","test","t3st")
+    print(verifyPassword(cursor, "test", "t3st"))
+    deleteAccount(cursor, conn, accountNum)
+    deleteAccount(cursor, conn, accountNum)
     cursor.close()
     conn.close()
 except Exception as e:
@@ -107,7 +111,7 @@ def upload_file():
             # Clean up the flashcards data
             if raw_flashcards.startswith("```json"):
                 raw_flashcards = raw_flashcards.strip("```json").strip("```").strip()
-
+                print(raw_flashcards)
             try:
                 # Parse the cleaned flashcards string into a Python object
                 results["flashcards"] = json.loads(raw_flashcards)
