@@ -9,20 +9,46 @@ html, body {
 
 .center-container {
     display: flex;
-    height: 82vh;
-    background-color: rgba(115, 164, 255, 0.75); /* Light blue with slight transparency */
+    flex-direction: column; /* Stack items vertically */
+    height: 82%;
+    width: 25%;
+    background-color: rgba(115, 164, 255, 0.85); /* Light blue with slight transparency */
     align-items: center;
     justify-content: center;
     margin: auto;
+    margin-top: 50px; /* Move the container down by 50px */
     padding: 20px; /* Add padding to widen the background */
+    border-radius: 10px; /* Add rounded corners */
+    box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
   }
 
-body {background-color: rgba(155, 202, 255); /* Light blue */
-        background-image:  url('https://www.thoughtco.com/thmb/-v2FYXFX17XaTjncSW759xrb1QI=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/in-the-classroom-multi-ethnic-students-listening-to-a-lecturer-and-writing-in-notebooks--smart-young-people-study-at-the-college--962475722-5c76f411c9e77c0001f57b64.jpg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        position: relative;
+  body {
+    background-color: rgba(155, 202, 255); /* Light blue */
+    background-image: none; /* Remove the global background image */
+}
+
+/* Apply the background image only to the sign-in page */
+.sign-in-page {
+    background-color: rgba(155, 202, 255); /* Light blue */
+    background-image: url('https://www.thoughtco.com/thmb/-v2FYXFX17XaTjncSW759xrb1QI=/750x0/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/in-the-classroom-multi-ethnic-students-listening-to-a-lecturer-and-writing-in-notebooks--smart-young-people-study-at-the-college--962475722-5c76f411c9e77c0001f57b64.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100vh; /* Full height */
+    width: 100vw; /* Full width */
+    position: relative;
+    z-index: 0; /* Ensure it is above the overlay */
+}
+
+.sign-in-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(115, 164, 255, 0.75); /* Light blue with transparency */
+  z-index: -1; /* Place it behind the content */
 }
 
 body::before {
