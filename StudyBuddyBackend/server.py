@@ -198,11 +198,12 @@ def grade_test():
                 })
             elif question["type"] == "discussion":
                 # Use ChatGPT to evaluate discussion responses
-                evaluation = evaluate_discussion_response(response, question["correct_answer"])
+                evaluation_result = evaluate_discussion_response(response, question["correct_answer"])
                 graded_results.append({
                     "question": question["question"],
                     "user_response": response,
-                    "evaluation": evaluation
+                    "evaluation": evaluation_result["evaluation"],
+                    "correct": evaluation_result["correct"]
                 })
 
         return jsonify({"graded_results": graded_results}), 200
@@ -219,7 +220,15 @@ def evaluate_discussion_response(user_response, expected_answer):
             {"role": "user", "content": f"Evaluate the following response to the question. Provide a grade (correct/incorrect), what the correct answer is, and a brief explanation on why they did not get credit if they got it wrong:\n\nQuestion: {expected_answer}\n\nUser Response: {user_response}"}
         ],
     )
-    return response.choices[0].message.content
+    evaluation_text = response.choices[0].message.content
+
+    # Parse the evaluation to determine if the answer is correct
+    is_correct = "correct" in evaluation_text.lower() and "incorrect" not in evaluation_text.lower()
+
+    return {
+        "evaluation": evaluation_text,
+        "correct": is_correct
+    }
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
