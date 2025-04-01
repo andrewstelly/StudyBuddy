@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+import openai
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS  # Import CORS
 from flaskext.mysql import MySQL
@@ -8,6 +9,9 @@ from WhisperDev import transcribe_mp3, generate_summary, create_study_guide, cre
 from Database import createAccount, deleteAccount, verifyPassword, test_create_update_read_delete, reset_database
 # Add the directory containing WhisperDev.py to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'StudyBuddyBackend')))
+
+api_key = os.getenv("OPENAI_API_KEY")
+client = openai.OpenAI(api_key=api_key)
 
 
 
@@ -100,8 +104,20 @@ def upload_file():
 
         # Create practice test if selected
         if create_practice_test_flag:
-            results["practice_test"] = create_practice_test(transcription_text)
-            print("Practice Test completed")
+            raw_practice_test = create_practice_test(transcription_text)
+            print("Raw practice test JSON:", raw_practice_test)  # Debug log
+
+            try:
+                # Clean up the raw practice test string if it starts with ```json
+                if raw_practice_test.startswith("```json"):
+                    raw_practice_test = raw_practice_test.strip("```json").strip("```").strip()
+
+                # Parse the practice test JSON
+                results["practice_test"] = json.loads(raw_practice_test)
+            except json.JSONDecodeError as e:
+                print(f"Error decoding practice test JSON: {e}")
+                results["practice_test"] = {"error": "Failed to generate practice test"}
+            print("Parsed practice test:", results["practice_test"])  # Debug log
 
         # Create flashcards if selected
         if create_flashcards_flag:  # Generate flashcards if selected
@@ -161,6 +177,49 @@ def download_transcription():
     except Exception as e:
         print(f"Error serving transcription file: {e}")
         return jsonify({"error": "Failed to download transcription"}), 500
+
+@app.route('/grade-test', methods=['POST'])
+def grade_test():
+    """Grades the user's practice test responses."""
+    try:
+        data = request.json
+        user_responses = data.get("responses", [])
+        practice_test = data.get("practice_test", {})
+        graded_results = []
+
+        for question, response in zip(practice_test.get("questions", []), user_responses):
+            if question["type"] in ["multiple_choice", "true_false"]:
+                is_correct = response == question["correct_answer"]
+                graded_results.append({
+                    "question": question["question"],
+                    "user_response": response,
+                    "correct": is_correct,
+                    "correct_answer": question["correct_answer"]
+                })
+            elif question["type"] == "discussion":
+                # Use ChatGPT to evaluate discussion responses
+                evaluation = evaluate_discussion_response(response, question["correct_answer"])
+                graded_results.append({
+                    "question": question["question"],
+                    "user_response": response,
+                    "evaluation": evaluation
+                })
+
+        return jsonify({"graded_results": graded_results}), 200
+    except Exception as e:
+        print(f"Error grading test: {e}")
+        return jsonify({"error": str(e)}), 500
+
+def evaluate_discussion_response(user_response, expected_answer):
+    """Evaluates a discussion response using ChatGPT."""
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "You are an AI that evaluates discussion answers."},
+            {"role": "user", "content": f"Evaluate the following response to the question. Provide a grade (correct/incorrect), what the correct answer is, and a brief explanation on why they did not get credit if they got it wrong:\n\nQuestion: {expected_answer}\n\nUser Response: {user_response}"}
+        ],
+    )
+    return response.choices[0].message.content
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
