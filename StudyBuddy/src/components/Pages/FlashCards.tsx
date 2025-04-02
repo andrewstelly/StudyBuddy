@@ -1,3 +1,4 @@
+// components/Pages/FlashCards.tsx
 import React, { useEffect, useState } from "react";
 import Flashcard from "../UI/Flashcard";
 import { ArrowLeftCircle, ArrowRightCircle } from "lucide-react";
@@ -10,7 +11,7 @@ type FlashcardType = {
 const FlashCards: React.FC = () => {
   const [flashcards, setFlashcards] = useState<FlashcardType[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loadingMessage, setLoadingMessage] = useState<string>("Loading...");
+  const [loadingMessage, setLoadingMessage] = useState("Loading...");
 
   useEffect(() => {
     const storedContent = localStorage.getItem("generatedContent");
@@ -20,7 +21,6 @@ const FlashCards: React.FC = () => {
         const flashcardsData = parsedContent.flashcards;
 
         if (Array.isArray(flashcardsData)) {
-          // Convert { question, answer } into { term, definition }
           const formattedFlashcards = flashcardsData.map((fc: any) => ({
             term: fc.question,
             definition: fc.answer,
@@ -64,21 +64,26 @@ const FlashCards: React.FC = () => {
               gap: "2rem",
             }}
           >
-            <ArrowLeftCircle
+              <ArrowLeftCircle
               size={48}
               strokeWidth={2.5}
               onClick={goToPrevious}
-              style={{ cursor: "pointer" }}
+              className="arrow-icon"
             />
-
-            <Flashcard term={currentCard.term} definition={currentCard.definition} />
+            <Flashcard
+              term={currentCard.term}
+              definition={currentCard.definition}
+              key={currentIndex} 
+            />
+          
 
             <ArrowRightCircle
               size={48}
               strokeWidth={2.5}
               onClick={goToNext}
-              style={{ cursor: "pointer" }}
+              className="arrow-icon"
             />
+
           </div>
 
           <p className="card-counter" style={{ marginTop: "1rem" }}>
