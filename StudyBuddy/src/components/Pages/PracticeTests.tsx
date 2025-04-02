@@ -48,7 +48,6 @@ const PracticeTest: React.FC = () => {
   return (
     <div className="page-layout">
       <div style={{ width: "90%", maxWidth: "900px", height: "80vh", display: "flex", flexDirection: "column" }}>
-
         {/* Font Controls */}
         <div style={{ display: "flex", justifyContent: "space-between", gap: "20px", marginBottom: "10px" }}>
           {/* Font Size Selector */}
@@ -78,11 +77,11 @@ const PracticeTest: React.FC = () => {
           </label>
         </div>
 
-        {/* Scrollable Box for Practice Test */}
+        {/* Scrollable Box for Practice Test and Graded Results */}
         <div
           style={{
             flex: 1,
-            overflowY: "auto",
+            overflowY: "auto", // Enables scrolling
             border: "1px solid #ccc",
             borderRadius: "5px",
             padding: "10px",
@@ -90,6 +89,7 @@ const PracticeTest: React.FC = () => {
             fontFamily: fontFamily,
           }}
         >
+          {/* Render Practice Test Questions */}
           {practiceTest.length > 0 ? (
             practiceTest.map((question, index) => (
               <div key={index} style={{ marginBottom: "20px" }}>
@@ -148,6 +148,61 @@ const PracticeTest: React.FC = () => {
           ) : (
             <p>No practice test available.</p>
           )}
+
+          {/* Render Graded Results */}
+          {gradedResults && (
+            <div style={{ marginTop: "20px" }}>
+              <h2>Graded Results</h2>
+              <div>
+                {gradedResults.map((result: any, index: number) => (
+                  <div
+                    key={index}
+                    style={{
+                      marginBottom: "15px",
+                      padding: "10px",
+                      border: "1px solid #ccc",
+                      borderRadius: "5px",
+                      backgroundColor: result.correct ? "#d4edda" : "#f8d7da",
+                    }}
+                  >
+                    <p>
+                      <strong>Q{index + 1}:</strong> {result.question}
+                    </p>
+                    <p>
+                      Your Answer:{" "}
+                      {result.user_response === true
+                        ? "True"
+                        : result.user_response === false
+                        ? "False"
+                        : result.user_response}{" "}
+                      {result.correct ? (
+                        <span style={{ color: "green" }}>✔</span>
+                      ) : (
+                        <span style={{ color: "red" }}>✘</span>
+                      )}
+                    </p>
+                    {!result.correct && result.correct_answer !== undefined && (
+                      <p>
+                        Correct Answer:{" "}
+                        <strong>
+                          {typeof result.correct_answer === "boolean"
+                            ? result.correct_answer
+                              ? "True"
+                              : "False"
+                            : result.correct_answer}
+                        </strong>
+                      </p>
+                    )}
+                    {result.evaluation && (
+                      <p>
+                        ChatGPT Evaluation: <strong>{result.evaluation}</strong>
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Submit Button */}
@@ -165,49 +220,6 @@ const PracticeTest: React.FC = () => {
         >
           Submit Test
         </button>
-
-        {/* Graded Results */}
-        {gradedResults && (
-          <div style={{ marginTop: "20px" }}>
-            <h2>Graded Results</h2>
-            <div>
-              {gradedResults.map((result: any, index: number) => (
-                <div
-                  key={index}
-                  style={{
-                    marginBottom: "15px",
-                    padding: "10px",
-                    border: "1px solid #ccc",
-                    borderRadius: "5px",
-                    backgroundColor: result.correct ? "#d4edda" : "#f8d7da",
-                  }}
-                >
-                  <p>
-                    <strong>Q{index + 1}:</strong> {result.question}
-                  </p>
-                  <p>
-                    Your Answer: {result.user_response === true ? "True" : result.user_response === false ? "False" : result.user_response}{" "}
-                    {result.correct ? (
-                      <span style={{ color: "green" }}>✔</span>
-                    ) : (
-                      <span style={{ color: "red" }}>✘</span>
-                    )}
-                  </p>
-                  {!result.correct && result.correct_answer !== undefined && (
-                    <p>
-                      Correct Answer: <strong>{typeof result.correct_answer === "boolean" ? (result.correct_answer ? "True" : "False") : result.correct_answer}</strong>
-                    </p>
-                  )}
-                  {result.evaluation && (
-                    <p>
-                      ChatGPT Evaluation: <strong>{result.evaluation}</strong>
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
