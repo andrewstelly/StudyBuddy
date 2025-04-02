@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import './SignIn.css'; // Import the CSS file
+import '../components/Styling/SignIn.css'; 
 
 export default function SignIn() {
   const navigate = useNavigate();
