@@ -17,7 +17,6 @@ function App() {
   const navigate = useNavigate();
   const isLoginPage = location.pathname === "/";
   const isHomePage = location.pathname === "/home";
-
   const [showEula, setShowEula] = useState(false);
 
   useEffect(() => {
@@ -31,11 +30,10 @@ function App() {
     if (auth && isHomePage && !eulaAccepted) {
       setShowEula(true);
     }
-  }, [isLoginPage, isHomePage, navigate]);
+  }, [isLoginPage, isHomePage, navigate, location.pathname]);
 
   return (
     <>
-      {/* ✅ App layout always renders */}
       <div className="flex">
         {!isLoginPage && <Sidebar />}
         <div className={`main-container ${isLoginPage ? "w-full" : "ml-64"}`}>
@@ -43,7 +41,6 @@ function App() {
         </div>
       </div>
 
-      {/* ✅ EULA modal overlays on top */}
       {showEula && <EulaModal onClose={() => setShowEula(false)} />}
     </>
   );

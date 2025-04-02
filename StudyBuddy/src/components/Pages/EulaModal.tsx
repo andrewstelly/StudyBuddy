@@ -4,7 +4,6 @@ import * as Dialog from "@radix-ui/react-dialog";
 import Cookies from "js-cookie";
 import styles from "../Styling/Eula.module.scss";
 import { Button } from "../UI/Button";
-import { Checkbox } from "../UI/checkbox";
 
 interface EulaModalProps {
   onClose: () => void;

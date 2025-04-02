@@ -29,50 +29,48 @@ const Sidebar = () => {
   }, [isExpanded]);
 
   return (
-    <div>
-      <aside>
-        <nav>
-          <ul>
-            <li>
-              <a href="/home">
-                <i className="bx bx-home-circle"></i>
-                <span>Home</span>
-              </a>
-            </li>
-            <li>
-              <a href="/notes">
-                <i className="bx bx-book"></i>
-                <span>Notes</span>
-              </a>
-            </li>
-            <li>
-              <a href="/practice-tests">
-                <i className="bx bx-test-tube"></i>
-                <span>Practice Tests</span>
-              </a>
-            </li>
-            <li>
-              <a href="/flash-cards">
-                <i className="bx bx-note"></i>
-                <span>Flashcards</span>
-              </a>
-            </li>
-            <li>
-              <a href="/settings">
-                <i className="bx bx-cog"></i>
-                <span>Settings</span>
-              </a>
-            </li>
-            <li>
-              <a onClick={toggleSidebar}>
-                <i className="bx bx-chevron-right"></i>
-                <span>Collapse</span>
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </aside>
-    </div>
+    <aside>
+      <nav>
+        <ul>
+          <li>
+            <a href="/home" title="Home">
+              <i className="bx bx-home-circle"></i>
+              <span>Home</span>
+            </a>
+          </li>
+          <li>
+            <a href="/notes" title="Notes">
+              <i className="bx bx-book"></i>
+              <span>Notes</span>
+            </a>
+          </li>
+          <li>
+            <a href="/practice-tests" title="Practice Tests">
+              <i className="bx bx-test-tube"></i>
+              <span>Practice Tests</span>
+            </a>
+          </li>
+          <li>
+            <a href="/flash-cards" title="Flashcards">
+              <i className="bx bx-note"></i>
+              <span>Flashcards</span>
+            </a>
+          </li>
+          <li>
+            <a href="/settings" title="Settings">
+              <i className="bx bx-cog"></i>
+              <span>Settings</span>
+            </a>
+          </li>
+          <li>
+            <a onClick={toggleSidebar}>
+              <i className="bx bx-chevron-right"></i>
+              <span>{"Collapse"}</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
   );
 };
 
