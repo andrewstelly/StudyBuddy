@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Flashcard.css"; 
+import "../Styling/Flashcard.css";
 
 type Props = {
   term: string;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./SidebarStyle.css";
+import "../components/Styling/SidebarStyle.css";
 
 // Dynamically import the external CSS file
 const loadExternalCSS = (url: string) => {

@@ -12,6 +12,8 @@
   "dependencies": {
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
+    "@radix-ui/react-checkbox": "^1.1.4",
+    "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-slot": "^1.1.2",
     "@tailwindcss/vite": "^4.0.6",
     "@types/react-router-dom": "^5.3.3",
@@ -46,6 +48,7 @@
     "postcss-cli": "^11.0.0",
     "postcss-nested": "^7.0.2",
     "postcss-nesting": "^13.0.1",
+    "sass-embedded": "^1.86.1",
     "tailwindcss": "^3.4.17",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.22.0",

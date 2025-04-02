@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import './ProcessComplete.css';
+import '../components/Styling/ProcessComplete.css';
 
 interface ProcessCompleteProps {
   onComplete: () => void;
