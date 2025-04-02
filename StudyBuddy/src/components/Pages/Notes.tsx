@@ -33,7 +33,7 @@ const Notes: React.FC = () => {
             const availableVoices = window.speechSynthesis.getVoices();
             setVoices(availableVoices);
             if (availableVoices.length > 0) {
-                setSelectedVoice(availableVoices[0].name); // Default to the first voice
+                setSelectedVoice(availableVoices[4].name); // Default to the first voice
             }
         };
 

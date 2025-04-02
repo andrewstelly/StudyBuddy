@@ -47,12 +47,12 @@ def create_study_guide(transcription):
     return response.choices[0].message.content
 
 def create_practice_test(transcription):
-    """Generates a practice test with multiple-choice and true/false questions."""
+    """Generates a practice test with multiple-choice, true/false, and discussion questions."""
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You are an AI that generates practice tests."},
-            {"role": "user", "content": f"Create a practice test with at least 5 multiple-choice questions (MCQs), 3 true/false questions, and 1 discussion question. Provide an answer key:\n\n{transcription}"}
+            {"role": "user", "content": f"Create a practice test based on the following text. The test should include at least 5 multiple-choice questions, 3 true/false questions, and 1 discussion question. Return the test in JSON format with the following structure: {{'questions': [{{'type': 'multiple_choice', 'question': '...', 'options': ['...'], 'correct_answer': '...'}}, {{'type': 'true_false', 'question': '...', 'correct_answer': true/false}}, {{'type': 'discussion', 'question': '...', 'correct_answer': '...'}}]}}:\n\n{transcription}"}
         ],
     )
     return response.choices[0].message.content
