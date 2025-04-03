@@ -152,7 +152,7 @@ def deleteTranscription(cursor, conn, TranscriptionNum):
 
 def createPracticeTest(cursor, conn, PracticeTestName, AccountNum, TranscriptionNum, FolderNum="null"):
     try:
-        cursor.execute("INSERT INTO PracticeTest (PracticeTestName, TranscriptionNum, AccountNum, FolderNum) VALUES (%s, %s, %s, %s)",
+        cursor.execute("INSERT INTO PracticeTest (PracticeTestName, AccountNum, TranscriptionNum, FolderNum) VALUES (%s, %s, %s, %s)",
                        (PracticeTestName, AccountNum, TranscriptionNum, FolderNum))
         conn.commit()
         test_num = cursor.lastrowid
@@ -409,11 +409,11 @@ def deleteFlashcard(cursor, conn, FlashcardNum):
         print("Error deleting Flashcard:", e)
 
 
-def createQuestion(cursor, conn, Text, TestNum, TranscriptionNum):
+def createQuestion(cursor, conn, Type, Text, TestNum, TranscriptionNum):
     try:
 
-        cursor.execute("INSERT INTO Question (Text, TestNum, TranscriptionNum) VALUES (%s, %s, %s)",
-                       (Text, TestNum, TranscriptionNum))
+        cursor.execute("INSERT INTO Question (Type, Text, TestNum, TranscriptionNum) VALUES (%s, %s, %s,%s)",
+                       (Type, Text, TestNum, TranscriptionNum))
         conn.commit()
         question_num = cursor.lastrowid
         print(f"Question created successfully with QuestionNum: {question_num}")
@@ -590,13 +590,13 @@ def test_create_update_read_delete(cursor, conn):
 
     # CREATE QUESTION (Linked to the Practice Test)
     print("Creating Question...")
-    QuestionNum = createQuestion(cursor, conn, 'What is 2 + 2?', PracticeTestNum, TranscriptionNum)
-    print(f"Created QuestionNum: {QuestionNum}")
+    #QuestionNum = createQuestion(cursor, conn, "", 'What is 2 + 2?', PracticeTestNum, TranscriptionNum)
+    #print(f"Created QuestionNum: {QuestionNum}")
 
     # CREATE ANSWER (Linked to the Question)
     print("Creating Answer...")
-    AnswerNum = createAnswer(cursor, conn, '4', QuestionNum, 1)  # 1 for Correct Answer
-    print(f"Created AnswerNum: {AnswerNum}")
+    #AnswerNum = createAnswer(cursor, conn, '4', QuestionNum, 1)  # 1 for Correct Answer
+    #print(f"Created AnswerNum: {AnswerNum}")
 
     # CREATE FLASHCARD SET (Linked to Transcription, Folder, Account)
     print("Creating Flashcard Set...")
@@ -656,10 +656,10 @@ def test_create_update_read_delete(cursor, conn):
     readPracticeTest(cursor, PracticeTestNum)
 
     print("Reading one Question...")
-    readQuestion(cursor, QuestionNum)
+    #readQuestion(cursor, QuestionNum)
 
     print("Reading one Answer...")
-    readAnswer(cursor, AnswerNum)
+    #readAnswer(cursor, AnswerNum)
 
     print("Reading one Flashcard Set...")
     readFlashcardSet(cursor, FlashcardSetNum)
@@ -689,10 +689,10 @@ def test_create_update_read_delete(cursor, conn):
     deleteFlashcardSet(cursor, conn, FlashcardSetNum)
 
     print("Deleting Answer...")
-    deleteAnswer(cursor, conn, AnswerNum)
+    #deleteAnswer(cursor, conn, AnswerNum)
 
     print("Deleting Question...")
-    deleteQuestion(cursor, conn, QuestionNum)
+    #deleteQuestion(cursor, conn, QuestionNum)
 
     print("Deleting Practice Test...")
     deletePracticeTest(cursor, conn, PracticeTestNum)

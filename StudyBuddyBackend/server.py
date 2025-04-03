@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS  # Import CORS
 from flaskext.mysql import MySQL
 from WhisperDev import transcribe_mp3, generate_summary, create_study_guide, create_practice_test, translate_text, create_flashcards  # Import functions
-from Database import createAccount, createFolder, createTranscription, createSummary, createFlashcard, createFlashcardSet, createStudyGuide,createPracticeTest,read_database,reset_database
+from Database import createAccount, createFolder, createTranscription, createSummary, createFlashcard, createFlashcardSet, createStudyGuide, createPracticeTest, createQuestion, createAnswer,read_database,reset_database
 # Add the directory containing WhisperDev.py to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'StudyBuddyBackend')))
 
@@ -83,10 +83,10 @@ def upload_file():
         folder_num =-1
         # Save transcription to a file
         try:
-            folder_num = storeFolder(mysql, "Test Folder", 111)
+            folder_num = storeFolder(mysql, "Test Folder", 116)
             with open("transcription.txt", "w", encoding="utf-8") as f:
                 f.write(transcription_text)
-                transcription_num = storeTranscription(mysql,"Transcription Name", transcription_text,111,folder_num)
+                transcription_num = storeTranscription(mysql,"Transcription Name", transcription_text,116,folder_num)
             print("Transcription saved to transcription.txt")  # Debug log
         except Exception as e:
             print(f"Error saving transcription file: {e}")
@@ -94,13 +94,14 @@ def upload_file():
         # Generate summary if selected
         if generate_summary_flag:
             results["summary"] = generate_summary(transcription_text)
-            storeSummary(mysql, "Summary Name", results["summary"], 111, transcription_num, folder_num)
+            storeSummary(mysql, "Summary Name", results["summary"], 116, transcription_num, folder_num)
             print("Summary completed")
 
         # Create study guide if selected
         if create_study_guide_flag:
             results["study_guide"] = create_study_guide(transcription_text)
-            storeStudyGuide(mysql, "Summary Name", results["summary"], 111, transcription_num, folder_num)
+            print(type(results["study_guide"]))
+            storeStudyGuide(mysql, "StudyGuide Name", results["study_guide"], 116, transcription_num, folder_num)
             print("Study Guide completed")
 
         # Create practice test if selected
@@ -112,12 +113,15 @@ def upload_file():
                 # Clean up the raw practice test string if it starts with ```json
                 if raw_practice_test.startswith("```json"):
                     raw_practice_test = raw_practice_test.strip("```json").strip("```").strip()
-
+                
                 # Parse the practice test JSON
                 results["practice_test"] = json.loads(raw_practice_test)
+                
             except json.JSONDecodeError as e:
                 print(f"Error decoding practice test JSON: {e}")
                 results["practice_test"] = {"error": "Failed to generate practice test"}
+
+            storePracticeTest(mysql,results["practice_test"],"Test Practice Test",116,transcription_num,folder_num)
             print("Parsed practice test:", results["practice_test"])  # Debug log
 
         # Create flashcards if selected
@@ -128,14 +132,14 @@ def upload_file():
             # Clean up the flashcards data
             if raw_flashcards.startswith("```json"):
                 raw_flashcards = raw_flashcards.strip("```json").strip("```").strip()
-                
+              
             try:
                 # Parse the cleaned flashcards string into a Python object
                 results["flashcards"] = json.loads(raw_flashcards)          
             except json.JSONDecodeError as e:
                 print(f"Error decoding flashcards JSON: {e}")
                 results["flashcards"] = []
-            storeFlashcards(mysql,raw_flashcards,111,transcription_num,folder_num)
+            storeFlashcards(mysql, results["flashcards"],116,transcription_num,folder_num)  
             print("Cleaned flashcards:", results["flashcards"])  # Debug log
 
         # Translate if selected
@@ -223,11 +227,26 @@ def storeStudyGuide(mysql,StudyGuideName, StudyGuideText, AccountNum, Transcript
     except Exception as e:
         print(e)
         return "null"
-def storePracticeTest(mysql, PracticeTestName, AccountNum, TranscriptionNum, FolderNum="null"):
+def storePracticeTest(mysql, data, PracticeTestName, AccountNum, TranscriptionNum, FolderNum="null"):
     try:
         conn = mysql.connect()
         cursor = conn.cursor()
         PracticeTestNum = createPracticeTest(cursor,conn, PracticeTestName, AccountNum, TranscriptionNum, FolderNum)
+        for question in data['questions']:
+            questionNum = createQuestion(cursor, conn, question['type'],question['question'],PracticeTestNum,TranscriptionNum)
+            if(question['type'] == "multiple_choice"):
+                for answer in question.get('options'):
+                    if(answer == question['correct_answer']):
+                        createAnswer(cursor,conn, answer, questionNum,1)
+                    else:
+                        createAnswer(cursor,conn, answer, questionNum,0)
+            elif(question.get('type') == "true_false"):
+                if(question['correct_answer']=="false"):
+                    createAnswer(cursor, conn, "True",questionNum,0)
+                    createAnswer(cursor, conn, "False",questionNum,1)
+                else:
+                    createAnswer(cursor, conn, "True",questionNum,1)
+                    createAnswer(cursor, conn, "False",questionNum,0)
         cursor.close()
         conn.close()
         return PracticeTestNum
@@ -239,9 +258,8 @@ def storeFlashcards(mysql, raw_flashcards, AccountNum, TranscriptNum,FolderNum="
         conn = mysql.connect()
         cursor = conn.cursor()
         flashcardSetNum = createFlashcardSet(cursor,conn,"testSet", AccountNum, TranscriptNum,FolderNum)
-        data = json.loads(raw_flashcards)
-        for flashcard in data:
-            createFlashcard(cursor,conn,flashcard.get('question'),flashcard.get('answer'),flashcardSetNum)
+        for flashcard in raw_flashcards:
+            createFlashcard(cursor,conn,flashcard['question'],flashcard['answer'],flashcardSetNum)
             
         cursor.close()
         conn.close()
