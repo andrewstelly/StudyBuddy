@@ -1,0 +1,115 @@
+.file-upload-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 600px;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+  }
+  
+  .drag-drop-box {
+    border: 2px dashed #7ea3dc;
+    border-radius: 0.5rem;
+    width: 100%;
+    height: 350px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f8ff;
+    font-size: 1rem;
+    color: #444;
+    transition: background-color 0.2s ease;
+  }
+  
+  .drag-drop-box:hover {
+    background-color: #e6f1ff;
+  }
+  
+  .file-input-label {
+    cursor: pointer;
+    font-weight: bold;
+    color: #2c5bb5;
+    margin-top: 0.5rem;
+    text-decoration: underline;
+  }
+  
+  .file-input-label input[type="file"] {
+    display: none;
+  }
+  
+  .file-name {
+    margin-top: 0.5rem;
+    font-style: italic;
+  }
+  
+  .options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 0.95rem;
+  }
+
+  .options label {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    cursor: pointer; 
+  }
+
+  .options input[type="checkbox"] {
+    cursor: pointer;
+  }
+  
+  
+  .upload-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    background-color: #7ea3dc;
+    border: none;
+    color: white;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .upload-button:hover {
+    background-color: #5e88c2;
+  }
+  
+  .loading-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(237, 247, 255, 0.8);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 0.5rem;
+    z-index: 10;
+  }
+  
+  .drag-drop-box.highlight {
+    background-color: #d0e6ff;
+    border-color: #2c5bb5;
+    box-shadow: 0 0 0 4px rgba(44, 91, 181, 0.2);
+  }
+
+  .file-upload-header {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #000000;
+  margin-bottom: 1rem;
+  text-align: center;
+  margin-top: -6rem;
+}

@@ -129,12 +129,22 @@ const PracticeTest: React.FC = () => {
                     {isSpeaking ? "Stop Speaking" : "Read Aloud"}
                 </button>
 
-                <textarea 
-                    className="text-box"
-                    value={practiceTest}
-                    onChange={handleChange}
-                    style={{ fontSize: `${fontSize}px`, fontFamily: fontFamily }} // ✅ Apply dynamic font size & type
-                />
+                <textarea
+                className="text-box"
+                value={practiceTest}
+                onChange={handleChange}
+                style={{
+                    fontSize: `${fontSize}px`,
+                    fontFamily: fontFamily,
+                    flexGrow: 1,
+                    resize: "none",
+                    width: "100%",
+                    border: "1px solid #ccc",
+                    borderRadius: "0.5rem",
+                    padding: "1rem",
+                    boxSizing: "border-box",
+                    minHeight: "50vh", 
+                    }} />
             </div>
         </div>
     );
