@@ -27,97 +27,21 @@ body {
 
 /* Main content area: Takes up remaining space after sidebar */
 .main-container {
-
   height: 100vh;
   display: flex;
-  width: calc(100vw); /* Full width minus sidebar */
+  width: calc(100vw);
 }
 
+/* Layout used by FileUpload and PageLayout */
 .file-upload-layout {
-  flex-grow: 1; /* Allow full expansion */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #e3f1ff; /* Light blue */
-  width: 100%;
-  height: 100vh; /* Ensure it fills the screen */
-  background-image: radial-gradient(circle, #d0e8ff 10%, transparent 10%), radial-gradient(circle, #f8fbff 10%, transparent 10%);
-  background-position: 0 0, 25px 25px;
-  background-size: 50px 50px;
-}
-
-.text-box {
-  width: 100%; /* Full width of parent */
-  height: 100%; /* Full height */
-  min-height: 60vh;
-  max-height: 80vh;
-  font-size: 16px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  resize: none; /* Prevent user resizing */
-  background-color: white;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  display: block; /* ✅ Ensure proper block alignment */
-}
-
-
-
-/* Box around the file upload component */
-.file-upload-container {
-  background-color: #7ea3dc; /* blue background */
-  padding: 2rem; /* similar to Tailwind's p-8 */
-  border-radius: 0.5rem; /* rounded corners */
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-              0 4px 6px -2px rgba(0, 0, 0, 0.1); /* subtle shadow */
-  width: 400px; /* Adjust this value as needed */
-  height: 400px; /* Make it a square */
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  position: relative;
-  border: 5px dashed transparent; /* Dashed border */
-  border-image: linear-gradient(to right, #7699cf, #7699cf) 1; /* Gradient border */
+  width: 100vw;
+  height: 100vh;
+  overflow-x: hidden;
 }
 
-/* Style for the file input and upload button */
-.file-upload-container input[type="file"],
-.file-upload-container button {
-  font-size: 1.125rem; /* Larger text */
-  padding: 0.75rem 1.25rem; /* Bigger clickable area */
-  margin: 0.5rem 0; /* Spacing between elements */
-}
-
-/* Style for the file upload title */
-.file-upload-title {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  position: absolute;
-  top: 1rem;
-}
-
-/* Style for the loading screen */
-.loading-screen {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  background-color: rgb(237, 247, 255); /* Semi-transparent background */
-  position: absolute;
-  top: 0;
-  left: 0;
-  border-radius: 0.5rem; /* Match the border radius of the box */
-}
-
-.loading-screen p {
-  font-size: 1.5rem;
-  color: #333;
-}
-
-/* Styles for the PageLayout component */
+/* Page layout wrapper */
 .page-layout {
   display: flex;
   flex-direction: column;
@@ -134,13 +58,13 @@ body {
 }
 
 .content {
-  flex-grow: 1; /* Allow full expansion */
+  flex-grow: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #e3f1ff; /* Light blue */
+  background-color: #e3f1ff;
   width: 100%;
-  height: 100vh; /* Ensure it fills the screen */
+  height: 100vh;
   background-image: radial-gradient(circle, #d0e8ff 10%, transparent 10%), radial-gradient(circle, #f8fbff 10%, transparent 10%);
   background-position: 0 0, 25px 25px;
   background-size: 50px 50px;
@@ -151,34 +75,17 @@ body {
   padding: 2rem;
   border-radius: 0.5rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-              0 4px 6px -2px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+              0 4px 6px -2px rgba(0, 0, 0, 0.1);
   width: 90%;
   max-width: 900px;
-  height: auto;
   min-height: 60vh;
-  margin: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* ✅ Vertically center inside the container */
+  justify-content: center;
   align-items: center;
 }
 
-
-
-.file-upload-container input[type="file"] {
-  margin: 0.5rem 0; /* Spacing between elements */
-  align-self: center; /* Center the input element */
-}
-
-.file-upload-container label {
-  margin-right: 0.5rem; /* Adjust the value as needed */
-}
-
-.file-upload-container label input[type="checkbox"] {
-  margin-right: 0.1rem; /* Adjust the value as needed */
-}
-
-/* Ensure the dialog backdrop is translucent + blurred */
+/* Dialog overlay styles */
 .radix-dialog-overlay,
 [data-state="open"] > .radix-dialog-overlay,
 body > div[class*="radix-portal"] > div {
@@ -197,4 +104,32 @@ body > div[class*="radix-portal"] > div {
   backdrop-filter: blur(3px) saturate(80%);
   -webkit-backdrop-filter: blur(3px) saturate(80%);
   pointer-events: none;
+}
+
+.settings-container {
+  background-color: #9ac9e9;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+              0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.settings-container h1 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+.settings-container button {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  margin-bottom: 1rem;
 }
