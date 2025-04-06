@@ -5,6 +5,7 @@ app = Flask(__name__)
 from datetime import datetime
 
 def createAccount(cursor, conn, Email, Username, Password, Joindate=None):
+    """Creates a an account in the SQL database"""
     try:
         # If Joindate is not provided, use the current date
         if Joindate is None:
@@ -22,6 +23,7 @@ def createAccount(cursor, conn, Email, Username, Password, Joindate=None):
     except Exception as err:
         print("Error:", err)
 def readAccount(cursor, AccountNum):
+    """Reads an account from the database given it's unique Identifying number"""
     try:
         cursor.execute("SELECT * FROM Accounts WHERE AccountNum = %s", (AccountNum,))
         data = cursor.fetchall()
@@ -62,7 +64,7 @@ def createFolder(cursor, conn, FolderName, AccountNum):
         return folder_num
     except Exception as err:
         print("Error:", err)
-        return None
+        return "null"
 def readFolder(cursor, FolderNum):
     try:
         cursor.execute("SELECT * FROM Folders WHERE FolderNum = %s", (FolderNum,))
@@ -94,31 +96,24 @@ def deleteFolder(cursor, conn, FolderNum):
     except Exception as e:
         print(f"Error deleting Folder with FolderNum {FolderNum}: {e}")
 
-def createTranscription(cursor, conn, TranscriptionName, TranscriptionText, FolderNum, AccountNum):
-    
+def createTranscription(cursor, conn, TranscriptionName, TranscriptionText, AccountNum, FolderNum="null"):
     try:
-         # Check if FolderNum exists
-        cursor.execute("SELECT COUNT(*) FROM Folders WHERE FolderNum = %s", (FolderNum,))
-        folder_exists = cursor.fetchone()[0] > 0
         
         # Check if AccountNum exists
         cursor.execute("SELECT COUNT(*) FROM Accounts WHERE AccountNum = %s", (AccountNum,))
         account_exists = cursor.fetchone()[0] > 0
         
-        if not folder_exists:
-            print(f"Error: FolderNum {FolderNum} does not exist.")
-            return None
         if not account_exists:
             print(f"Error: AccountNum {AccountNum} does not exist.")
             return None
-        cursor.execute("INSERT INTO Transcription (TranscriptionName, TranscriptionText, FolderNum, AccountNum) VALUES (%s, %s, %s,%s)", (TranscriptionName, TranscriptionText, FolderNum, AccountNum))
+        cursor.execute("INSERT INTO Transcription (TranscriptionName, TranscriptionText, AccountNum, FolderNum) VALUES (%s, %s, %s,%s)", (TranscriptionName, TranscriptionText, AccountNum, FolderNum))
         conn.commit()
         transcription_num = cursor.lastrowid
         print(f"Transcription created successfully with TranscriptionNum: {transcription_num}")
         return transcription_num
     except Exception as err:
         print("Error:", err)
-        return None
+        return "null"
 def readTranscription(cursor, TranscriptionNum):
     try:
 
@@ -155,17 +150,17 @@ def deleteTranscription(cursor, conn, TranscriptionNum):
         print(f"Error deleting Transcription with TranscriptionNum {TranscriptionNum}: {e}")
 
 
-def createPracticeTest(cursor, conn, PracticeTestName, TranscriptionNum, FolderNum, AccountNum):
+def createPracticeTest(cursor, conn, PracticeTestName, AccountNum, TranscriptionNum, FolderNum="null"):
     try:
-        cursor.execute("INSERT INTO PracticeTest (PracticeTestName, TranscriptionNum, FolderNum, AccountNum) VALUES (%s, %s, %s, %s)",
-                       (PracticeTestName, TranscriptionNum, FolderNum, AccountNum))
+        cursor.execute("INSERT INTO PracticeTest (PracticeTestName, AccountNum, TranscriptionNum, FolderNum) VALUES (%s, %s, %s, %s)",
+                       (PracticeTestName, AccountNum, TranscriptionNum, FolderNum))
         conn.commit()
         test_num = cursor.lastrowid
         print(f"PracticeTest created successfully with TestNum: {test_num}")
         return test_num
     except Exception as err:
         print("Error:", err)
-        return None
+        return "null"
 
 def readPracticeTest(cursor, TestNum):
     try:
@@ -202,17 +197,17 @@ def deletePracticeTest(cursor, conn, TestNum):
         print(f"Error deleting PracticeTest: {e}")
 
 
-def createStudyGuide(cursor, conn, StudyGuideText, FolderNum, AccountNum, TranscriptionNum):
+def createStudyGuide(cursor, conn, StudyGuideName, StudyGuideText, AccountNum, TranscriptionNum, FolderNum):
     try:
-        cursor.execute("INSERT INTO StudyGuide (StudyGuideText, FolderNum, AccountNum, TranscriptionNum) VALUES (%s, %s, %s, %s)",
-                       (StudyGuideText, FolderNum, AccountNum, TranscriptionNum))
+        cursor.execute("INSERT INTO StudyGuide (StudyGuideName, StudyGuideText, AccountNum, TranscriptionNum, FolderNum) VALUES (%s, %s, %s, %s, %s)",
+                       (StudyGuideName, StudyGuideText, AccountNum, TranscriptionNum, FolderNum))
         conn.commit()
         study_guide_num = cursor.lastrowid
         print(f"StudyGuide created successfully with StudyGuideNum: {study_guide_num}")
         return study_guide_num
     except Exception as err:
         print("Error:", err)
-        return None
+        return "null"
 def readStudyGuide(cursor, StudyGuideNum):
     try:
         cursor.execute("SELECT * FROM StudyGuide WHERE StudyGuideNum = %s", (StudyGuideNum,))
@@ -248,11 +243,55 @@ def deleteStudyGuide(cursor, conn, StudyGuideNum):
     except Exception as e:
         print(f"Error deleting StudyGuide: {e}")
 
-
-def createFlashcardSet(cursor, conn, setName, TranscriptionNum, FolderNum, AccountNum):
+def createSummary(cursor, conn, SummaryName, SummaryText, AccountNum, TranscriptionNum, FolderNum="null"):
     try:
-        
-        cursor.execute("INSERT INTO FlashcardSet (SetName, TranscriptionNum, FolderNum, AccountNum) VALUES (%s, %s,%s, %s)", (setName, TranscriptionNum, FolderNum, AccountNum))
+        cursor.execute("INSERT INTO Summary (SummaryName, SummaryText, AccountNum, TranscriptionNum, FolderNum) VALUES (%s, %s, %s,  %s, %s)",
+                       (SummaryName, SummaryText, AccountNum, TranscriptionNum, FolderNum))
+        conn.commit()
+        summary_num = cursor.lastrowid
+        print(f"Summary created successfully with SummaryNum: {summary_num}")
+        return summary_num
+    except Exception as err:
+        print("Error:", err)
+        return "null"
+def readSummary(cursor, SummaryNum):
+    try:
+        cursor.execute("SELECT * FROM Summary WHERE SummaryNum = %s", (SummaryNum))
+        data = cursor.fetchall()
+        print("Printing Summary:")
+        for row in data:
+            print(row)
+    except Exception as e:
+        print(f"Error fetching Summary: {e}")
+def readAllSummaries(cursor):
+    try:
+        cursor.execute("SELECT * FROM Summary")
+        data = cursor.fetchall()
+        print("Printing all Summary:")
+        for row in data:
+            print(row)
+    except Exception as e:
+        print(f"Error fetching Summary: {e}")
+
+def updateSummary(cursor, conn, SummaryNum, column, value):
+    try:
+        cursor.execute(f"UPDATE Summary SET {column} = %s WHERE SummaryNum = %s", (value, SummaryNum))
+        conn.commit()
+        print(f"Summary with SummaryNum {SummaryNum} updated successfully.")
+    except Exception as e:
+        print(f"Error updating Summary: {e}")
+
+def deleteSummary(cursor, conn, SummaryNum):
+    try:
+        cursor.execute("DELETE FROM Summary WHERE SummaryNum = %s", (SummaryNum))
+        conn.commit()
+        print(f"Summary with SummaryNum {SummaryNum} deleted successfully.")
+    except Exception as e:
+        print(f"Error deleting Summary: {e}")
+
+def createFlashcardSet(cursor, conn, setName, AccountNum, TranscriptionNum, FolderNum="null"):
+    try:
+        cursor.execute("INSERT INTO FlashcardSet (SetName, AccountNum, TranscriptionNum, FolderNum) VALUES (%s, %s,%s, %s)", (setName, AccountNum, TranscriptionNum, FolderNum))
         conn.commit()
         flashcardset_num = cursor.lastrowid
         print(f"FlashcardSet created successfully with FlashcardSet: {flashcardset_num}")
@@ -307,7 +346,7 @@ def deleteFlashcardSet(cursor, conn, setNum):
 def createFlashcard(cursor, conn, FrontText, BackText, FlashcardSetNum):
     try:
         # Check if FlashcardSetNum exists
-        cursor.execute("SELECT COUNT(*) FROM FlashcardSet WHERE FlashcardSetNum = %s", (FlashcardSetNum,))
+        cursor.execute("SELECT COUNT(*) FROM FlashcardSet WHERE FlashcardSetNum = %s", (str(FlashcardSetNum)))
         flashcardset_exists = cursor.fetchone()[0] > 0
         if not flashcardset_exists:
             print(f"Error: FlashcardSetNum {FlashcardSetNum} does not exist.")
@@ -323,7 +362,7 @@ def createFlashcard(cursor, conn, FrontText, BackText, FlashcardSetNum):
     except Exception as err:
         print("Error:", err)
         conn.rollback()  # Rollback in case of an error
-        return None
+        return "null"
 
 def readFlashcard(cursor, FlashcardNum):
     try:
@@ -370,18 +409,18 @@ def deleteFlashcard(cursor, conn, FlashcardNum):
         print("Error deleting Flashcard:", e)
 
 
-def createQuestion(cursor, conn, Text, TestNum, TranscriptionNum):
+def createQuestion(cursor, conn, Type, Text, TestNum, TranscriptionNum):
     try:
 
-        cursor.execute("INSERT INTO Question (Text, TestNum, TranscriptionNum) VALUES (%s, %s, %s)",
-                       (Text, TestNum, TranscriptionNum))
+        cursor.execute("INSERT INTO Question (Type, Text, TestNum, TranscriptionNum) VALUES (%s, %s, %s,%s)",
+                       (Type, Text, TestNum, TranscriptionNum))
         conn.commit()
         question_num = cursor.lastrowid
         print(f"Question created successfully with QuestionNum: {question_num}")
         return question_num
     except Exception as err:
         print("Error:", err)
-        return None
+        return "null"
 
 def readQuestion(cursor, QuestionNum):
     try:
@@ -420,17 +459,17 @@ def deleteQuestion(cursor, conn, QuestionNum):
 
 def createAnswer(cursor, conn, Text, QuestionNum, Correct):
     try:
-        cursor.execute("INSERT INTO Answer (Text, QuestionNum, Correct) VALUES (%s, %s, %s)", (Text, QuestionNum, Correct))
+        cursor.execute("INSERT INTO Answer (Text, QuestionNum, Correct) VALUES (%s, %s, %s)", (Text, str(QuestionNum), Correct))
         conn.commit()
         answer_num = cursor.lastrowid
-        print(f"Answer created successfully with AnswerNum: {answer_num}")
+        print(f"Answer created successfully with AnswerNum: {str(answer_num)}")
         return answer_num
     except Exception as err:
         print("Error:", err)
-        return None
+        return "null"
 def readAnswer(cursor, AnswerNum):
     try:
-        cursor.execute("SELECT * FROM Answer WHERE AnswerNum = %s", (AnswerNum,))
+        cursor.execute("SELECT * FROM Answer WHERE AnswerNum = %s", (str(AnswerNum)))
         data = cursor.fetchall()
         print("Printing Answer:")
         for row in data:
@@ -460,8 +499,31 @@ def deleteAnswer(cursor, conn, AnswerNum):
         conn.commit()
     except Exception as e:
         print("Error deleting Answer:", e)
+def read_database(cursor,conn):
+    """Deletes everything from the database"""
+    tables = [
+            'Transcription',
+            'Flashcards',
+            'StudyGuide',
+            'FlashcardSet',
+            'Question',
+            'Answer',
+            'PracticeTest',
+            'Folders',
+            'Accounts'
+        ]
 
+    for table in tables:
+        print(f"Reading {table} from database")
+        try:
+            cursor.execute(f"SELECT * FROM {table};")
+            data = cursor.fetchall()
+            for row in data:
+                print(row)
+        except Exception as err:
+            print(f"Error printing all of {table}: {err}")
 def reset_database(cursor,conn):
+    """Deletes everything from the database"""
     tables = [
             'Transcription',
             'Flashcards',
@@ -495,7 +557,6 @@ def verifyPassword(cursor, Email, password):
     try:
         cursor.execute("SELECT AccountNum, Password, Joindate FROM Accounts WHERE Email = %s", (Email))
         data = cursor.fetchall()
-
         for row in data:
             accountNum = row[0]
             accountPassword = row[1]
@@ -519,27 +580,27 @@ def test_create_update_read_delete(cursor, conn):
 
     # CREATE TRANSCRIPTION (Linked to the Folder and Account)
     print("Creating Transcription...")
-    TranscriptionNum = createTranscription(cursor, conn, 'Test Transcription', 'This is the transcription text', FolderNum,AccountNum)
+    TranscriptionNum = createTranscription(cursor, conn, 'Test Transcription', 'This is the transcription text', AccountNum, FolderNum)
     print(f"Created TranscriptionNum: {TranscriptionNum}")
 
     # CREATE PRACTICE TEST (Linked to Transcription, Folder, Account)
     print("Creating Practice Test...")
-    PracticeTestNum = createPracticeTest(cursor, conn, 'Test Practice', TranscriptionNum, FolderNum, AccountNum)
+    PracticeTestNum = createPracticeTest(cursor, conn, 'Test Practice', AccountNum, TranscriptionNum, FolderNum)
     print(f"Created PracticeTestNum: {PracticeTestNum}")
 
     # CREATE QUESTION (Linked to the Practice Test)
     print("Creating Question...")
-    QuestionNum = createQuestion(cursor, conn, 'What is 2 + 2?', PracticeTestNum, TranscriptionNum)
-    print(f"Created QuestionNum: {QuestionNum}")
+    #QuestionNum = createQuestion(cursor, conn, "", 'What is 2 + 2?', PracticeTestNum, TranscriptionNum)
+    #print(f"Created QuestionNum: {QuestionNum}")
 
     # CREATE ANSWER (Linked to the Question)
     print("Creating Answer...")
-    AnswerNum = createAnswer(cursor, conn, '4', QuestionNum, 1)  # 1 for Correct Answer
-    print(f"Created AnswerNum: {AnswerNum}")
+    #AnswerNum = createAnswer(cursor, conn, '4', QuestionNum, 1)  # 1 for Correct Answer
+    #print(f"Created AnswerNum: {AnswerNum}")
 
     # CREATE FLASHCARD SET (Linked to Transcription, Folder, Account)
     print("Creating Flashcard Set...")
-    FlashcardSetNum = createFlashcardSet(cursor, conn, 'Test Flashcard Set', TranscriptionNum, FolderNum, AccountNum)
+    FlashcardSetNum = createFlashcardSet(cursor, conn, 'Test Flashcard Set',  AccountNum, TranscriptionNum, FolderNum)
     print(f"Created FlashcardSetNum: {FlashcardSetNum}")
 
     # CREATE FLASHCARDS (Linked to Flashcard Set)
@@ -550,7 +611,7 @@ def test_create_update_read_delete(cursor, conn):
 
     # CREATE STUDY GUIDE (Linked to Folder, Account, and Transcription)
     print("Creating Study Guide...")
-    StudyGuideNum = createStudyGuide(cursor, conn, 'This is the Study Guide text.', FolderNum, AccountNum, TranscriptionNum)
+    StudyGuideNum = createStudyGuide(cursor, conn, "Study Guide Name",'This is the Study Guide text.', AccountNum, TranscriptionNum, FolderNum)
     print(f"Created StudyGuideNum: {StudyGuideNum}")
 
     # READ ALL CREATED ITEMS
@@ -595,10 +656,10 @@ def test_create_update_read_delete(cursor, conn):
     readPracticeTest(cursor, PracticeTestNum)
 
     print("Reading one Question...")
-    readQuestion(cursor, QuestionNum)
+    #readQuestion(cursor, QuestionNum)
 
     print("Reading one Answer...")
-    readAnswer(cursor, AnswerNum)
+    #readAnswer(cursor, AnswerNum)
 
     print("Reading one Flashcard Set...")
     readFlashcardSet(cursor, FlashcardSetNum)
@@ -628,10 +689,10 @@ def test_create_update_read_delete(cursor, conn):
     deleteFlashcardSet(cursor, conn, FlashcardSetNum)
 
     print("Deleting Answer...")
-    deleteAnswer(cursor, conn, AnswerNum)
+    #deleteAnswer(cursor, conn, AnswerNum)
 
     print("Deleting Question...")
-    deleteQuestion(cursor, conn, QuestionNum)
+    #deleteQuestion(cursor, conn, QuestionNum)
 
     print("Deleting Practice Test...")
     deletePracticeTest(cursor, conn, PracticeTestNum)
