@@ -6,13 +6,12 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS  # Import CORS
 from flaskext.mysql import MySQL
 from WhisperDev import transcribe_mp3, generate_summary, create_study_guide, create_practice_test, translate_text, create_flashcards  # Import functions
-from Database import createAccount, createFolder, createTranscription, createSummary, createFlashcard, createFlashcardSet, createStudyGuide, createPracticeTest, createQuestion, createAnswer,read_database,reset_database
+from Database import verifyPassword, createAccount, createFolder, createTranscription, createSummary, createFlashcard, createFlashcardSet, createStudyGuide, createPracticeTest, createQuestion, createAnswer,read_database,reset_database
 # Add the directory containing WhisperDev.py to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'StudyBuddyBackend')))
 
 api_key = os.getenv("OPENAI_API_KEY")
 client = openai.OpenAI(api_key=api_key)
-
 
 
 app = Flask(__name__)
@@ -30,7 +29,7 @@ mysql = MySQL(app)
 try:
     conn = mysql.connect()
     cursor = conn.cursor()
-    read_database(cursor,conn)
+    print(str(verifyPassword(cursor,"test@gmail.com","tst")))
     cursor.close()
     conn.close()
 except Exception as e:
