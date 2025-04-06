@@ -164,7 +164,7 @@ def createPracticeTest(cursor, conn, PracticeTestName, AccountNum, Transcription
 
 def readPracticeTest(cursor, TestNum):
     try:
-        cursor.execute("SELECT * FROM PracticeTest WHERE TestNum = %s", (TestNum,))
+        cursor.execute("SELECT * FROM PracticeTest WHERE PracticeTestNum = %s", (TestNum,))
         data = cursor.fetchall()
         print("Printing PracticeTest:")
         for row in data:
@@ -183,16 +183,16 @@ def readAllPracticeTests(cursor):
 
 def updatePracticeTest(cursor, conn, TestNum, column, value):
     try:
-        cursor.execute(f"UPDATE PracticeTest SET {column} = %s WHERE TestNum = %s", (value, TestNum))
+        cursor.execute(f"UPDATE PracticeTest SET {column} = %s WHERE PracticeTestNum = %s", (value, TestNum))
         conn.commit()
         print(f"PracticeTest with TestNum {TestNum} updated successfully.")
     except Exception as e:
         print(f"Error updating PracticeTest: {e}")
 def deletePracticeTest(cursor, conn, TestNum):
     try:
-        cursor.execute("DELETE FROM PracticeTest WHERE TestNum = %s", (TestNum,))
+        cursor.execute("DELETE FROM PracticeTest WHERE PracticeTestNum = %s", (TestNum,))
         conn.commit()
-        print(f"PracticeTest with TestNum {TestNum} deleted successfully.")
+        print(f"PracticeTest with PracticeTestNum {TestNum} deleted successfully.")
     except Exception as e:
         print(f"Error deleting PracticeTest: {e}")
 
@@ -291,7 +291,7 @@ def deleteSummary(cursor, conn, SummaryNum):
 
 def createFlashcardSet(cursor, conn, setName, AccountNum, TranscriptionNum, FolderNum="null"):
     try:
-        cursor.execute("INSERT INTO FlashcardSet (SetName, AccountNum, TranscriptionNum, FolderNum) VALUES (%s, %s,%s, %s)", (setName, AccountNum, TranscriptionNum, FolderNum))
+        cursor.execute("INSERT INTO FlashcardSet (FlashcardSetName, AccountNum, TranscriptionNum, FolderNum) VALUES (%s, %s,%s, %s)", (setName, AccountNum, TranscriptionNum, FolderNum))
         conn.commit()
         flashcardset_num = cursor.lastrowid
         print(f"FlashcardSet created successfully with FlashcardSet: {flashcardset_num}")
@@ -500,7 +500,7 @@ def deleteAnswer(cursor, conn, AnswerNum):
     except Exception as e:
         print("Error deleting Answer:", e)
 def read_database(cursor,conn):
-    """Deletes everything from the database"""
+    """Reads everything from the database"""
     tables = [
             'Transcription',
             'Flashcards',
@@ -512,7 +512,6 @@ def read_database(cursor,conn):
             'Folders',
             'Accounts'
         ]
-
     for table in tables:
         print(f"Reading {table} from database")
         try:
