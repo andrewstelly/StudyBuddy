@@ -113,7 +113,8 @@ const Notes: React.FC = () => {
                     </select>
                 </label>
 
-                {/* ✅ Text-to-Speech Button */}
+            {/* ✅ Text-to-Speech Button */}
+            <div style={{ display: "flex", justifyContent: "center" }}>
                 <button
                     onClick={handleTextToSpeech}
                     style={{
@@ -124,6 +125,7 @@ const Notes: React.FC = () => {
                         border: "none",
                         borderRadius: "5px",
                         cursor: "pointer",
+                        width: "200px"
                     }}
                 >
                     {isSpeaking ? "Stop Speaking" : "Read Aloud"}
