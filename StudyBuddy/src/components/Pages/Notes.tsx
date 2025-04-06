@@ -33,7 +33,7 @@ const Notes: React.FC = () => {
             const availableVoices = window.speechSynthesis.getVoices();
             setVoices(availableVoices);
             if (availableVoices.length > 0) {
-                setSelectedVoice(availableVoices[4].name); // Default to the first voice
+                setSelectedVoice(availableVoices[0].name); // Default to the first voice
             }
         };
 
@@ -130,23 +130,24 @@ const Notes: React.FC = () => {
                 >
                     {isSpeaking ? "Stop Speaking" : "Read Aloud"}
                 </button>
-                
-                <textarea
-                className="text-box"
-                value={studyGuide}
-                onChange={handleChange}
-                style={{
-                    fontSize: `${fontSize}px`,
-                    fontFamily: fontFamily,
-                    flexGrow: 1,
-                    resize: "none",
-                    width: "100%",
-                    border: "1px solid #ccc",
-                    borderRadius: "0.5rem",
-                    padding: "1rem",
-                    boxSizing: "border-box",
-                    minHeight: "50vh", 
-                    }} />
+            </div>
+
+                <textarea 
+                    className="text-box"
+                    value={studyGuide}
+                    onChange={handleChange}
+                    style={{
+                        fontSize: `${fontSize}px`,
+                        fontFamily: fontFamily,
+                        resize: "none", // Disable resizing
+                        flexGrow: 1, // Allow the textarea to grow and fill available space
+                        width: "100%", // Ensure it spans the full width
+                        border: "1px solid #ccc",
+                        borderRadius: "5px",
+                        padding: "10px",
+                        boxSizing: "border-box", // Include padding in width/height calculations
+                    }}
+                />
             </div>
         </div>
     );
