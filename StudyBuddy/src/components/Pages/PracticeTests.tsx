@@ -225,7 +225,8 @@ const PracticeTest: React.FC = () => {
           )}
         </div>
 
-        {/* Submit Button */}
+      {/* Submit Button */}
+      <div style={{ display: "flex", justifyContent: "center" }}>
         <button
           onClick={handleSubmit}
           style={{
@@ -236,10 +237,12 @@ const PracticeTest: React.FC = () => {
             border: "none",
             borderRadius: "5px",
             cursor: "pointer",
+            width: "200px"
           }}
         >
           Submit Test
         </button>
+      </div>
       </div>
     </div>
   );
