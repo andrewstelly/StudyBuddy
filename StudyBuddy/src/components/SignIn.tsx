@@ -21,11 +21,11 @@ export default function SignIn() {
         <div className="max-w-md w-full bg-white shadow-lg rounded-2xl p-8">
           <div className="flex justify-center">
             <img
-              src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
+              src='../Images/StudyBuddyLogo.png'
               alt="Logo"
               className="h-20 w-auto -mt-1"
-              width="175" 
-              height="175"
+              width="275" 
+              height="275"
             />
           </div>
           <h2 className="text-center text-3xl font-bold text-gray-900">
