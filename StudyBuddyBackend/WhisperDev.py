@@ -91,6 +91,7 @@ def upload_file():
         generate_summary_flag = request.form.get("summary") == "true"
         create_study_guide_flag = request.form.get("studyGuide") == "true"
         create_practice_test_flag = request.form.get("practiceTest") == "true"
+        create_flashcards_flag = request.form.get("flashcards") == "true"
         translate_flag = request.form.get("translate") == "true"
         target_language = request.form.get("targetLanguage", "")
 
@@ -99,6 +100,7 @@ def upload_file():
         print(f"Summary: {generate_summary_flag}")
         print(f"Study Guide: {create_study_guide_flag}")
         print(f"Practice Test: {create_practice_test_flag}")
+        print(f"Flashcards: {create_flashcards_flag}")
         print(f"Translate: {translate_flag}, Language: {target_language}")
 
         temp_file_path = "temp_audio.mp3"
@@ -108,24 +110,36 @@ def upload_file():
         transcription = transcribe_mp3(temp_file_path)
         print("Transcription completed.")
 
-        results = {"transcription": transcription}
+        # Translate transcription if translation is selected
+        if translate_flag and target_language:
+            print(f"Translating transcription to {target_language}...")
+            transcription = translate_text(transcription, target_language)
+            print("Translation completed.")
 
+        results = {
+            "transcription": transcription  # This will now hold either the original or translated transcription
+        }
+
+        # Generate summary if selected
         if generate_summary_flag:
             print("Generating summary...")
             results["summary"] = generate_summary(transcription)
 
+        # Create study guide if selected
         if create_study_guide_flag:
             print("Generating study guide...")
             results["study_guide"] = create_study_guide(transcription)
 
+        # Create practice test if selected
         if create_practice_test_flag:
             print("Generating practice test...")
             results["practice_test"] = create_practice_test(transcription)
             print("Generated Practice Test:", results["practice_test"])
 
-        if translate_flag and target_language:
-            print(f"Translating to {target_language}...")
-            results["translation"] = translate_text(transcription, target_language)
+        # Create flashcards if selected
+        if create_flashcards_flag:
+            print("Generating flashcards...")
+            results["flashcards"] = create_flashcards(transcription)
 
         # Log final results
         print("\nFinal Generated Content:")

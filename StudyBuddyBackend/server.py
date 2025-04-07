@@ -74,32 +74,25 @@ def upload_file():
 
         # Always transcribe the file
         transcription_text = transcribe_mp3(file_path)
-        results["transcription"] = transcription_text
-        print(transcription_text)
+        print("Original transcription:", transcription_text)
 
-        print("Transcription completed")
-        transcription_num = -1
-        folder_num =-1
-        # Save transcription to a file
-        try:
-            folder_num = storeFolder(mysql, "Test Folder", 119)
-            with open("transcription.txt", "w", encoding="utf-8") as f:
-                f.write(transcription_text)
-                transcription_num = storeTranscription(mysql,"Transcription Name", transcription_text,119,folder_num)
-            print("Transcription saved to transcription.txt")  # Debug log
-        except Exception as e:
-            print(f"Error saving transcription file: {e}")
+        # Translate transcription if translation is selected
+        if translate_flag and target_language:
+            print(f"Translating transcription to {target_language}...")
+            transcription_text = translate_text(transcription_text, target_language)
+            print("Translated transcription:", transcription_text)
+
+        # Add the transcription (translated or original) to the results
+        results["transcription"] = transcription_text
 
         # Generate summary if selected
         if generate_summary_flag:
             results["summary"] = generate_summary(transcription_text)
-            storeSummary(mysql, "Summary Name", results["summary"], 119, transcription_num, folder_num)
             print("Summary completed")
 
         # Create study guide if selected
         if create_study_guide_flag:
             results["study_guide"] = create_study_guide(transcription_text)
-            storeStudyGuide(mysql, "StudyGuide Name", results["study_guide"], 119, transcription_num, folder_num)
             print("Study Guide completed")
 
         # Create practice test if selected
@@ -108,42 +101,25 @@ def upload_file():
             print("Raw practice test JSON:", raw_practice_test)  # Debug log
 
             try:
-                # Clean up the raw practice test string if it starts with ```json
                 if raw_practice_test.startswith("```json"):
                     raw_practice_test = raw_practice_test.strip("```json").strip("```").strip()
-                
-                # Parse the practice test JSON
                 results["practice_test"] = json.loads(raw_practice_test)
-                
             except json.JSONDecodeError as e:
                 print(f"Error decoding practice test JSON: {e}")
                 results["practice_test"] = {"error": "Failed to generate practice test"}
 
-            storePracticeTest(mysql,results["practice_test"],"Test Practice Test",119,transcription_num,folder_num)
-            print("Parsed practice test:", results["practice_test"])  # Debug log
-
         # Create flashcards if selected
-        if create_flashcards_flag:  # Generate flashcards if selected
+        if create_flashcards_flag:
             raw_flashcards = create_flashcards(transcription_text)
             print("Raw flashcards from ChatGPT:", raw_flashcards)  # Debug log
 
-            # Clean up the flashcards data
             if raw_flashcards.startswith("```json"):
                 raw_flashcards = raw_flashcards.strip("```json").strip("```").strip()
-              
             try:
-                # Parse the cleaned flashcards string into a Python object
-                results["flashcards"] = json.loads(raw_flashcards)          
+                results["flashcards"] = json.loads(raw_flashcards)
             except json.JSONDecodeError as e:
                 print(f"Error decoding flashcards JSON: {e}")
                 results["flashcards"] = []
-            storeFlashcards(mysql, results["flashcards"],119,transcription_num,folder_num)  
-            print("Cleaned flashcards:", results["flashcards"])  # Debug log
-
-        # Translate if selected
-        if translate_flag and target_language:
-            results["translation"] = translate_text(transcription_text, target_language)
-            print(f"Translation to {target_language} completed")
 
         # Delete the file after processing
         os.remove(file_path)
