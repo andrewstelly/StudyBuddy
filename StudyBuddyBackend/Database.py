@@ -65,11 +65,11 @@ def retrieveFile(mysql, tableName, Num, AccountNum, FolderNum):
         case "Transcription":
             return retrieveTranscription(mysql, Num, AccountNum, FolderNum)
         case "StudyGuide":
-           retrieveStudyGuide(mysql,Num,AccountNum,FolderNum)
+           return retrieveStudyGuide(mysql,Num,AccountNum,FolderNum)
         case "Summary":
             return retrieveSummary(mysql, Num, AccountNum, FolderNum)
         case "FlashcardSet":
-            return
+            return retrieveFlashcardSet(mysql,Num,AccountNum,FolderNum)
         case "PracticeTest":
             return retrievePracticeTest(mysql, Num, AccountNum, FolderNum)
        
@@ -90,6 +90,7 @@ def retrieveTranscription(mysql, TranscriptionNum, AccountNum, FolderNum):
                 'transcription': Text,
                 'name': Name
             })
+        return transcirptionJson
     except Exception as err:
         print(f"Error retrieving transcription {TranscriptionNum}: {err}")
         cursor.close()
@@ -115,6 +116,8 @@ def retrieveSummary(mysql, SummaryNum, AccountNum, FolderNum):
         return SummaryJson
     except Exception as err:
         print(f"Error retrieving Summary {SummaryNum}: {err}")
+        cursor.close()
+        conn.close()
         return None
 def retrieveStudyGuide(mysql, StudyGuideNum, AccountNum, FolderNum):
     """"returns the the name and text of the Summary (summary, name)"""
@@ -136,10 +139,11 @@ def retrieveStudyGuide(mysql, StudyGuideNum, AccountNum, FolderNum):
         return StudyGuideJson
     except Exception as err:
         print(f"Error retrieving StudyGuide {StudyGuideNum}: {err}")
+        cursor.close()
+        conn.close()
         return None
 def retrievePracticeTest(mysql, PracticeTestNum, AccountNum, FolderNum):
     """"returns the the name and text of the Practice Test (summary, name)"""
-   
     try:
         conn = mysql.connect()
         cursor = conn.cursor()
@@ -152,34 +156,64 @@ def retrievePracticeTest(mysql, PracticeTestNum, AccountNum, FolderNum):
         cursor.execute(question_query , (PracticeTestNum))
         question_data = cursor.fetchall()
         for question in question_data:
-                question_Num, question_Text, question_Type = question
-                question_list = {
-                    'question' : question_Text,
-                    'type' : question_Type,
-                }
-                if(question_Type=="true_false" or question_Type=="multiple_choice"):
-                    query = f"SELECT Text, Correct FROM Answer WHERE QuestionNum = %s;"
-                    cursor.execute(query, (question_Num))
-                    answer_data = cursor.fetchall()
-                    answer_list =[]
-                    correct_answer = ""
-                    for answer in answer_data:
-                        answer_Text, Correct = answer
-                        answer_list.append(answer_Text)
-                        if(Correct == 1):
-                            correct_answer = answer_Text
-                    question_list["options"] = answer_list
-                    question_list["correct_answer"] = correct_answer
-                else:
-                    question_list["correct_answer"] = "Answers May Vary"
-                practice_test["practice_test"]["questions"].append(question_list)
+            question_Num, question_Text, question_Type = question
+            question_list = {
+                'question' : question_Text,
+                'type' : question_Type,
+            }
+            if(question_Type=="true_false" or question_Type=="multiple_choice"):
+                query = f"SELECT Text, Correct FROM Answer WHERE QuestionNum = %s;"
+                cursor.execute(query, (question_Num))
+                answer_data = cursor.fetchall()
+                answer_list =[]
+                correct_answer = ""
+                for answer in answer_data:
+                    answer_Text, Correct = answer
+                    answer_list.append(answer_Text)
+                    if(Correct == 1):
+                        correct_answer = answer_Text
+                question_list["options"] = answer_list
+                question_list["correct_answer"] = correct_answer
+            else:
+                question_list["correct_answer"] = "Answers May Vary"
+            practice_test["practice_test"]["questions"].append(question_list)
         cursor.close()
         conn.close()
         return practice_test
     except Exception as err:
         print(f"Error retrieving PracticeTest {PracticeTestNum}: {err}")
+        cursor.close()
+        conn.close()
         return None
-
+def retrieveFlashcardSet(mysql, FlashcardSetNum, AccountNum, FolderNum):
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        query = f"SELECT FlashcardSetName FROM FlashcardSet WHERE AccountNum = %s AND FolderNum = %s AND FlashcardSetNum = %s;"
+        cursor.execute(query, (AccountNum,FolderNum,FlashcardSetNum ))
+        names = cursor.fetchone()
+        flashcard_JSON = {'flashcards': [], }
+        for name in names:
+            FlashcardSetName = name
+        flashcard_JSON["name"]=  FlashcardSetName
+        query = f"SELECT FrontText, BackText From Flashcards WHERE FlashcardSetNum = %s"
+        cursor.execute(query, (FlashcardSetNum))
+        flashcards = cursor.fetchall()
+        for flashcard in flashcards:
+            fronttext, backtext = flashcard
+            flashcard_data = {
+                "question": fronttext,
+                "answer": backtext
+            }
+            flashcard_JSON["flashcards"].append(flashcard_data)
+        cursor.close()
+        conn.close()
+        return flashcard_JSON
+    except Exception as err:
+        print(f"Error retrieving FlashcardSetNum {FlashcardSetNum}: {err}")
+        cursor.close()
+        conn.close()
+        return None
 def createAccount(cursor, conn, Email, Username, Password, Joindate=None):
     """Creates a an account in the SQL database"""
     try:
