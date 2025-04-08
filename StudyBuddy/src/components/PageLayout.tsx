@@ -1,7 +1,7 @@
 import React from "react";
 
 interface PageLayoutProps {
-  title: string; // Title for the header
+  title: React.ReactNode; // Title for the header
   children: React.ReactNode; // Content to render inside the layout
 }
 

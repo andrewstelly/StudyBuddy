@@ -1,7 +1,7 @@
 import React from "react";
 
 interface FileUploadLayoutProps {
-  title: string; // Just like PageLayout
+  title: React.ReactNode; // Just like PageLayout
   children: React.ReactNode;
 }
 
