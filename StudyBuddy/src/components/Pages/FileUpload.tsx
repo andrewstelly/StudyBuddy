@@ -82,13 +82,13 @@ const FileUpload: React.FC = () => {
         </div>
       ) : (
         <>
-        <h1 className="file-upload-header">File Upload</h1>
           <div
             className={`drag-drop-box ${isDragOver ? "highlight" : ""}`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
           >
+            <h1 className="file-upload-header">File Upload</h1>
             <p>Drag & Drop file here or</p>
             <label className="file-input-label">
               <input type="file" onChange={handleFileChange} />
@@ -103,6 +103,7 @@ const FileUpload: React.FC = () => {
                 type="checkbox"
                 checked={summary}
                 onChange={() => setSummary(!summary)}
+                style={{ width: "20px", height: "20px" }} // Increased size
               />
               Summary
             </label>
@@ -111,6 +112,7 @@ const FileUpload: React.FC = () => {
                 type="checkbox"
                 checked={studyGuide}
                 onChange={() => setStudyGuide(!studyGuide)}
+                style={{ width: "20px", height: "20px" }} // Increased size
               />
               Study Guide
             </label>
@@ -119,6 +121,7 @@ const FileUpload: React.FC = () => {
                 type="checkbox"
                 checked={practiceTest}
                 onChange={() => setPracticeTest(!practiceTest)}
+                style={{ width: "20px", height: "20px" }} // Increased size
               />
               Practice Test
             </label>
@@ -127,6 +130,7 @@ const FileUpload: React.FC = () => {
                 type="checkbox"
                 checked={flashcards}
                 onChange={() => setFlashcards(!flashcards)}
+                style={{ width: "20px", height: "20px" }} // Increased size
               />
               Flashcards
             </label>
@@ -135,6 +139,7 @@ const FileUpload: React.FC = () => {
                 type="checkbox"
                 checked={translate}
                 onChange={() => setTranslate(!translate)}
+                style={{ width: "20px", height: "20px" }} // Increased size
               />
               Translate
             </label>

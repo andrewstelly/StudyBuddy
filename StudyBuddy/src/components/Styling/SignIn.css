@@ -19,7 +19,7 @@ html, body {
     margin-top: 50px; /* Move the container down by 50px */
     padding: 20px; /* Add padding to widen the background */
     border-radius: 10px; /* Add rounded corners */
-    box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+    box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.3); /* Add a subtle shadow */
   }
 
   body {
@@ -61,3 +61,5 @@ body::before {
     background-color: rgba(191, 217, 255, 0.65); /* Adjust the transparency here */
     z-index: -1;
   }
+
+  
