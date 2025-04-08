@@ -1,18 +1,42 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import '../components/Styling/SignIn.css'; 
 
 export default function SignIn() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form submitted!");
+        console.log("Form submitted!");
     // Set a cookie to indicate the user is logged in
     Cookies.set("auth", "true", { expires: 7 }); // Cookie expires in 7 days
     // Redirect to home page after successful sign-in
     navigate("/home");
+    
+    // Send a POST request to the backend for authentication
+    try {
+      const response = await fetch('http://localhost:5000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // If authentication is successful, set a cookie and navigate to the home page
+        Cookies.set("auth", "true", { expires: 7 });
+        navigate("/home");
+      } else {
+        alert(data.error || 'Invalid credentials');
+      }
+    } catch (error) {
+      console.error('Error during sign-in:', error);
+      alert('Error signing in');
+    }
   };
 
   return (
@@ -23,7 +47,7 @@ export default function SignIn() {
             <img
               src='../Images/StudyBuddyLogo.png'
               alt="Logo"
-              className="h-20 w-auto -mt-1"
+              className="h-auto w-[375px] p-4"
               width="275" 
               height="275"
             />
@@ -41,6 +65,8 @@ export default function SignIn() {
                 id="email"
                 name="email"
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500"
               />
@@ -54,6 +80,8 @@ export default function SignIn() {
                 id="password"
                 name="password"
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
                 className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500"
               />

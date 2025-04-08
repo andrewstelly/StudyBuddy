@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import '../Styling/fonts.css';
+
 
 const Notes: React.FC = () => {
     const [studyGuide, setStudyGuide] = useState<string>("Loading...");
@@ -93,6 +95,7 @@ const Notes: React.FC = () => {
                             <option value="Georgia">Georgia</option>
                             <option value="Times New Roman">Times New Roman</option>
                             <option value="Verdana">Verdana</option>
+                            <option value="OpenDyslexic">OpenDyslexic</option>
                         </select>
                     </label>
                 </div>

@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import openai
+import bcrypt
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS  # Import CORS
 from flaskext.mysql import MySQL
@@ -34,6 +35,53 @@ try:
     conn.close()
 except Exception as e:
     print(f"Error: {e}")
+
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    email = data.get('email')
+    username = data.get('fullname')  # frontend sends it as 'fullname'
+    password = data.get('password')
+
+    if not email or not username or not password:
+        return jsonify({'error': 'Missing fields'}), 400
+
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    try:
+        account_id = createAccount(cursor, conn, email, username, password)
+        return jsonify({'message': 'Account created', 'account_id': account_id}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+
+    if not email or not password:
+        return jsonify({'error': 'Missing fields'}), 400
+
+    conn = mysql.connect()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT * FROM Accounts WHERE Email = %s", (email,))
+        account = cursor.fetchone()
+        
+        if account and bcrypt.checkpw(password.encode('utf-8'), account[2].encode('utf-8')):  # assuming password is at index 2
+            return jsonify({'message': 'Login successful'}), 200
+        else:
+            return jsonify({'error': 'Invalid credentials'}), 401
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+        
 # Handle preflight OPTIONS request for CORS
 @app.route('/upload', methods=['OPTIONS'])
 def options():
@@ -74,25 +122,32 @@ def upload_file():
 
         # Always transcribe the file
         transcription_text = transcribe_mp3(file_path)
-        print("Original transcription:", transcription_text)
-
-        # Translate transcription if translation is selected
-        if translate_flag and target_language:
-            print(f"Translating transcription to {target_language}...")
-            transcription_text = translate_text(transcription_text, target_language)
-            print("Translated transcription:", transcription_text)
-
-        # Add the transcription (translated or original) to the results
         results["transcription"] = transcription_text
+        print(transcription_text)
+
+        print("Transcription completed")
+        transcription_num = -1
+        folder_num =-1
+        # Save transcription to a file
+        try:
+            folder_num = storeFolder(mysql, "Test Folder", 119)
+            with open("transcription.txt", "w", encoding="utf-8") as f:
+                f.write(transcription_text)
+                transcription_num = storeTranscription(mysql,"Transcription Name", transcription_text,119,folder_num)
+            print("Transcription saved to transcription.txt")  # Debug log
+        except Exception as e:
+            print(f"Error saving transcription file: {e}")
 
         # Generate summary if selected
         if generate_summary_flag:
             results["summary"] = generate_summary(transcription_text)
+            storeSummary(mysql, "Summary Name", results["summary"], 119, transcription_num, folder_num)
             print("Summary completed")
 
         # Create study guide if selected
         if create_study_guide_flag:
             results["study_guide"] = create_study_guide(transcription_text)
+            storeStudyGuide(mysql, "StudyGuide Name", results["study_guide"], 119, transcription_num, folder_num)
             print("Study Guide completed")
 
         # Create practice test if selected
@@ -101,25 +156,42 @@ def upload_file():
             print("Raw practice test JSON:", raw_practice_test)  # Debug log
 
             try:
+                # Clean up the raw practice test string if it starts with ```json
                 if raw_practice_test.startswith("```json"):
                     raw_practice_test = raw_practice_test.strip("```json").strip("```").strip()
+                
+                # Parse the practice test JSON
                 results["practice_test"] = json.loads(raw_practice_test)
+                
             except json.JSONDecodeError as e:
                 print(f"Error decoding practice test JSON: {e}")
                 results["practice_test"] = {"error": "Failed to generate practice test"}
 
+            storePracticeTest(mysql,results["practice_test"],"Test Practice Test",119,transcription_num,folder_num)
+            print("Parsed practice test:", results["practice_test"])  # Debug log
+
         # Create flashcards if selected
-        if create_flashcards_flag:
+        if create_flashcards_flag:  # Generate flashcards if selected
             raw_flashcards = create_flashcards(transcription_text)
             print("Raw flashcards from ChatGPT:", raw_flashcards)  # Debug log
 
+            # Clean up the flashcards data
             if raw_flashcards.startswith("```json"):
                 raw_flashcards = raw_flashcards.strip("```json").strip("```").strip()
+              
             try:
-                results["flashcards"] = json.loads(raw_flashcards)
+                # Parse the cleaned flashcards string into a Python object
+                results["flashcards"] = json.loads(raw_flashcards)          
             except json.JSONDecodeError as e:
                 print(f"Error decoding flashcards JSON: {e}")
                 results["flashcards"] = []
+            storeFlashcards(mysql, results["flashcards"],119,transcription_num,folder_num)  
+            print("Cleaned flashcards:", results["flashcards"])  # Debug log
+
+        # Translate if selected
+        if translate_flag and target_language:
+            results["translation"] = translate_text(transcription_text, target_language)
+            print(f"Translation to {target_language} completed")
 
         # Delete the file after processing
         os.remove(file_path)
