@@ -42,7 +42,7 @@ def create_study_guide(transcription):
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You are an AI that creates detailed study guides."},
-            {"role": "user", "content": f"Create a study guide:\n\n{transcription}"}
+            {"role": "user", "content": f"Create a study guide and do not use any markdown formatting such as hashtags, asterisks, or backticks. Instead, organize the guide using clear, indented sections and line breaks:\n\n{transcription}"}
         ],
     )
     return response.choices[0].message.content
