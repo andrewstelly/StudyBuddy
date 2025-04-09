@@ -5,6 +5,7 @@ import whisper
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flaskext.mysql import MySQL
+
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
@@ -103,7 +104,7 @@ def upload_file():
         print(f"Flashcards: {create_flashcards_flag}")
         print(f"Translate: {translate_flag}, Language: {target_language}")
 
-        temp_file_path = "temp_audio.mp3"
+        temp_file_path = "temp_audio.wav"
         file.save(temp_file_path)
 
         # Transcribe audio

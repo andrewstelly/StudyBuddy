@@ -13,7 +13,9 @@ const FileUpload: React.FC = () => {
   const [flashcards, setFlashcards] = useState(false);
   const [translate, setTranslate] = useState(false);
   const [targetLanguage, setTargetLanguage] = useState("");
-  const [isDragOver, setIsDragOver] = useState(false); // ✅ Highlight state
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedAudio, setRecordedAudio] = useState<Blob | null>(null);
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -36,9 +38,36 @@ const FileUpload: React.FC = () => {
     if (file) setSelectedFile(file);
   };
 
+  const handleRecordAudio = async () => {
+    if (!isRecording) {
+      setIsRecording(true);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const audioChunks: Blob[] = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+        setRecordedAudio(audioBlob);
+        setIsRecording(false);
+      };
+
+      mediaRecorder.start();
+      (window as any).mediaRecorder = mediaRecorder;
+    } else {
+      const mediaRecorder = (window as any).mediaRecorder;
+      if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
+      }
+    }
+  };
+
   const handleUpload = async () => {
-    if (!selectedFile) {
-      alert("Please select a file first.");
+    if (!selectedFile && !recordedAudio) {
+      alert("Please select a file or record audio first.");
       return;
     }
 
@@ -48,7 +77,11 @@ const FileUpload: React.FC = () => {
     }
 
     const formData = new FormData();
-    formData.append("file", selectedFile);
+    if (recordedAudio) {
+      formData.append("file", recordedAudio, "recorded_audio.wav");
+    } else if (selectedFile) {
+      formData.append("file", selectedFile);
+    }
     formData.append("summary", summary.toString());
     formData.append("studyGuide", studyGuide.toString());
     formData.append("practiceTest", practiceTest.toString());
@@ -97,13 +130,17 @@ const FileUpload: React.FC = () => {
             {selectedFile && <p className="file-name">{selectedFile.name}</p>}
           </div>
 
+          <button onClick={handleRecordAudio}>
+            {isRecording ? "Stop Recording" : "Record Audio"}
+          </button>
+
           <div className="options">
             <label>
               <input
                 type="checkbox"
                 checked={summary}
                 onChange={() => setSummary(!summary)}
-                style={{ width: "20px", height: "20px" }} // Increased size
+                style={{ width: "20px", height: "20px" }}
               />
               Summary
             </label>
@@ -112,7 +149,7 @@ const FileUpload: React.FC = () => {
                 type="checkbox"
                 checked={studyGuide}
                 onChange={() => setStudyGuide(!studyGuide)}
-                style={{ width: "20px", height: "20px" }} // Increased size
+                style={{ width: "20px", height: "20px" }}
               />
               Study Guide
             </label>
@@ -121,7 +158,7 @@ const FileUpload: React.FC = () => {
                 type="checkbox"
                 checked={practiceTest}
                 onChange={() => setPracticeTest(!practiceTest)}
-                style={{ width: "20px", height: "20px" }} // Increased size
+                style={{ width: "20px", height: "20px" }}
               />
               Practice Test
             </label>
@@ -130,7 +167,7 @@ const FileUpload: React.FC = () => {
                 type="checkbox"
                 checked={flashcards}
                 onChange={() => setFlashcards(!flashcards)}
-                style={{ width: "20px", height: "20px" }} // Increased size
+                style={{ width: "20px", height: "20px" }}
               />
               Flashcards
             </label>
@@ -139,7 +176,7 @@ const FileUpload: React.FC = () => {
                 type="checkbox"
                 checked={translate}
                 onChange={() => setTranslate(!translate)}
-                style={{ width: "20px", height: "20px" }} // Increased size
+                style={{ width: "20px", height: "20px" }}
               />
               Translate
             </label>
