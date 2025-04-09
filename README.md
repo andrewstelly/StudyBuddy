@@ -24,3 +24,4 @@ pip install pygame
 pip install flask-cors
 npm install @radix-ui/react-dialog
 npm install -D sass-embedded
+pip install bcrypt
