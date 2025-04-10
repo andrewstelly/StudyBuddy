@@ -7,10 +7,6 @@ const FileUpload: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showCompleteMessage, setShowCompleteMessage] = useState(false);
-  const [summary, setSummary] = useState(false);
-  const [studyGuide, setStudyGuide] = useState(false);
-  const [practiceTest, setPracticeTest] = useState(false);
-  const [flashcards, setFlashcards] = useState(false);
   const [translate, setTranslate] = useState(false);
   const [targetLanguage, setTargetLanguage] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
@@ -82,10 +78,6 @@ const FileUpload: React.FC = () => {
     } else if (selectedFile) {
       formData.append("file", selectedFile);
     }
-    formData.append("summary", summary.toString());
-    formData.append("studyGuide", studyGuide.toString());
-    formData.append("practiceTest", practiceTest.toString());
-    formData.append("flashcards", flashcards.toString());
     formData.append("translate", translate.toString());
     formData.append("targetLanguage", targetLanguage);
 
@@ -135,42 +127,6 @@ const FileUpload: React.FC = () => {
           </button>
 
           <div className="options">
-            <label>
-              <input
-                type="checkbox"
-                checked={summary}
-                onChange={() => setSummary(!summary)}
-                style={{ width: "20px", height: "20px" }}
-              />
-              Summary
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={studyGuide}
-                onChange={() => setStudyGuide(!studyGuide)}
-                style={{ width: "20px", height: "20px" }}
-              />
-              Study Guide
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={practiceTest}
-                onChange={() => setPracticeTest(!practiceTest)}
-                style={{ width: "20px", height: "20px" }}
-              />
-              Practice Test
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={flashcards}
-                onChange={() => setFlashcards(!flashcards)}
-                style={{ width: "20px", height: "20px" }}
-              />
-              Flashcards
-            </label>
             <label>
               <input
                 type="checkbox"
