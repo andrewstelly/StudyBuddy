@@ -226,6 +226,41 @@ def grade_test():
         print(f"Error grading test: {e}")
         return jsonify({"error": str(e)}), 500
 
+@app.route('/regenerate-practice-test', methods=['POST'])
+def regenerate_practice_test():
+    """Regenerates the practice test using the existing transcription."""
+    try:
+        data = request.json
+        transcription_text = data.get("transcription")
+
+        if not transcription_text:
+            return jsonify({"error": "No transcription provided"}), 400
+
+        # Regenerate the practice test
+        raw_practice_test = create_practice_test(transcription_text)
+        print("Raw practice test output:", raw_practice_test)  # Debugging log
+
+        try:
+            # Check if the raw practice test is empty
+            if not raw_practice_test.strip():
+                raise ValueError("Practice test generation returned an empty response.")
+
+            # Clean up the raw practice test string if it starts with ```json
+            if raw_practice_test.startswith("```json"):
+                raw_practice_test = raw_practice_test.strip("```json").strip("```").strip()
+
+            # Parse the practice test JSON
+            practice_test = json.loads(raw_practice_test)
+        except (json.JSONDecodeError, ValueError) as e:
+            print(f"Error decoding practice test JSON: {e}")
+            return jsonify({"error": "Failed to generate practice test"}), 500
+
+        return jsonify({"practice_test": practice_test}), 200
+
+    except Exception as e:
+        print(f"Error regenerating practice test: {e}")
+        return jsonify({"error": str(e)}), 500
+
 def evaluate_discussion_response(user_response, expected_answer):
     """Evaluates a discussion response using ChatGPT."""
     response = client.chat.completions.create(
