@@ -19,12 +19,6 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)  # Ena
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-app.config['MYSQL_DATABASE_HOST'] = 'study-buddy-database.co3kew2gkyw2.us-east-1.rds.amazonaws.com' # Specify Endpoint
-app.config['MYSQL_DATABASE_USER'] = 'admin' # Specify Master username
-app.config['MYSQL_DATABASE_PASSWORD'] = 'StudyBuddy!' # Specify Master password
-app.config['MYSQL_DATABASE_DB'] = 'study_buddy_database' # Specify database name
-
-mysql = MySQL(app)
 
 # Handle preflight OPTIONS request for CORS
 @app.route('/upload', methods=['OPTIONS'])
