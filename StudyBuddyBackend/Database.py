@@ -34,7 +34,6 @@ def retrieveAllFilesInFolder(mysql, AccountNum,FolderNum):
         'StudyGuide',
         'FlashcardSet',
         'PracticeTest',
-        'Summary'
     ]
     FileList = []
     try:
@@ -66,8 +65,6 @@ def retrieveFile(mysql, tableName, Num, AccountNum, FolderNum):
             return retrieveTranscription(mysql, Num, AccountNum, FolderNum)
         case "StudyGuide":
            return retrieveStudyGuide(mysql,Num,AccountNum,FolderNum)
-        case "Summary":
-            return retrieveSummary(mysql, Num, AccountNum, FolderNum)
         case "FlashcardSet":
             return retrieveFlashcardSet(mysql,Num,AccountNum,FolderNum)
         case "PracticeTest":
@@ -93,29 +90,6 @@ def retrieveTranscription(mysql, TranscriptionNum, AccountNum, FolderNum):
         return transcirptionJson
     except Exception as err:
         print(f"Error retrieving transcription {TranscriptionNum}: {err}")
-        cursor.close()
-        conn.close()
-        return None
-def retrieveSummary(mysql, SummaryNum, AccountNum, FolderNum):
-    """"returns the the name and text of the Summary (summary, name)"""
-    try:
-        conn = mysql.connect()
-        cursor = conn.cursor()
-        query = f"SELECT SummaryText, SummaryName FROM Summary WHERE AccountNum = %s AND FolderNum = %s AND SummaryNum = %s;"
-        cursor.execute(query, (AccountNum,FolderNum,SummaryNum))
-        data = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        SummaryJson = []
-        for row in data:
-            Text, Name = row
-            SummaryJson.append({
-                'summary': Text,
-                'name': Name
-            })
-        return SummaryJson
-    except Exception as err:
-        print(f"Error retrieving Summary {SummaryNum}: {err}")
         cursor.close()
         conn.close()
         return None
@@ -453,51 +427,6 @@ def deleteStudyGuide(cursor, conn, StudyGuideNum):
     except Exception as e:
         print(f"Error deleting StudyGuide: {e}")
 
-def createSummary(cursor, conn, SummaryName, SummaryText, AccountNum, TranscriptionNum, FolderNum="null"):
-    try:
-        cursor.execute("INSERT INTO Summary (SummaryName, SummaryText, AccountNum, TranscriptionNum, FolderNum) VALUES (%s, %s, %s,  %s, %s)",
-                       (SummaryName, SummaryText, AccountNum, TranscriptionNum, FolderNum))
-        conn.commit()
-        summary_num = cursor.lastrowid
-        print(f"Summary created successfully with SummaryNum: {summary_num}")
-        return summary_num
-    except Exception as err:
-        print("Error:", err)
-        return "null"
-def readSummary(cursor, SummaryNum):
-    try:
-        cursor.execute("SELECT * FROM Summary WHERE SummaryNum = %s", (SummaryNum))
-        data = cursor.fetchall()
-        print("Printing Summary:")
-        for row in data:
-            print(row)
-    except Exception as e:
-        print(f"Error fetching Summary: {e}")
-def readAllSummaries(cursor):
-    try:
-        cursor.execute("SELECT * FROM Summary")
-        data = cursor.fetchall()
-        print("Printing all Summary:")
-        for row in data:
-            print(row)
-    except Exception as e:
-        print(f"Error fetching Summary: {e}")
-
-def updateSummary(cursor, conn, SummaryNum, column, value):
-    try:
-        cursor.execute(f"UPDATE Summary SET {column} = %s WHERE SummaryNum = %s", (value, SummaryNum))
-        conn.commit()
-        print(f"Summary with SummaryNum {SummaryNum} updated successfully.")
-    except Exception as e:
-        print(f"Error updating Summary: {e}")
-
-def deleteSummary(cursor, conn, SummaryNum):
-    try:
-        cursor.execute("DELETE FROM Summary WHERE SummaryNum = %s", (SummaryNum))
-        conn.commit()
-        print(f"Summary with SummaryNum {SummaryNum} deleted successfully.")
-    except Exception as e:
-        print(f"Error deleting Summary: {e}")
 
 def createFlashcardSet(cursor, conn, setName, AccountNum, TranscriptionNum, FolderNum="null"):
     try:

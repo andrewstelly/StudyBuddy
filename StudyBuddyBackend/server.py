@@ -6,14 +6,14 @@ import bcrypt
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS  # Import CORS
 from flaskext.mysql import MySQL
-from WhisperDev import transcribe_mp3, create_study_guide, create_practice_test, translate_text, create_flashcards  # Removed generate_summary
-from Database import verifyPassword, retrieveAllFilesInFolder, retrieveFile, createAccount,retrieveAllFolders, createFolder, createTranscription, createSummary, createFlashcard, createFlashcardSet, createStudyGuide, createPracticeTest, createQuestion, createAnswer,read_database,reset_database
-
+from WhisperDev import transcribe_mp3, create_study_guide, create_practice_test, translate_text, create_flashcards  # Import functions
+from Database import verifyPassword, retrieveAllFilesInFolder, retrieveFile, createAccount,retrieveAllFolders, createFolder, createTranscription, createFlashcard, createFlashcardSet, createStudyGuide, createPracticeTest, createQuestion, createAnswer,read_database,reset_database
 # Add the directory containing WhisperDev.py to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'StudyBuddyBackend')))
 
 api_key = os.getenv("OPENAI_API_KEY")
 client = openai.OpenAI(api_key=api_key)
+
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)  # Enable CORS for all routes
@@ -21,13 +21,12 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)  # Ena
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-app.config['MYSQL_DATABASE_HOST'] = 'study-buddy-database.co3kew2gkyw2.us-east-1.rds.amazonaws.com'  # Specify Endpoint
-app.config['MYSQL_DATABASE_USER'] = 'admin'  # Specify Master username
-app.config['MYSQL_DATABASE_PASSWORD'] = 'StudyBuddy!'  # Specify Master password
-app.config['MYSQL_DATABASE_DB'] = 'study_buddy_database'  # Specify database name
+app.config['MYSQL_DATABASE_HOST'] = 'study-buddy-database.co3kew2gkyw2.us-east-1.rds.amazonaws.com' # Specify Endpoint
+app.config['MYSQL_DATABASE_USER'] = 'admin' # Specify Master username
+app.config['MYSQL_DATABASE_PASSWORD'] = 'StudyBuddy!' # Specify Master password
+app.config['MYSQL_DATABASE_DB'] = 'study_buddy_database' # Specify database name
 
 mysql = MySQL(app)
-
 print(retrieveAllFolders(mysql,119))
 print(retrieveAllFilesInFolder(mysql,119,90))
 print(retrieveFile(mysql,"Transcription", 78, 119,90))
@@ -35,6 +34,7 @@ print(retrieveFile(mysql,"PracticeTest", 59, 119,90))
 print(retrieveFile(mysql,"StudyGuide", 48, 119,90))
 print(retrieveFile(mysql, "FlashcardSet", 64, 119,90))
 print(retrieveFile(mysql, "Summary", 13, 119,90))
+
 # Handle preflight OPTIONS request for CORS
 @app.route('/upload', methods=['OPTIONS'])
 def options():
@@ -44,8 +44,7 @@ def options():
     response.headers.add("Access-Control-Allow-Methods", "POST,OPTIONS")
     return response, 200
 
-
-@app.route('/register', methods=['POST'])
+app.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
     email = data.get('email')
@@ -92,7 +91,6 @@ def login():
         cursor.close()
         conn.close()
 
-
 @app.route('/upload', methods=['POST'])
 def upload_file():
     """Handles file upload and content generation."""
@@ -116,7 +114,7 @@ def upload_file():
         translate_flag = request.form.get("translate") == "true"
         target_language = request.form.get("targetLanguage")
 
-        # Transcribe audio
+         # Transcribe audio
         print("Starting transcription...")
         transcription_text = transcribe_mp3(file_path)  # Transcribe in the original language
         print("Transcription completed.")
@@ -173,7 +171,6 @@ def upload_file():
             print(f"Error decoding flashcards JSON: {e}")
             results["flashcards"] = []
         print("Flashcards:", results["flashcards"])  # Log flashcards
-
         # Delete the file after processing
         os.remove(file_path)
         print(f"File {file_path} deleted")
@@ -210,6 +207,80 @@ def download_transcription():
     except Exception as e:
         print(f"Error serving transcription file: {e}")
         return jsonify({"error": "Failed to download transcription"}), 500
+def storeFolder(mysql, FolderName, AccountNum):
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        FolderNum = createFolder(cursor,conn,FolderName,AccountNum)
+        cursor.close()
+        conn.close()
+        return FolderNum
+    except Exception as e:
+        print(e)
+        return "null"
+def storeTranscription(mysql, TranscriptionName, TranscriptionText, AccountNum,FolderNum="null"):
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        TranscriptionNum = createTranscription(cursor,conn, TranscriptionName, TranscriptionText, AccountNum,FolderNum)
+        cursor.close()
+        conn.close()
+        return TranscriptionNum
+    except Exception as e:
+        print(e)
+        return "null"
+
+def storeStudyGuide(mysql,StudyGuideName, StudyGuideText, AccountNum, TranscriptionNum, FolderNum):
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        SummaryNum = createStudyGuide(cursor,conn, StudyGuideName, StudyGuideText, AccountNum, TranscriptionNum, FolderNum)
+        cursor.close()
+        conn.close()
+        return SummaryNum
+    except Exception as e:
+        print(e)
+        return "null"
+def storePracticeTest(mysql, data, PracticeTestName, AccountNum, TranscriptionNum, FolderNum="null"):
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        PracticeTestNum = createPracticeTest(cursor,conn, PracticeTestName, AccountNum, TranscriptionNum, FolderNum)
+        for question in data['questions']:
+            questionNum = createQuestion(cursor, conn, question['type'],question['question'],PracticeTestNum,TranscriptionNum)
+            if(question['type'] == "multiple_choice"):
+                for answer in question.get('options'):
+                    if(answer == question['correct_answer']):
+                        createAnswer(cursor,conn, answer, questionNum,1)
+                    else:
+                        createAnswer(cursor,conn, answer, questionNum,0)
+            elif(question.get('type') == "true_false"):
+                if(question['correct_answer']=="false"):
+                    createAnswer(cursor, conn, "True",questionNum,0)
+                    createAnswer(cursor, conn, "False",questionNum,1)
+                else:
+                    createAnswer(cursor, conn, "True",questionNum,1)
+                    createAnswer(cursor, conn, "False",questionNum,0)
+        cursor.close()
+        conn.close()
+        return PracticeTestNum
+    except Exception as e:
+        print(e)
+        return "null"
+def storeFlashcards(mysql, raw_flashcards, AccountNum, TranscriptNum,FolderNum="null"):
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        flashcardSetNum = createFlashcardSet(cursor,conn,"testSet", AccountNum, TranscriptNum,FolderNum)
+        for flashcard in raw_flashcards:
+            createFlashcard(cursor,conn,flashcard['question'],flashcard['answer'],flashcardSetNum)
+            
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(e)
+        return "null"
+    """Stores Flashcards in the database"""
 
 @app.route('/grade-test', methods=['POST'])
 def grade_test():
@@ -243,7 +314,6 @@ def grade_test():
     except Exception as e:
         print(f"Error grading test: {e}")
         return jsonify({"error": str(e)}), 500
-
 @app.route('/regenerate-practice-test', methods=['POST'])
 def regenerate_practice_test():
     """Regenerates the practice test using the existing transcription."""
