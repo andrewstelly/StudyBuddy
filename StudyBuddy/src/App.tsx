@@ -11,6 +11,7 @@ import Navigation from "./components/Pages/Navigation";
 import Cookies from "js-cookie";
 import EulaModal from "./components/Pages/EulaModal";
 import "./styles.css";
+import Register from "./components/Register";
 
 function App() {
   const location = useLocation();
@@ -51,6 +52,7 @@ function AppWrapper() {
     <Router>
       <Routes>
         <Route path="/*" element={<App />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </Router>
   );

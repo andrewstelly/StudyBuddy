@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import '../components/Styling/SignIn.css'; 
+import { Link } from "react-router-dom";
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
@@ -94,6 +95,13 @@ export default function SignIn() {
               >
                 Sign in
               </button>
+            </div>
+            <div>
+              <Link to="/register">
+                <button className="px-4 py-2 bg-blue-500 text-white rounded-md">
+                  New User? Register Here!
+                </button>
+              </Link>
             </div>
           </form>
         </div>
