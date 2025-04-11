@@ -1,6 +1,7 @@
 html, body {
   height: 100%;
   margin: 0;
+  padding: 0;
 }
 
 #root, .App {
@@ -34,10 +35,12 @@ body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  height: 100vh; /* Full height */
-  width: 100vw; /* Full width */
-  position: relative;
-  z-index: 0; /* Ensure it is above the overlay */
+  height: 100vh; /* Full height of the viewport */
+  width: 100vw; /* Full width of the viewport */
+  position: fixed; /* Ensure it spans the entire viewport */
+  top: 0; /* Start at the top of the page */
+  left: 0; /* Start at the left of the page */
+  z-index: -1; /* Place it behind the content */
 }
 
 .register-page::before {
