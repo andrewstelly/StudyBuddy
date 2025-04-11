@@ -10,8 +10,9 @@ html, body {
 .center-container {
     display: flex;
     flex-direction: column; /* Stack items vertically */
-    height: 82%;
-    width: 25%;
+    height: 88%;
+    width: 290px;
+    min-width: 290px;
     background-color: rgba(115, 164, 255, 0.85); /* Light blue with slight transparency */
     align-items: center;
     justify-content: center;
@@ -62,4 +63,7 @@ body::before {
     z-index: -1;
   }
 
-  
+  input {
+    width: 100%; /* Ensure inputs span the full width of their container */
+    box-sizing: border-box; /* Include padding and border in width calculation */
+}
