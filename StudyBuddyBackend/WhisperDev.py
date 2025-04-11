@@ -5,6 +5,8 @@ import whisper
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flaskext.mysql import MySQL
+import json
+
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
@@ -24,24 +26,13 @@ def transcribe_mp3(file_path):
     result = model.transcribe(file_path)
     return result["text"]
 
-def generate_summary(transcription):
-    """Generates a summary of the transcribed text."""
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "You are an AI that summarizes text."},
-            {"role": "user", "content": f"Summarize this text:\n\n{transcription}"}
-        ],
-    )
-    return response.choices[0].message.content
-
 def create_study_guide(transcription):
     """Creates a study guide from the transcribed text."""
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You are an AI that creates detailed study guides."},
-            {"role": "user", "content": f"Create a study guide:\n\n{transcription}"}
+            {"role": "user", "content": f"Create a study guide and do not use any markdown formatting such as hashtags, asterisks, or backticks. Instead, organize the guide using clear, indented sections and line breaks:\n\n{transcription}"}
         ],
     )
     return response.choices[0].message.content
@@ -88,44 +79,58 @@ def upload_file():
             return jsonify({"error": "No file provided"}), 400
 
         # Read user selections from form data
-        generate_summary_flag = request.form.get("summary") == "true"
-        create_study_guide_flag = request.form.get("studyGuide") == "true"
-        create_practice_test_flag = request.form.get("practiceTest") == "true"
         translate_flag = request.form.get("translate") == "true"
         target_language = request.form.get("targetLanguage", "")
 
         # Log received data
         print("\nReceived form data:")
-        print(f"Summary: {generate_summary_flag}")
-        print(f"Study Guide: {create_study_guide_flag}")
-        print(f"Practice Test: {create_practice_test_flag}")
         print(f"Translate: {translate_flag}, Language: {target_language}")
 
-        temp_file_path = "temp_audio.mp3"
+        temp_file_path = "temp_audio.wav"
         file.save(temp_file_path)
 
-        # Transcribe audio
-        transcription = transcribe_mp3(temp_file_path)
-        print("Transcription completed.")
-
-        results = {"transcription": transcription}
-
-        if generate_summary_flag:
-            print("Generating summary...")
-            results["summary"] = generate_summary(transcription)
-
-        if create_study_guide_flag:
-            print("Generating study guide...")
-            results["study_guide"] = create_study_guide(transcription)
-
-        if create_practice_test_flag:
-            print("Generating practice test...")
-            results["practice_test"] = create_practice_test(transcription)
-            print("Generated Practice Test:", results["practice_test"])
-
+        # Transcribe audio directly into the target language if translation is selected
         if translate_flag and target_language:
-            print(f"Translating to {target_language}...")
-            results["translation"] = translate_text(transcription, target_language)
+            print(f"Transcribing directly into {target_language}...")
+            transcription = transcribe_mp3(temp_file_path)  # Transcribe in the original language
+            transcription = translate_text(transcription, target_language)  # Translate directly
+            print(f"Transcription in {target_language} completed.")
+        else:
+            print("Transcribing in the original language...")
+            transcription = transcribe_mp3(temp_file_path)
+            print("Transcription completed.")
+
+        # Generate results using the transcription (already in the target language if translation is selected)
+        results = {
+            "transcription": transcription,  # This will be in the target language if translation is selected
+            "study_guide": create_study_guide(transcription),
+        }
+
+        # Generate practice test
+        try:
+            raw_practice_test = create_practice_test(transcription)
+            print("Raw practice test:", raw_practice_test)
+
+            # Clean and parse the practice test JSON
+            if raw_practice_test.startswith("```json"):
+                raw_practice_test = raw_practice_test.strip("```json").strip("```").strip()
+            results["practice_test"] = json.loads(raw_practice_test)
+        except json.JSONDecodeError as e:
+            print(f"Error decoding practice test JSON: {e}")
+            results["practice_test"] = {"error": "Failed to generate practice test"}
+
+        # Generate flashcards
+        try:
+            raw_flashcards = create_flashcards(transcription)
+            print("Raw flashcards:", raw_flashcards)
+
+            # Clean and parse the flashcards JSON
+            if raw_flashcards.startswith("```json"):
+                raw_flashcards = raw_flashcards.strip("```json").strip("```").strip()
+            results["flashcards"] = json.loads(raw_flashcards)
+        except json.JSONDecodeError as e:
+            print(f"Error decoding flashcards JSON: {e}")
+            results["flashcards"] = []
 
         # Log final results
         print("\nFinal Generated Content:")

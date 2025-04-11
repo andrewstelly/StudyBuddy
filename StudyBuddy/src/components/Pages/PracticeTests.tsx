@@ -11,8 +11,9 @@ const PracticeTest: React.FC = () => {
   const [practiceTest, setPracticeTest] = useState<Question[]>([]);
   const [responses, setResponses] = useState<any[]>([]);
   const [gradedResults, setGradedResults] = useState<any | null>(null);
-  const [fontSize, setFontSize] = useState<number>(16); // Default font size
-  const [fontFamily, setFontFamily] = useState<string>("Arial"); // Default font type
+  const [fontSize, setFontSize] = useState<number>(16);
+  const [fontFamily, setFontFamily] = useState<string>("Arial");
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const storedContent = localStorage.getItem("generatedContent");
@@ -39,46 +40,124 @@ const PracticeTest: React.FC = () => {
         body: JSON.stringify({ responses, practice_test: { questions: practiceTest } }),
       });
       const data = await response.json();
-      setGradedResults(data.graded_results);
+
+      if (response.ok) {
+        setGradedResults(data.graded_results);
+        setPracticeTest([]); // Clear the practice test
+      } else {
+        console.error("Error grading practice test:", data.error);
+      }
     } catch (error) {
       console.error("Error submitting practice test:", error);
     }
   };
 
+  const regenerateTest = async () => {
+    setLoading(true);
+    try {
+      const storedContent = localStorage.getItem("generatedContent");
+      if (!storedContent) {
+        console.error("No transcription available to regenerate the test.");
+        return;
+      }
+
+      const parsedContent = JSON.parse(storedContent);
+      const transcription = parsedContent.transcription;
+
+      const response = await fetch("http://localhost:5000/regenerate-practice-test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transcription }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.practice_test) {
+        setPracticeTest(data.practice_test.questions);
+        setResponses(new Array(data.practice_test.questions.length).fill(null));
+        setGradedResults(null); // Clear previous results
+        console.log("Practice test regenerated successfully.");
+      } else {
+        console.error("Error regenerating practice test:", data.error);
+      }
+    } catch (error) {
+      console.error("Error regenerating practice test:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="page-layout">
-      <div style={{ width: "90%", maxWidth: "900px", height: "80vh", display: "flex", flexDirection: "column" }}>
-
+      <div
+        style={{
+          width: "90%",
+          maxWidth: "900px",
+          height: "80vh",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         {/* Font Controls */}
-        <div style={{ display: "flex", justifyContent: "space-between", gap: "20px", marginBottom: "10px" }}>
-          {/* Font Size Selector */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            gap: "20px",
+            marginBottom: "10px",
+          }}
+        >
           <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             Font Size:
-            <select value={fontSize} onChange={(e) => setFontSize(parseInt(e.target.value))} style={{ padding: "5px" }}>
-              <option value={12}>12px</option>
-              <option value={14}>14px</option>
-              <option value={16}>16px (Default)</option>
-              <option value={18}>18px</option>
-              <option value={20}>20px</option>
-              <option value={24}>24px</option>
-              <option value={28}>28px</option>
+            <select
+              value={fontSize}
+              onChange={(e) => setFontSize(parseInt(e.target.value))}
+              style={{ padding: "5px" }}
+            >
+              {[12, 14, 16, 18, 20, 24, 28].map((size) => (
+                <option key={size} value={size}>
+                  {size}px{size === 16 ? " (Default)" : ""}
+                </option>
+              ))}
             </select>
           </label>
 
-          {/* Font Type Selector */}
+          {/* Regenerate Test Button */}
+          <button
+            onClick={regenerateTest}
+            style={{
+              padding: "10px 20px",
+              backgroundColor: "blue",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+              width: "200px",
+            }}
+            disabled={loading}
+          >
+            {loading ? "Regenerating..." : "Regenerate Test"}
+          </button>
+
           <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             Font Type:
-            <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} style={{ padding: "5px" }}>
-              <option value="Arial">Arial</option>
-              <option value="Courier New">Courier New</option>
-              <option value="Georgia">Georgia</option>
-              <option value="Times New Roman">Times New Roman</option>
-              <option value="Verdana">Verdana</option>
+            <select
+              value={fontFamily}
+              onChange={(e) => setFontFamily(e.target.value)}
+              style={{ padding: "5px" }}
+            >
+              {["Arial", "Courier New", "Georgia", "Times New Roman", "Verdana"].map(
+                (font) => (
+                  <option key={font} value={font}>
+                    {font}
+                  </option>
+                )
+              )}
             </select>
           </label>
         </div>
 
-        {/* Scrollable Box for Practice Test */}
+        {/* Scrollable Content */}
         <div
           style={{
             flex: 1,
@@ -90,7 +169,59 @@ const PracticeTest: React.FC = () => {
             fontFamily: fontFamily,
           }}
         >
-          {practiceTest.length > 0 ? (
+          {gradedResults ? (
+            <div style={{ marginTop: "20px" }}>
+              <h2>Graded Results</h2>
+              <div>
+                {gradedResults.map((result: any, index: number) => (
+                  <div
+                    key={index}
+                    style={{
+                      marginBottom: "15px",
+                      padding: "10px",
+                      border: "1px solid #ccc",
+                      borderRadius: "5px",
+                      backgroundColor: result.correct ? "#d4edda" : "#f8d7da",
+                    }}
+                  >
+                    <p>
+                      <strong>Q{index + 1}:</strong> {result.question}
+                    </p>
+                    <p>
+                      Your Answer:{" "}
+                      {result.user_response === true
+                        ? "True"
+                        : result.user_response === false
+                        ? "False"
+                        : result.user_response}{" "}
+                      {result.correct ? (
+                        <span style={{ color: "green" }}>✔</span>
+                      ) : (
+                        <span style={{ color: "red" }}>✘</span>
+                      )}
+                    </p>
+                    {!result.correct && result.correct_answer !== undefined && (
+                      <p>
+                        Correct Answer:{" "}
+                        <strong>
+                          {typeof result.correct_answer === "boolean"
+                            ? result.correct_answer
+                              ? "True"
+                              : "False"
+                            : result.correct_answer}
+                        </strong>
+                      </p>
+                    )}
+                    {result.evaluation && (
+                      <p>
+                        ChatGPT Evaluation: <strong>{result.evaluation}</strong>
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : practiceTest.length > 0 ? (
             practiceTest.map((question, index) => (
               <div key={index} style={{ marginBottom: "20px" }}>
                 <p>
@@ -151,63 +282,23 @@ const PracticeTest: React.FC = () => {
         </div>
 
         {/* Submit Button */}
-        <button
-          onClick={handleSubmit}
-          style={{
-            marginTop: "10px",
-            padding: "10px 20px",
-            backgroundColor: "green",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        >
-          Submit Test
-        </button>
-
-        {/* Graded Results */}
-        {gradedResults && (
-          <div style={{ marginTop: "20px" }}>
-            <h2>Graded Results</h2>
-            <div>
-              {gradedResults.map((result: any, index: number) => (
-                <div
-                  key={index}
-                  style={{
-                    marginBottom: "15px",
-                    padding: "10px",
-                    border: "1px solid #ccc",
-                    borderRadius: "5px",
-                    backgroundColor: result.correct ? "#d4edda" : "#f8d7da",
-                  }}
-                >
-                  <p>
-                    <strong>Q{index + 1}:</strong> {result.question}
-                  </p>
-                  <p>
-                    Your Answer: {result.user_response === true ? "True" : result.user_response === false ? "False" : result.user_response}{" "}
-                    {result.correct ? (
-                      <span style={{ color: "green" }}>✔</span>
-                    ) : (
-                      <span style={{ color: "red" }}>✘</span>
-                    )}
-                  </p>
-                  {!result.correct && result.correct_answer !== undefined && (
-                    <p>
-                      Correct Answer: <strong>{typeof result.correct_answer === "boolean" ? (result.correct_answer ? "True" : "False") : result.correct_answer}</strong>
-                    </p>
-                  )}
-                  {result.evaluation && (
-                    <p>
-                      ChatGPT Evaluation: <strong>{result.evaluation}</strong>
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        <div style={{ display: "flex", justifyContent: "center", gap: "20px" }}>
+          <button
+            onClick={handleSubmit}
+            style={{
+              marginTop: "10px",
+              padding: "10px 20px",
+              backgroundColor: "green",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+              width: "200px",
+            }}
+          >
+            Submit Test
+          </button>
+        </div>
       </div>
     </div>
   );

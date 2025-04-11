@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import '../Styling/fonts.css';
+
 
 const Notes: React.FC = () => {
     const [studyGuide, setStudyGuide] = useState<string>("Loading...");
@@ -33,7 +35,7 @@ const Notes: React.FC = () => {
             const availableVoices = window.speechSynthesis.getVoices();
             setVoices(availableVoices);
             if (availableVoices.length > 0) {
-                setSelectedVoice(availableVoices[4].name); // Default to the first voice
+                setSelectedVoice(availableVoices[0].name); // Default to the first voice
             }
         };
 
@@ -93,6 +95,7 @@ const Notes: React.FC = () => {
                             <option value="Georgia">Georgia</option>
                             <option value="Times New Roman">Times New Roman</option>
                             <option value="Verdana">Verdana</option>
+                            <option value="OpenDyslexic">OpenDyslexic</option>
                         </select>
                     </label>
                 </div>
@@ -113,7 +116,8 @@ const Notes: React.FC = () => {
                     </select>
                 </label>
 
-                {/* ✅ Text-to-Speech Button */}
+            {/* ✅ Text-to-Speech Button */}
+            <div style={{ display: "flex", justifyContent: "center" }}>
                 <button
                     onClick={handleTextToSpeech}
                     style={{
@@ -124,16 +128,28 @@ const Notes: React.FC = () => {
                         border: "none",
                         borderRadius: "5px",
                         cursor: "pointer",
+                        width: "200px"
                     }}
                 >
                     {isSpeaking ? "Stop Speaking" : "Read Aloud"}
                 </button>
+            </div>
 
                 <textarea 
                     className="text-box"
                     value={studyGuide}
                     onChange={handleChange}
-                    style={{ fontSize: `${fontSize}px`, fontFamily: fontFamily }} // ✅ Apply dynamic font size & type
+                    style={{
+                        fontSize: `${fontSize}px`,
+                        fontFamily: fontFamily,
+                        resize: "none", // Disable resizing
+                        flexGrow: 1, // Allow the textarea to grow and fill available space
+                        width: "100%", // Ensure it spans the full width
+                        border: "1px solid #ccc",
+                        borderRadius: "5px",
+                        padding: "10px",
+                        boxSizing: "border-box", // Include padding in width/height calculations
+                    }}
                 />
             </div>
         </div>

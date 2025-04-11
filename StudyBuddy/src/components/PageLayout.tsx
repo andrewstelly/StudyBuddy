@@ -1,19 +1,17 @@
 import React from "react";
 
 interface PageLayoutProps {
-  title: string;
-  children: React.ReactNode;
+  title: React.ReactNode; // Title for the header
+  children: React.ReactNode; // Content to render inside the layout
 }
 
-const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
+const PageLayout: React.FC<PageLayoutProps> = ({ title, children }) => {
   return (
     <div className="page-layout">
       <header className="header">
-        <h1>{"StudyBuddy"}</h1>
+        <h1>{title}</h1>
       </header>
-      <div className="content">
-        {children}
-      </div>
+      <div className="content">{children}</div>
     </div>
   );
 };
