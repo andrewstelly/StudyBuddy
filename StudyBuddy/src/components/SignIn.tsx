@@ -105,8 +105,8 @@ export default function SignIn() {
                       fontSize: '15px', // Larger font size
                       width: '41%', // Adjust width to fit the layout
                       position: 'relative', // Enable positioning
-                      top: '-10px', // Move up by 10px
-                      right: '-10px', // Move to the right by 10px
+                      top: '-6px', // Move up by 10px
+                      right: '-8px', // Move to the right by 10px
                     }}
                   >
                     Sign in
@@ -119,8 +119,8 @@ export default function SignIn() {
                         fontSize: '15px', // Larger font size
                         width: '48%', // Adjust width to fit the layout
                         position: 'relative', // Enable positioning
-                        top: '-1.25px', // Move up by 10px
-                        right: '-10px', // Move to the right by 10px
+                        top: '2.5px', // Move up by 10px
+                        right: '-12px', // Move to the right by 10px
                       }}
                     >
                       New User? Register Here!
@@ -131,6 +131,10 @@ export default function SignIn() {
             </form>
           </div>
         </div>
+      </div>
+      {/* Watermark */}
+      <div className="watermark">
+        © 2025 StudyBuddy, Inc.
       </div>
     </div>
   );

@@ -67,3 +67,11 @@ body::before {
     width: 100%; /* Ensure inputs span the full width of their container */
     box-sizing: border-box; /* Include padding and border in width calculation */
 }
+
+.watermark {
+  position: absolute;
+  bottom: 8px; /* 8px from the bottom */
+  right: 8px; /* 8px from the right */
+  color: #000000; /* Tailwind's gray-500 */
+  font-size: 0.875rem; /* Tailwind's text-sm */
+}
