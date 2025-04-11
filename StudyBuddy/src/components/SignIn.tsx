@@ -11,7 +11,7 @@ export default function SignIn() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-        console.log("Form submitted!");
+    console.log("Form submitted!");
     // Set a cookie to indicate the user is logged in
     Cookies.set("auth", "true", { expires: 7 }); // Cookie expires in 7 days
     // Redirect to home page after successful sign-in
@@ -57,54 +57,84 @@ export default function SignIn() {
             Sign in to your account
           </h2>
 
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500"
-              />
-            </div>
+          {/* Grouped container for email, password, and buttons */}
+          <div className="form-container mt-6 flex flex-col items-center space-y-6">
+            <form className="w-full space-y-6" onSubmit={handleSubmit}>
+              <div className="flex items-center justify-between w-full">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  Email address:
+                </label>
+                <div className="flex justify-end w-3/4">
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-3/4 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-900 mb-2">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500"
-              />
-            </div>
+              <div className="flex items-center justify-between w-full">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-900">
+                  Password:
+                </label>
+                <div className="flex justify-end w-3/4">
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-3/4 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
 
-            <div className="flex justify-center">
-              <button
-                type="submit"
-                className="py-2 px-4 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 focus:outline-none mt-2"
-              >
-                Sign in
-              </button>
-            </div>
-            <div>
-              <Link to="/register">
-                <button className="px-4 py-2 bg-blue-500 text-white rounded-md">
-                  New User? Register Here!
-                </button>
-              </Link>
-            </div>
-          </form>
+              {/* Buttons grouped inside the container */}
+              <div className="button-container flex flex-col w-full">
+                <div className="flex justify-between w-full">
+                  <button
+                    type="submit"
+                    className="bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 focus:outline-none"
+                    style={{
+                      padding: '10px 2px', // Explicit padding for larger size
+                      fontSize: '15px', // Larger font size
+                      width: '41%', // Adjust width to fit the layout
+                      position: 'relative', // Enable positioning
+                      top: '-6px', // Move up by 10px
+                      right: '-8px', // Move to the right by 10px
+                    }}
+                  >
+                    Sign in
+                  </button>
+                  <Link to="/register">
+                    <button
+                      className="bg-blue-500 text-white rounded-md"
+                      style={{
+                        padding: '1.3px 2px', // Explicit padding for larger size
+                        fontSize: '15px', // Larger font size
+                        width: '48%', // Adjust width to fit the layout
+                        position: 'relative', // Enable positioning
+                        top: '2.5px', // Move up by 10px
+                        right: '-12px', // Move to the right by 10px
+                      }}
+                    >
+                      New User? Register Here!
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
+      </div>
+      {/* Watermark */}
+      <div className="watermark">
+        © 2025 StudyBuddy, Inc.
       </div>
     </div>
   );
