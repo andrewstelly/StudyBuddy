@@ -4,6 +4,216 @@ from flaskext.mysql import MySQL
 app = Flask(__name__)
 from datetime import datetime
 
+def retrieveAllFolders(mysql, AccountNum):
+    """"Returns Lists of Folders and Numbers associated with Accounts in the form of a JSON like object (FolderNum, FolderName)"""
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        cursor.execute("SELECT FolderNum, FolderName FROM Folders WHERE AccountNum = %s", (AccountNum))
+        data = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        folderFromAccounts = []
+        for row in data:
+            FolderNum, FolderName = row
+            folderFromAccounts.append({
+                "FolderName" : FolderName,
+                "FolderNum": FolderNum  
+            })
+       
+        return folderFromAccounts
+    except Exception as err:
+        print(f"Error fetching Folder {FolderNum}:", err)
+        cursor.close()
+        conn.close()
+        return None
+def retrieveAllFilesInFolder(mysql, AccountNum,FolderNum):
+    """Retrieves all of the Files in a Folder (Name, FileType, Num)"""
+    tables = [
+        'Transcription',
+        'StudyGuide',
+        'FlashcardSet',
+        'PracticeTest',
+        'Summary'
+    ]
+    FileList = []
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        for table in tables:
+            query = f"SELECT {table}Num, {table}Name FROM {table} WHERE AccountNum = %s AND FolderNum = %s;"
+            cursor.execute(query, (AccountNum,FolderNum))
+            data = cursor.fetchall()
+            for row in data:
+                Num, Name = row
+                FileList.append({
+                "Name" : Name,
+                "FileType" : table,
+                "Num": Num  
+                })
+        cursor.close()
+        conn.close()
+        return FileList
+    except Exception as err:
+        print(f"Error printing all of Files in Folder {FolderNum}: {err}")
+        cursor.close()
+        conn.close()
+        return None
+def retrieveFile(mysql, tableName, Num, AccountNum, FolderNum):
+    """"returns the relevant display data of the file """
+    match tableName:
+        case "Transcription":
+            return retrieveTranscription(mysql, Num, AccountNum, FolderNum)
+        case "StudyGuide":
+           return retrieveStudyGuide(mysql,Num,AccountNum,FolderNum)
+        case "Summary":
+            return retrieveSummary(mysql, Num, AccountNum, FolderNum)
+        case "FlashcardSet":
+            return retrieveFlashcardSet(mysql,Num,AccountNum,FolderNum)
+        case "PracticeTest":
+            return retrievePracticeTest(mysql, Num, AccountNum, FolderNum)
+       
+def retrieveTranscription(mysql, TranscriptionNum, AccountNum, FolderNum):
+    """"returns the the name and text of the transcription (transcription,name)"""
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        query = f"SELECT TranscriptionText, TranscriptionName FROM Transcription WHERE AccountNum = %s AND FolderNum = %s AND TranscriptionNum = %s;"
+        cursor.execute(query, (AccountNum,FolderNum,TranscriptionNum))
+        data = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        transcirptionJson = []
+        for row in data:
+            Text, Name = row
+            transcirptionJson.append({
+                'transcription': Text,
+                'name': Name
+            })
+        return transcirptionJson
+    except Exception as err:
+        print(f"Error retrieving transcription {TranscriptionNum}: {err}")
+        cursor.close()
+        conn.close()
+        return None
+def retrieveSummary(mysql, SummaryNum, AccountNum, FolderNum):
+    """"returns the the name and text of the Summary (summary, name)"""
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        query = f"SELECT SummaryText, SummaryName FROM Summary WHERE AccountNum = %s AND FolderNum = %s AND SummaryNum = %s;"
+        cursor.execute(query, (AccountNum,FolderNum,SummaryNum))
+        data = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        SummaryJson = []
+        for row in data:
+            Text, Name = row
+            SummaryJson.append({
+                'summary': Text,
+                'name': Name
+            })
+        return SummaryJson
+    except Exception as err:
+        print(f"Error retrieving Summary {SummaryNum}: {err}")
+        cursor.close()
+        conn.close()
+        return None
+def retrieveStudyGuide(mysql, StudyGuideNum, AccountNum, FolderNum):
+    """"returns the the name and text of the Summary (summary, name)"""
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        query = f"SELECT StudyGuideText, StudyGuideName FROM StudyGuide WHERE AccountNum = %s AND FolderNum = %s AND StudyGuideNum = %s;"
+        cursor.execute(query, (AccountNum,FolderNum,StudyGuideNum))
+        data = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        StudyGuideJson = []
+        for row in data:
+            Text, Name = row
+            StudyGuideJson.append({
+                'study_guide': Text,
+                'name': Name
+            })
+        return StudyGuideJson
+    except Exception as err:
+        print(f"Error retrieving StudyGuide {StudyGuideNum}: {err}")
+        cursor.close()
+        conn.close()
+        return None
+def retrievePracticeTest(mysql, PracticeTestNum, AccountNum, FolderNum):
+    """"returns the the name and text of the Practice Test (summary, name)"""
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        query = f"SELECT PracticeTestName FROM PracticeTest WHERE AccountNum = %s AND FolderNum = %s AND PracticeTestNum = %s;"
+        cursor.execute(query, (AccountNum,FolderNum,PracticeTestNum))
+        name = cursor.fetchone()
+        PracticeTestName = name
+        practice_test = {'practice_test': {'questions': []}, 'name': PracticeTestName}
+        question_query = f"SELECT QuestionNum, Text, Type FROM Question WHERE PracticeTestNum = %s;"
+        cursor.execute(question_query , (PracticeTestNum))
+        question_data = cursor.fetchall()
+        for question in question_data:
+            question_Num, question_Text, question_Type = question
+            question_list = {
+                'question' : question_Text,
+                'type' : question_Type,
+            }
+            if(question_Type=="true_false" or question_Type=="multiple_choice"):
+                query = f"SELECT Text, Correct FROM Answer WHERE QuestionNum = %s;"
+                cursor.execute(query, (question_Num))
+                answer_data = cursor.fetchall()
+                answer_list =[]
+                correct_answer = ""
+                for answer in answer_data:
+                    answer_Text, Correct = answer
+                    answer_list.append(answer_Text)
+                    if(Correct == 1):
+                        correct_answer = answer_Text
+                question_list["options"] = answer_list
+                question_list["correct_answer"] = correct_answer
+            else:
+                question_list["correct_answer"] = "Answers May Vary"
+            practice_test["practice_test"]["questions"].append(question_list)
+        cursor.close()
+        conn.close()
+        return practice_test
+    except Exception as err:
+        print(f"Error retrieving PracticeTest {PracticeTestNum}: {err}")
+        cursor.close()
+        conn.close()
+        return None
+def retrieveFlashcardSet(mysql, FlashcardSetNum, AccountNum, FolderNum):
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        query = f"SELECT FlashcardSetName FROM FlashcardSet WHERE AccountNum = %s AND FolderNum = %s AND FlashcardSetNum = %s;"
+        cursor.execute(query, (AccountNum,FolderNum,FlashcardSetNum ))
+        names = cursor.fetchone()
+        flashcard_JSON = {'flashcards': [], }
+        for name in names:
+            FlashcardSetName = name
+        flashcard_JSON["name"]=  FlashcardSetName
+        query = f"SELECT FrontText, BackText From Flashcards WHERE FlashcardSetNum = %s"
+        cursor.execute(query, (FlashcardSetNum))
+        flashcards = cursor.fetchall()
+        for flashcard in flashcards:
+            fronttext, backtext = flashcard
+            flashcard_data = {
+                "question": fronttext,
+                "answer": backtext
+            }
+            flashcard_JSON["flashcards"].append(flashcard_data)
+        cursor.close()
+        conn.close()
+        return flashcard_JSON
+    except Exception as err:
+        print(f"Error retrieving FlashcardSetNum {FlashcardSetNum}: {err}")
+        cursor.close()
+        conn.close()
+        return None
 def createAccount(cursor, conn, Email, Username, Password, Joindate=None):
     """Creates a an account in the SQL database"""
     try:
@@ -164,7 +374,7 @@ def createPracticeTest(cursor, conn, PracticeTestName, AccountNum, Transcription
 
 def readPracticeTest(cursor, TestNum):
     try:
-        cursor.execute("SELECT * FROM PracticeTest WHERE TestNum = %s", (TestNum,))
+        cursor.execute("SELECT * FROM PracticeTest WHERE PracticeTestNum = %s", (TestNum,))
         data = cursor.fetchall()
         print("Printing PracticeTest:")
         for row in data:
@@ -183,16 +393,16 @@ def readAllPracticeTests(cursor):
 
 def updatePracticeTest(cursor, conn, TestNum, column, value):
     try:
-        cursor.execute(f"UPDATE PracticeTest SET {column} = %s WHERE TestNum = %s", (value, TestNum))
+        cursor.execute(f"UPDATE PracticeTest SET {column} = %s WHERE PracticeTestNum = %s", (value, TestNum))
         conn.commit()
         print(f"PracticeTest with TestNum {TestNum} updated successfully.")
     except Exception as e:
         print(f"Error updating PracticeTest: {e}")
 def deletePracticeTest(cursor, conn, TestNum):
     try:
-        cursor.execute("DELETE FROM PracticeTest WHERE TestNum = %s", (TestNum,))
+        cursor.execute("DELETE FROM PracticeTest WHERE PracticeTestNum = %s", (TestNum,))
         conn.commit()
-        print(f"PracticeTest with TestNum {TestNum} deleted successfully.")
+        print(f"PracticeTest with PracticeTestNum {TestNum} deleted successfully.")
     except Exception as e:
         print(f"Error deleting PracticeTest: {e}")
 
@@ -291,7 +501,7 @@ def deleteSummary(cursor, conn, SummaryNum):
 
 def createFlashcardSet(cursor, conn, setName, AccountNum, TranscriptionNum, FolderNum="null"):
     try:
-        cursor.execute("INSERT INTO FlashcardSet (SetName, AccountNum, TranscriptionNum, FolderNum) VALUES (%s, %s,%s, %s)", (setName, AccountNum, TranscriptionNum, FolderNum))
+        cursor.execute("INSERT INTO FlashcardSet (FlashcardSetName, AccountNum, TranscriptionNum, FolderNum) VALUES (%s, %s,%s, %s)", (setName, AccountNum, TranscriptionNum, FolderNum))
         conn.commit()
         flashcardset_num = cursor.lastrowid
         print(f"FlashcardSet created successfully with FlashcardSet: {flashcardset_num}")
@@ -500,7 +710,7 @@ def deleteAnswer(cursor, conn, AnswerNum):
     except Exception as e:
         print("Error deleting Answer:", e)
 def read_database(cursor,conn):
-    """Deletes everything from the database"""
+    """Reads everything from the database"""
     tables = [
             'Transcription',
             'Flashcards',
@@ -512,7 +722,6 @@ def read_database(cursor,conn):
             'Folders',
             'Accounts'
         ]
-
     for table in tables:
         print(f"Reading {table} from database")
         try:
