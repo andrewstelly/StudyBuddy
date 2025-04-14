@@ -551,7 +551,7 @@ def deleteFlashcard(cursor, conn, FlashcardNum):
 def createQuestion(cursor, conn, Type, Text, TestNum, TranscriptionNum):
     try:
 
-        cursor.execute("INSERT INTO Question (Type, Text, TestNum, TranscriptionNum) VALUES (%s, %s, %s,%s)",
+        cursor.execute("INSERT INTO Question (Type, Text, PracticeTestNum, TranscriptionNum) VALUES (%s, %s, %s,%s)",
                        (Type, Text, TestNum, TranscriptionNum))
         conn.commit()
         question_num = cursor.lastrowid
