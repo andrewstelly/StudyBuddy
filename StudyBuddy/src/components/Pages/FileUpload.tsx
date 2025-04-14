@@ -160,6 +160,18 @@ const FileUpload: React.FC = () => {
       {showCompleteMessage && (
         <ProcessComplete onComplete={() => setShowCompleteMessage(false)} />
       )}
+      
+      <div
+      className="watermark"
+      style={{
+        position: "fixed",
+        bottom: "10px",
+        right: "10px",
+        zIndex: 999,
+      }}
+      >
+        © 2025 StudyBuddy, Inc.
+      </div>
     </div>
   );
 };

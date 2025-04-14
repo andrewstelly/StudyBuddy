@@ -152,6 +152,10 @@ const Notes: React.FC = () => {
                     }}
                 />
             </div>
+        {/* Watermark */}
+        <div className="watermark">
+            © 2025 StudyBuddy, Inc.
+        </div>
         </div>
     );
 };

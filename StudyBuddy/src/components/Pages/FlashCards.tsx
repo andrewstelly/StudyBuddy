@@ -91,6 +91,10 @@ const FlashCards: React.FC = () => {
           </p>
         </>
       )}
+    {/* Watermark */}
+    <div className="watermark">
+     © 2025 StudyBuddy, Inc.
+    </div>
     </div>
   );
 };

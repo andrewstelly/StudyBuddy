@@ -300,6 +300,10 @@ const PracticeTest: React.FC = () => {
           </button>
         </div>
       </div>
+    {/* Watermark */}
+    <div className="watermark">
+      © 2025 StudyBuddy, Inc.
+    </div>
     </div>
   );
 };
