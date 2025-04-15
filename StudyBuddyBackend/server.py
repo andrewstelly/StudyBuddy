@@ -27,13 +27,6 @@ app.config['MYSQL_DATABASE_PASSWORD'] = 'StudyBuddy!' # Specify Master password
 app.config['MYSQL_DATABASE_DB'] = 'study_buddy_database' # Specify database name
 
 mysql = MySQL(app)
-print(retrieveAllFolders(mysql,119))
-print(retrieveAllFilesInFolder(mysql,119,90))
-print(retrieveFile(mysql,"Transcription", 78, 119,90))
-print(retrieveFile(mysql,"PracticeTest", 59, 119,90))
-print(retrieveFile(mysql,"StudyGuide", 48, 119,90))
-print(retrieveFile(mysql, "FlashcardSet", 64, 119,90))
-print(retrieveFile(mysql, "Summary", 13, 119,90))
 
 # Handle preflight OPTIONS request for CORS
 @app.route('/upload', methods=['OPTIONS'])
