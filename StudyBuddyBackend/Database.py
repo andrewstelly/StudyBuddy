@@ -34,7 +34,6 @@ def retrieveAllFilesInFolder(mysql, AccountNum,FolderNum):
         'StudyGuide',
         'FlashcardSet',
         'PracticeTest',
-        'Summary'
     ]
     FileList = []
     try:
@@ -66,13 +65,19 @@ def retrieveFile(mysql, tableName, Num, AccountNum, FolderNum):
             return retrieveTranscription(mysql, Num, AccountNum, FolderNum)
         case "StudyGuide":
            return retrieveStudyGuide(mysql,Num,AccountNum,FolderNum)
-        case "Summary":
-            return retrieveSummary(mysql, Num, AccountNum, FolderNum)
         case "FlashcardSet":
             return retrieveFlashcardSet(mysql,Num,AccountNum,FolderNum)
         case "PracticeTest":
             return retrievePracticeTest(mysql, Num, AccountNum, FolderNum)
-       
+def combine_into_json(transcription, study_guide, practice_test, flashcards):
+    """Combines all generated content into a single JSON object."""
+    return {
+        "message": "File uploaded and processed successfully",
+        "transcription": transcription,
+        "study_guide": study_guide,
+        "practice_test": practice_test,
+        "flashcards": flashcards
+    }
 def retrieveTranscription(mysql, TranscriptionNum, AccountNum, FolderNum):
     """"returns the the name and text of the transcription (transcription,name)"""
     try:
@@ -83,42 +88,17 @@ def retrieveTranscription(mysql, TranscriptionNum, AccountNum, FolderNum):
         data = cursor.fetchall()
         cursor.close()
         conn.close()
-        transcirptionJson = []
         for row in data:
             Text, Name = row
-            transcirptionJson.append({
-                'transcription': Text,
-                'name': Name
-            })
+            transcirptionJson = Text
+
         return transcirptionJson
     except Exception as err:
         print(f"Error retrieving transcription {TranscriptionNum}: {err}")
         cursor.close()
         conn.close()
         return None
-def retrieveSummary(mysql, SummaryNum, AccountNum, FolderNum):
-    """"returns the the name and text of the Summary (summary, name)"""
-    try:
-        conn = mysql.connect()
-        cursor = conn.cursor()
-        query = f"SELECT SummaryText, SummaryName FROM Summary WHERE AccountNum = %s AND FolderNum = %s AND SummaryNum = %s;"
-        cursor.execute(query, (AccountNum,FolderNum,SummaryNum))
-        data = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        SummaryJson = []
-        for row in data:
-            Text, Name = row
-            SummaryJson.append({
-                'summary': Text,
-                'name': Name
-            })
-        return SummaryJson
-    except Exception as err:
-        print(f"Error retrieving Summary {SummaryNum}: {err}")
-        cursor.close()
-        conn.close()
-        return None
+
 def retrieveStudyGuide(mysql, StudyGuideNum, AccountNum, FolderNum):
     """"returns the the name and text of the Summary (summary, name)"""
     try:
@@ -129,13 +109,10 @@ def retrieveStudyGuide(mysql, StudyGuideNum, AccountNum, FolderNum):
         data = cursor.fetchall()
         cursor.close()
         conn.close()
-        StudyGuideJson = []
+        StudyGuideJson = {}
         for row in data:
             Text, Name = row
-            StudyGuideJson.append({
-                'study_guide': Text,
-                'name': Name
-            })
+            StudyGuideJson['study_guide'] = Text
         return StudyGuideJson
     except Exception as err:
         print(f"Error retrieving StudyGuide {StudyGuideNum}: {err}")
@@ -151,7 +128,7 @@ def retrievePracticeTest(mysql, PracticeTestNum, AccountNum, FolderNum):
         cursor.execute(query, (AccountNum,FolderNum,PracticeTestNum))
         name = cursor.fetchone()
         PracticeTestName = name
-        practice_test = {'practice_test': {'questions': []}, 'name': PracticeTestName}
+        practice_test = { 'questions': []}
         question_query = f"SELECT QuestionNum, Text, Type FROM Question WHERE PracticeTestNum = %s;"
         cursor.execute(question_query , (PracticeTestNum))
         question_data = cursor.fetchall()
@@ -176,7 +153,7 @@ def retrievePracticeTest(mysql, PracticeTestNum, AccountNum, FolderNum):
                 question_list["correct_answer"] = correct_answer
             else:
                 question_list["correct_answer"] = "Answers May Vary"
-            practice_test["practice_test"]["questions"].append(question_list)
+            practice_test["questions"].append(question_list)
         cursor.close()
         conn.close()
         return practice_test
@@ -192,10 +169,9 @@ def retrieveFlashcardSet(mysql, FlashcardSetNum, AccountNum, FolderNum):
         query = f"SELECT FlashcardSetName FROM FlashcardSet WHERE AccountNum = %s AND FolderNum = %s AND FlashcardSetNum = %s;"
         cursor.execute(query, (AccountNum,FolderNum,FlashcardSetNum ))
         names = cursor.fetchone()
-        flashcard_JSON = {'flashcards': [], }
+        flashcard_Array = []
         for name in names:
             FlashcardSetName = name
-        flashcard_JSON["name"]=  FlashcardSetName
         query = f"SELECT FrontText, BackText From Flashcards WHERE FlashcardSetNum = %s"
         cursor.execute(query, (FlashcardSetNum))
         flashcards = cursor.fetchall()
@@ -205,10 +181,10 @@ def retrieveFlashcardSet(mysql, FlashcardSetNum, AccountNum, FolderNum):
                 "question": fronttext,
                 "answer": backtext
             }
-            flashcard_JSON["flashcards"].append(flashcard_data)
+            flashcard_Array.append(flashcard_data)
         cursor.close()
         conn.close()
-        return flashcard_JSON
+        return flashcard_Array
     except Exception as err:
         print(f"Error retrieving FlashcardSetNum {FlashcardSetNum}: {err}")
         cursor.close()

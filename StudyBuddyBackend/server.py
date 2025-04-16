@@ -7,7 +7,7 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS  # Import CORS
 from flaskext.mysql import MySQL
 from WhisperDev import transcribe_mp3, create_study_guide, create_practice_test, translate_text, create_flashcards  # Removed generate_summary
-from Database import verifyPassword, retrieveAllFilesInFolder, retrieveFile, createAccount,retrieveAllFolders, createFolder, createTranscription, createSummary, createFlashcard, createFlashcardSet, createStudyGuide, createPracticeTest, createQuestion, createAnswer,read_database,reset_database
+from Database import verifyPassword, retrieveAllFilesInFolder, retrieveFile, createAccount,retrieveAllFolders, combine_into_json, createFlashcard, createFlashcardSet, createStudyGuide, createPracticeTest, createQuestion, createAnswer,read_database,reset_database
 
 # Add the directory containing WhisperDev.py to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'StudyBuddyBackend')))
@@ -29,12 +29,9 @@ app.config['MYSQL_DATABASE_DB'] = 'study_buddy_database'  # Specify database nam
 mysql = MySQL(app)
 
 print(retrieveAllFolders(mysql,119))
-print(retrieveAllFilesInFolder(mysql,119,90))
-print(retrieveFile(mysql,"Transcription", 78, 119,90))
-print(retrieveFile(mysql,"PracticeTest", 59, 119,90))
-print(retrieveFile(mysql,"StudyGuide", 48, 119,90))
-print(retrieveFile(mysql, "FlashcardSet", 64, 119,90))
-print(retrieveFile(mysql, "Summary", 13, 119,90))
+results= {"message": "File uploaded and processed successfully"}
+retrieveAllFilesInFolder(mysql,119,90)
+print(combine_into_json(retrieveFile(mysql,"Transcription", 78, 119,90), retrieveFile(mysql,"StudyGuide", 48, 119,90), retrieveFile(mysql,"PracticeTest", 59, 119,90), retrieveFile(mysql, "FlashcardSet", 64, 119,90)))
 # Handle preflight OPTIONS request for CORS
 @app.route('/upload', methods=['OPTIONS'])
 def options():
