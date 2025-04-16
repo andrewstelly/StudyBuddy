@@ -11,6 +11,7 @@ const PracticeTest: React.FC = () => {
   const [practiceTest, setPracticeTest] = useState<Question[]>([]);
   const [responses, setResponses] = useState<any[]>([]);
   const [gradedResults, setGradedResults] = useState<any | null>(null);
+  const [grade, setGrade] = useState<string | null>(null); // New state for grade
   const [fontSize, setFontSize] = useState<number>(16);
   const [fontFamily, setFontFamily] = useState<string>("Arial");
   const [loading, setLoading] = useState<boolean>(false);
@@ -43,6 +44,13 @@ const PracticeTest: React.FC = () => {
 
       if (response.ok) {
         setGradedResults(data.graded_results);
+
+        // Calculate the number of correct answers
+        const correctAnswers = data.graded_results.filter((result: any) => result.correct).length;
+
+        // Set the grade to display on the screen
+        setGrade(`You got ${correctAnswers} out of 9 correct!`);
+
         setPracticeTest([]); // Clear the practice test
       } else {
         console.error("Error grading practice test:", data.error);
@@ -76,6 +84,7 @@ const PracticeTest: React.FC = () => {
         setPracticeTest(data.practice_test.questions);
         setResponses(new Array(data.practice_test.questions.length).fill(null));
         setGradedResults(null); // Clear previous results
+        setGrade(null); // Clear the grade
         console.log("Practice test regenerated successfully.");
       } else {
         console.error("Error regenerating practice test:", data.error);
@@ -299,11 +308,26 @@ const PracticeTest: React.FC = () => {
             Submit Test
           </button>
         </div>
+
+        {/* Display Grade */}
+        {grade && (
+          <div
+            style={{
+              marginTop: "20px",
+              textAlign: "center",
+              fontSize: "18px",
+              color: "blue",
+              fontWeight: "bold",
+            }}
+          >
+            {grade}
+          </div>
+        )}
       </div>
-    {/* Watermark */}
-    <div className="watermark">
-      © 2025 StudyBuddy, Inc.
-    </div>
+      {/* Watermark */}
+      <div className="watermark">
+        © 2025 StudyBuddy, Inc.
+      </div>
     </div>
   );
 };
