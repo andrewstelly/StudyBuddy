@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 from flaskext.mysql import MySQL
 app = Flask(__name__)
 from datetime import datetime
-
+import bcrypt
 def retrieveAllFolders(mysql, AccountNum):
     """"Returns Lists of Folders and Numbers associated with Accounts in the form of a JSON like object (FolderNum, FolderName)"""
     try:
@@ -195,10 +195,17 @@ def createAccount(cursor, conn, Email, Username, Password, Joindate=None):
         if Joindate is None:
             Joindate = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
+        # Encode Joindate to bytes and generate a salt
+        salt = bcrypt.gensalt()
+        joindate_bytes = Joindate.encode('utf-8')
+        
+        # Combine password with Joindate before hashing
+        combined_password = Password.encode('utf-8') + joindate_bytes
+        hashed_password = bcrypt.hashpw(combined_password, salt)
 
         # SQL query to insert a new account
         cursor.execute("INSERT INTO Accounts (Email, Username, Password, Joindate) VALUES (%s, %s, %s, %s)", 
-                       (Email, Username, Password, Joindate))
+                       (Email, Username, hashed_password , Joindate))
         # Commit the transaction
         conn.commit()
         print("Account created successfully with AccountNum:", cursor.lastrowid)
@@ -693,17 +700,26 @@ def reset_database(cursor,conn):
             print(f"Error deleting from {table}: {err}")
 def verifyPassword(cursor, Email, password):
     try:
-        cursor.execute("SELECT AccountNum, Password, Joindate FROM Accounts WHERE Email = %s", (Email))
-        data = cursor.fetchall()
-        for row in data:
-            accountNum = row[0]
-            accountPassword = row[1]
-            salt = row[2]
-            if(str(password) == accountPassword):
+        # Retrieve account details
+        cursor.execute("SELECT AccountNum, Password, Joindate FROM Accounts WHERE Email = %s", (Email,))
+        data = cursor.fetchone()  # Using fetchone since Email should be unique
+        
+        if data:
+            accountNum, stored_hashed_password, joindate = data
+            
+            # Encode Joindate and combine with user-provided password
+            joindate_bytes = joindate.encode('utf-8')
+            combined_password = password.encode('utf-8') + joindate_bytes
+            
+            # Verify password using bcrypt
+            if bcrypt.checkpw(combined_password, stored_hashed_password.encode('utf-8')): 
                 return True, accountNum
-        return False
+        
+        return False, None
+
     except Exception as err:
-        print("Error fetching Account:", err)
+        print("Error verifying password:", err)
+        return False, None
 
 def test_create_update_read_delete(cursor, conn):
     # CREATE ACCOUNT
