@@ -46,7 +46,7 @@ const Sidebar = () => {
           </li>
           <li>
             <a href="/practice-tests" title="Practice Tests">
-              <i className="bx bx-test-tube"></i>
+              <i className="bx bx-check-circle"></i>
               <span>Practice Tests</span>
             </a>
           </li>
