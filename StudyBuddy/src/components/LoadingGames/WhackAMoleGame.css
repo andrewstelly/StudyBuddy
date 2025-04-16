@@ -2,7 +2,7 @@ canvas {
   border: 1px solid #000;
   display: block;
   margin: 0 auto;
-  background-color: #f0f0f0; /* Set the background color to match the game background */
+  background-color: #ffffff; /* Set the background color to match the game background */
 }
 
 .loading-screen {
@@ -19,6 +19,17 @@ canvas {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  background-color: #ffffff; /* Optional: Set a background color */
+  padding: 10px; /* Optional: Add padding */
+  border: 1px solid black; /* Optional: Add a border */
+  width: fit-content; /* Adjust to fit the canvas size */
+  height: fit-content; /* Adjust to fit the canvas size */
+  margin: auto; /* Center the container */
+  position: absolute; /* Position the container absolutely */
+  top: 50%; /* Move the container to the middle of the viewport */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Adjust for the container's own dimensions */
 }
 .processing-text {
   font-size: 24px;
