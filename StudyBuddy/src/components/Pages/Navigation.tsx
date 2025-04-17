@@ -22,9 +22,10 @@ const Navigation: React.FC = () => {
                 <img
                   src="/Images/StudyBuddyLogo.png"
                   alt="StudyBuddy Logo"
-                  style={{ width: "24px", height: "24px", marginRight: "8px" }}
+                  style={{ width: "42px", height: "42px", marginRight: "1px", position: 'relative',
+                  top: '8px', left: '8px' }}
                 />
-                StudyBuddy
+                <span style={{ position: "relative", left: "7.8px" }}>StudyBuddy</span>
               </>
             }
           >
@@ -41,7 +42,8 @@ const Navigation: React.FC = () => {
                 <img
                   src="/Images/StudyBuddyLogo.png"
                   alt="StudyBuddy Logo"
-                  style={{ width: "24px", height: "24px", marginRight: "8px" }}
+                  style={{ width: "42px", height: "42px", marginRight: "1px", position: 'relative',
+                  top: '8px' }}
                 />
                 StudyBuddy
               </>
@@ -60,7 +62,8 @@ const Navigation: React.FC = () => {
                 <img
                   src="/Images/StudyBuddyLogo.png"
                   alt="StudyBuddy Logo"
-                  style={{ width: "24px", height: "24px", marginRight: "8px" }}
+                  style={{ width: "42px", height: "42px", marginRight: "1px", position: 'relative',
+                  top: '8px' }}
                 />
                 StudyBuddy
               </>
@@ -79,7 +82,8 @@ const Navigation: React.FC = () => {
                 <img
                   src="/Images/StudyBuddyLogo.png"
                   alt="StudyBuddy Logo"
-                  style={{ width: "24px", height: "24px", marginRight: "8px" }}
+                  style={{ width: "42px", height: "42px", marginRight: "1px", position: 'relative',
+                  top: '8px' }}
                 />
                 StudyBuddy
               </>
@@ -98,7 +102,8 @@ const Navigation: React.FC = () => {
                 <img
                   src="/Images/StudyBuddyLogo.png"
                   alt="StudyBuddy Logo"
-                  style={{ width: "24px", height: "24px", marginRight: "8px" }}
+                  style={{ width: "42px", height: "42px", marginRight: "1px", position: 'relative',
+                  top: '8px' }}
                 />
                 StudyBuddy
               </>

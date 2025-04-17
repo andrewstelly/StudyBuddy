@@ -51,6 +51,10 @@ const Settings: React.FC = () => {
           Download Transcription
         </ShadcnButton>
       </div>
+    {/* Watermark */}
+    <div className="watermark">
+     © 2025 StudyBuddy, Inc.
+    </div>
     </div>
   );
 };

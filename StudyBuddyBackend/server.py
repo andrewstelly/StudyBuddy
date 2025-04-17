@@ -6,8 +6,9 @@ import bcrypt
 from flask import Flask, request, jsonify, send_file,session
 from flask_cors import CORS  # Import CORS
 from flaskext.mysql import MySQL
-from WhisperDev import transcribe_mp3, create_study_guide, create_practice_test, translate_text, create_flashcards  # Import functions
-from Database import verifyPassword, retrieveAllFilesInFolder, retrieveFile, createAccount,retrieveAllFolders, createFolder, createTranscription, createFlashcard, createFlashcardSet, createStudyGuide, createPracticeTest, createQuestion, createAnswer,read_database,reset_database
+from WhisperDev import transcribe_mp3, create_study_guide, create_practice_test, translate_text, create_flashcards  # Removed generate_summary
+from Database import verifyPassword, retrieveAllFilesInFolder, retrieveFile, createAccount,retrieveAllFolders, combine_into_json, createFlashcard, createFlashcardSet, createStudyGuide, createPracticeTest, createQuestion, createAnswer,read_database,reset_database
+
 # Add the directory containing WhisperDev.py to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'StudyBuddyBackend')))
 
@@ -34,6 +35,7 @@ mysql = MySQL(app)
 #print(retrieveFile(mysql,"StudyGuide", 48, 119,90))
 #print(retrieveFile(mysql, "FlashcardSet", 64, 119,90))
 
+#print(combine_into_json(retrieveFile(mysql,"Transcription", 78, 119,90), retrieveFile(mysql,"StudyGuide", 48, 119,90), retrieveFile(mysql,"PracticeTest", 59, 119,90), retrieveFile(mysql, "FlashcardSet", 64, 119,90)))
 # Handle preflight OPTIONS request for CORS
 @app.route('/upload', methods=['OPTIONS'])
 def options():
