@@ -203,7 +203,7 @@ def retrieve_folders():
     app.config['MYSQL_DATABASE_PASSWORD'] = 'StudyBuddy!' # Specify Master password
     app.config['MYSQL_DATABASE_DB'] = 'study_buddy_database' # Specify database name
     mysql = MySQL(app)
-    folder_data = retrieveAllFolders(MySQL,app.AccountNum)
+    folder_data = retrieveAllFolders(MySQL,app.accountNum)
     with open("folder_data.json", "w") as file:
         json.dump(folder_data, file, indent=4) # indent for pretty printing
     file_path = os.path.join(UPLOAD_FOLDER, file.filename)
