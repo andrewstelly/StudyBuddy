@@ -20,13 +20,13 @@ def retrieveAllFolders(mysql, AccountNum):
                 "FolderName" : FolderName,
                 "FolderNum": FolderNum  
             })
-       
         return folderFromAccounts
     except Exception as err:
         print(f"Error fetching Folder {FolderNum}:", err)
+        return None
+    finally:
         cursor.close()
         conn.close()
-        return None
 def retrieveAllFilesInFolder(mysql, AccountNum,FolderNum):
     """Retrieves all of the Files in a Folder (Name, FileType, Num)"""
     tables = [
@@ -50,14 +50,14 @@ def retrieveAllFilesInFolder(mysql, AccountNum,FolderNum):
                 "FileType" : table,
                 "Num": Num  
                 })
-        cursor.close()
-        conn.close()
+
         return FileList
     except Exception as err:
         print(f"Error printing all of Files in Folder {FolderNum}: {err}")
+        return None
+    finally:
         cursor.close()
         conn.close()
-        return None
 def retrieveFile(mysql, tableName, Num, AccountNum, FolderNum):
     """"returns the relevant display data of the file """
     match tableName:
@@ -86,8 +86,6 @@ def retrieveTranscription(mysql, TranscriptionNum, AccountNum, FolderNum):
         query = f"SELECT TranscriptionText, TranscriptionName FROM Transcription WHERE AccountNum = %s AND FolderNum = %s AND TranscriptionNum = %s;"
         cursor.execute(query, (AccountNum,FolderNum,TranscriptionNum))
         data = cursor.fetchall()
-        cursor.close()
-        conn.close()
         for row in data:
             Text, Name = row
             transcirptionJson = Text
@@ -95,9 +93,10 @@ def retrieveTranscription(mysql, TranscriptionNum, AccountNum, FolderNum):
         return transcirptionJson
     except Exception as err:
         print(f"Error retrieving transcription {TranscriptionNum}: {err}")
+        return None
+    finally:
         cursor.close()
         conn.close()
-        return None
 def retrieveStudyGuide(mysql, StudyGuideNum, AccountNum, FolderNum):
     """"returns the the name and text of the Summary (summary, name)"""
     try:
@@ -106,8 +105,6 @@ def retrieveStudyGuide(mysql, StudyGuideNum, AccountNum, FolderNum):
         query = f"SELECT StudyGuideText, StudyGuideName FROM StudyGuide WHERE AccountNum = %s AND FolderNum = %s AND StudyGuideNum = %s;"
         cursor.execute(query, (AccountNum,FolderNum,StudyGuideNum))
         data = cursor.fetchall()
-        cursor.close()
-        conn.close()
         StudyGuideJson = {}
         for row in data:
             Text, Name = row
@@ -115,9 +112,10 @@ def retrieveStudyGuide(mysql, StudyGuideNum, AccountNum, FolderNum):
         return StudyGuideJson
     except Exception as err:
         print(f"Error retrieving StudyGuide {StudyGuideNum}: {err}")
+        return None
+    finally:
         cursor.close()
         conn.close()
-        return None
 def retrievePracticeTest(mysql, PracticeTestNum, AccountNum, FolderNum):
     """"returns the the name and text of the Practice Test (summary, name)"""
     try:
@@ -153,14 +151,13 @@ def retrievePracticeTest(mysql, PracticeTestNum, AccountNum, FolderNum):
             else:
                 question_list["correct_answer"] = "Answers May Vary"
             practice_test["questions"].append(question_list)
-        cursor.close()
-        conn.close()
         return practice_test
     except Exception as err:
         print(f"Error retrieving PracticeTest {PracticeTestNum}: {err}")
+        return None
+    finally:
         cursor.close()
         conn.close()
-        return None
 def retrieveFlashcardSet(mysql, FlashcardSetNum, AccountNum, FolderNum):
     try:
         conn = mysql.connect()
@@ -181,14 +178,13 @@ def retrieveFlashcardSet(mysql, FlashcardSetNum, AccountNum, FolderNum):
                 "answer": backtext
             }
             flashcard_Array.append(flashcard_data)
-        cursor.close()
-        conn.close()
         return flashcard_Array
     except Exception as err:
         print(f"Error retrieving FlashcardSetNum {FlashcardSetNum}: {err}")
+        return None
+    finally:
         cursor.close()
         conn.close()
-        return None
 def createAccount(cursor, conn, Email, Username, Password, Joindate=None):
     """Creates a an account in the SQL database"""
     try:
@@ -646,7 +642,7 @@ def deleteAnswer(cursor, conn, AnswerNum):
         conn.commit()
     except Exception as e:
         print("Error deleting Answer:", e)
-def read_database(cursor,conn):
+def read_database(mysql):
     """Reads everything from the database"""
     tables = [
             'Transcription',
@@ -659,15 +655,20 @@ def read_database(cursor,conn):
             'Folders',
             'Accounts'
         ]
-    for table in tables:
-        print(f"Reading {table} from database")
-        try:
-            cursor.execute(f"SELECT * FROM {table};")
-            data = cursor.fetchall()
-            for row in data:
-                print(row)
-        except Exception as err:
-            print(f"Error printing all of {table}: {err}")
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        for table in tables:
+            print(f"Reading {table} from database")
+            try:
+                cursor.execute(f"SELECT * FROM {table};")
+                data = cursor.fetchall()
+                for row in data:
+                    print(row)
+            except Exception as err:
+                print(f"Error printing all of {table}: {err}")
+    except Exception as err:
+        print(f"Error reading database: {err}")
 def reset_database(mysql):
     """Deletes everything from the database"""
     
