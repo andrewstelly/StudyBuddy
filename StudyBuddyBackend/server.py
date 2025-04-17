@@ -3,11 +3,11 @@ import os
 import json
 import openai
 import bcrypt
-from flask import Flask, request, jsonify, send_file,session
+from flask import Flask, request, jsonify, send_file,session, make_response
 from flask_cors import CORS  # Import CORS
 from flaskext.mysql import MySQL
 from WhisperDev import transcribe_mp3, create_study_guide, create_practice_test, translate_text, create_flashcards  # Removed generate_summary
-from Database import verifyPassword, retrieveAllFilesInFolder, retrieveFile, createAccount,retrieveAllFolders, combine_into_json, createFlashcard, createFlashcardSet, createStudyGuide, createPracticeTest, createQuestion, createAnswer,read_database,reset_database
+from Database import verifyPassword, retrieveAllFilesInFolder, retrieveFile, createTranscription, createFolder, createAccount,retrieveAllFolders, combine_into_json, createFlashcard, createFlashcardSet, createStudyGuide, createPracticeTest, createQuestion, createAnswer,read_database,reset_database
 
 # Add the directory containing WhisperDev.py to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'StudyBuddyBackend')))
@@ -28,14 +28,8 @@ app.config['MYSQL_DATABASE_PASSWORD'] = 'StudyBuddy!' # Specify Master password
 app.config['MYSQL_DATABASE_DB'] = 'study_buddy_database' # Specify database name
 
 mysql = MySQL(app)
-#retrieveAllFolders(mysql,119)
-#print(retrieveAllFilesInFolder(mysql,119,90))
-#print(retrieveFile(mysql,"Transcription", 78, 119,90))
-#print(retrieveFile(mysql,"PracticeTest", 59, 119,90))
-#print(retrieveFile(mysql,"StudyGuide", 48, 119,90))
-#print(retrieveFile(mysql, "FlashcardSet", 64, 119,90))
 
-#print(combine_into_json(retrieveFile(mysql,"Transcription", 78, 119,90), retrieveFile(mysql,"StudyGuide", 48, 119,90), retrieveFile(mysql,"PracticeTest", 59, 119,90), retrieveFile(mysql, "FlashcardSet", 64, 119,90)))
+
 # Handle preflight OPTIONS request for CORS
 @app.route('/upload', methods=['OPTIONS'])
 def options():
@@ -45,7 +39,14 @@ def options():
     response.headers.add("Access-Control-Allow-Methods", "POST,OPTIONS")
     return response, 200
 
-app.route('/register', methods=['POST'])
+@app.route('/register', methods=['OPTIONS'])
+def register_options():
+    response = jsonify({"message": "CORS Preflight OK"})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+    response.headers.add("Access-Control-Allow-Methods", "POST,OPTIONS")
+    return response, 200
+@app.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
     email = data.get('email')
@@ -74,18 +75,15 @@ def login():
 
     if not email or not password:
         return jsonify({'error': 'Missing fields'}), 400
-
-    conn = mysql.connect()
-    cursor = conn.cursor()
-    app.accountNum = 119 #add password login functionality
     try:
-        cursor.execute("SELECT * FROM Accounts WHERE Email = %s", (email,))
-        account = cursor.fetchone()
-        
-        if account and bcrypt.checkpw(password.encode('utf-8'), account[2].encode('utf-8')):  # assuming password is at index 2
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        verified, app.accountNum = verifyPassword(cursor, email, password) #add password login functionality
+        if verified:  # assuming password is at index 2
             return jsonify({'message': 'Login successful'}), 200
         else:
             return jsonify({'error': 'Invalid credentials'}), 401
+        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
@@ -125,8 +123,8 @@ def upload_file():
             print(f"Translating transcription directly into {target_language}...")
             transcription_text = translate_text(transcription_text, target_language)
             print(f"Transcription in {target_language} completed.")
-        folder_num = storeFolder(mysql, "Test Folder", 119)
-        transcription_num = storeTranscription(mysql,"Transcription Name", transcription_text,119,folder_num)
+        app.folder_num = storeFolder(mysql, "Test Folder", app.accountNum)
+        transcription_num = storeTranscription(mysql,"Transcription Name", transcription_text,app.accountNum,app.folder_num )
         # Add transcription to results
         results = {
             "transcription": transcription_text  # This will be in the target language if translation is selected
@@ -135,7 +133,7 @@ def upload_file():
         # Always create study guide
         results["study_guide"] = create_study_guide(transcription_text)
         print("Study Guide:", results["study_guide"])  # Log study guide
-        storeStudyGuide(mysql, "StudyGuide Name", results["study_guide"], 119, transcription_num, folder_num)
+        storeStudyGuide(mysql, "StudyGuide Name", results["study_guide"], app.accountNum, transcription_num, app.folder_num )
         # Always create practice test
         raw_practice_test = create_practice_test(transcription_text)
         print("Raw practice test output:", raw_practice_test)  # Debugging log
@@ -150,7 +148,7 @@ def upload_file():
             
             # Parse the practice test JSON
             results["practice_test"] = json.loads(raw_practice_test)
-            storePracticeTest(mysql,results["practice_test"],"Test Practice Test",119,transcription_num,folder_num)
+            storePracticeTest(mysql,results["practice_test"],"Test Practice Test",app.accountNum,transcription_num,app.folder_num)
         except (json.JSONDecodeError, ValueError) as e:
             print(f"Error decoding practice test JSON: {e}")
             results["practice_test"] = {"error": "Failed to generate practice test"}
@@ -174,7 +172,7 @@ def upload_file():
             print(f"Error decoding flashcards JSON: {e}")
             results["flashcards"] = []
         print("Flashcards:", results["flashcards"])  # Log flashcards
-        storeFlashcards(mysql, results["flashcards"],119,transcription_num,folder_num)  
+        storeFlashcards(mysql, results["flashcards"],app.accountNum,transcription_num,app.folder_num)  
         # Delete the file after processing
         os.remove(file_path)
         print(f"File {file_path} deleted")

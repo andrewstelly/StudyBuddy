@@ -668,37 +668,38 @@ def read_database(cursor,conn):
                 print(row)
         except Exception as err:
             print(f"Error printing all of {table}: {err}")
-def reset_database(cursor,conn):
+def reset_database(mysql):
     """Deletes everything from the database"""
+    
     tables = [
-            'Transcription',
             'Flashcards',
             'StudyGuide',
             'FlashcardSet',
             'Question',
             'Answer',
             'PracticeTest',
+            'Transcription',
             'Folders',
             'Accounts'
         ]
     try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
         # Re-enable foreign key checks
         cursor.execute("SET FOREIGN_KEY_CHECKS = 1;")
         conn.commit()
-        
- 
-        print("Database has been reset successfully.")
-    except Exception as err:
-        print(f"Error: {err}")
-        # Loop through the tables and delete the data from each one
-    for table in tables:
-        try:
+        for table in tables:
             delete_sql = f"DELETE FROM {table};"
             cursor.execute(delete_sql)
             conn.commit()
             print(f"All records deleted from {table}")
-        except Exception as err:
-            print(f"Error deleting from {table}: {err}")
+        print("Database has been reset successfully.")
+    except Exception as err:
+        print(f"Error: {err}")
+        # Loop through the tables and delete the data from each one
+    finally:
+        cursor.close()
+        conn.close()
 def verifyPassword(cursor, Email, password):
     try:
         # Retrieve account details
