@@ -10,35 +10,32 @@ export default function SignIn() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("Form submitted!");
-    // Set a cookie to indicate the user is logged in
-    Cookies.set("auth", "true", { expires: 7 }); // Cookie expires in 7 days
-    // Redirect to home page after successful sign-in
-    navigate("/home");
-    
-    // Send a POST request to the backend for authentication
+    e.preventDefault()
+    console.log("Form submitted!")
+  
     try {
-      const response = await fetch('http://localhost:5000/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("http://localhost:5000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
+      })
+  
+      const data = await response.json()
+  
       if (response.ok) {
-        // If authentication is successful, set a cookie and navigate to the home page
-        Cookies.set("auth", "true", { expires: 7 });
-        navigate("/home");
+        // Only on 2xx:
+        Cookies.set("auth", "true", { expires: 7 })
+        navigate("/home")
       } else {
-        alert(data.error || 'Invalid credentials');
+        // Stay on this page for 4xx/5xx
+        alert(data.error || `Login failed (${response.status})`)
       }
     } catch (error) {
-      console.error('Error during sign-in:', error);
-      alert('Error signing in');
+      console.error("Error during sign-in:", error)
+      alert("Network error – please try again.")
     }
   };
+  
 
   return (
     <div className="sign-in-page"> {/* Wrapper for the background image */}
