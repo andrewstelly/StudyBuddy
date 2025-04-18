@@ -77,6 +77,7 @@ def login():
     if not email or not password:
         return jsonify({'error': 'Missing fields'}), 400
     elif email == "1@1.com" and password == "1":
+        app.accountNum = None
         return jsonify({'message': 'Login successful'}), 200
     else:
         try:
