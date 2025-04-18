@@ -23,7 +23,6 @@ const WhackAMoleGame: React.FC = () => {
     const moleImage = new Image();
     moleImage.src = '../Images/StudyBuddyLogo.png'; // Path to the mole image
     moleImageRef.current = moleImage;
-
     // Ensure images are loaded before starting the game
     let imagesLoaded = 0;
     const onImageLoad = () => {
