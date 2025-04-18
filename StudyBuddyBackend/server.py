@@ -84,15 +84,16 @@ def login():
             cursor = conn.cursor()
             verified, app.accountNum = verifyPassword(cursor, email, password) #add password login functionality
             if verified:  # assuming password is at index 2
+                cursor.close()
+                conn.close()
                 return jsonify({'message': 'Login successful'}), 200
             else:
+                cursor.close()
+                conn.close()
                 return jsonify({'error': 'Invalid credentials'}), 401
-            
         except Exception as e:
             return jsonify({'error': str(e)}), 500
-        finally:
-            cursor.close()
-            conn.close()
+            
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
