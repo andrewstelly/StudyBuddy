@@ -240,14 +240,34 @@ const PracticeTest: React.FC = () => {
                 {question.type === "multiple_choice" && question.options && (
                   <div>
                     {question.options.map((option, i) => (
-                      <label key={i} style={{ display: "block", marginBottom: "5px" }}>
+                      <label
+                        key={i}
+                        style={{
+                          display: "block", // Use flexbox for horizontal alignment
+                          marginBottom: "5px",
+                          marginLeft: "-565px",
+                        }}
+                      >
                         <input
                           type="radio"
                           name={`question-${index}`}
                           value={option}
                           onChange={() => handleResponseChange(index, option)}
+                          style={{
+                            transform: "scale(1.35)", // Make the radio buttons bigger
+                            marginRight: "-340px", // Remove spacing between the button and the text
+                            paddingLeft: "0px", // Remove unnecessary padding
+                          }}
                         />
-                        {option}
+                        <span
+                          style={{
+                            textAlign: "left", // Align text to the left
+                            width: "90%", // Allow the text to take up the remaining space
+                            marginLeft: "-285px",
+                          }}
+                        >
+                          {option}
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -255,23 +275,61 @@ const PracticeTest: React.FC = () => {
 
                 {question.type === "true_false" && (
                   <div>
-                    <label style={{ display: "block", marginBottom: "5px" }}>
+                    <label
+                      style={{
+                        display: "Block", // Use flexbox for horizontal alignment
+                          alignItems: "center", // Vertically center the text and radio button
+                          marginBottom: "5px",
+                          marginLeft: "-564px",
+                      }}
+                    >
                       <input
                         type="radio"
                         name={`question-${index}`}
                         value="true"
                         onChange={() => handleResponseChange(index, true)}
+                        style={{
+                          transform: "scale(1.35)", // Make the radio buttons bigger
+                          marginRight: "-625px", // Remove spacing between the button and the text
+                          paddingLeft: "0px", // Remove unnecessary padding
+                        }}
                       />
-                      True
+                      <span
+                        style={{
+                          textAlign: "left", // Align text to the left
+                          width: "90%", // Allow the text to take up the remaining space
+                        }}
+                      >
+                        True
+                      </span>
                     </label>
-                    <label style={{ display: "block", marginBottom: "5px" }}>
+                    <label
+                      style={{
+                        display: "block", // Use flexbox for horizontal alignment
+                        alignItems: "center", // Vertically center the text and radio button
+                        marginBottom: "5px",
+                        marginLeft: "-564px",
+                      }}
+                    >
                       <input
                         type="radio"
                         name={`question-${index}`}
                         value="false"
                         onChange={() => handleResponseChange(index, false)}
+                        style={{
+                          transform: "scale(1.35)", // Make the radio buttons bigger
+                          marginRight: "-625px", // Remove spacing between the button and the text
+                          paddingLeft: "0px", // Remove unnecessary padding
+                        }}
                       />
-                      False
+                      <span
+                        style={{
+                          textAlign: "left", // Align text to the left
+                          width: "90%", // Allow the text to take up the remaining space
+                        }}
+                      >
+                        False
+                      </span>
                     </label>
                   </div>
                 )}
