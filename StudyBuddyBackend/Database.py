@@ -23,10 +23,11 @@ def retrieveAllFolders(mysql, AccountNum):
         return folderFromAccounts
     except Exception as err:
         print(f"Error fetching Folder {FolderNum}:", err)
+        if(cursor in locals()):
+            cursor.close()
+        if(conn in locals()):
+            conn.close()
         return None
-    finally:
-        cursor.close()
-        conn.close()
 def retrieveAllFilesInFolder(mysql, AccountNum,FolderNum):
     """Retrieves all of the Files in a Folder (Name, FileType, Num)"""
     tables = [
@@ -50,7 +51,6 @@ def retrieveAllFilesInFolder(mysql, AccountNum,FolderNum):
                 "FileType" : table,
                 "Num": Num  
                 })
-
         return FileList
     except Exception as err:
         print(f"Error printing all of Files in Folder {FolderNum}: {err}")
@@ -97,25 +97,34 @@ def retrieveTranscription(mysql, TranscriptionNum, AccountNum, FolderNum):
     finally:
         cursor.close()
         conn.close()
-def retrieveStudyGuide(mysql, StudyGuideNum, AccountNum, FolderNum):
-    """"returns the the name and text of the Summary (summary, name)"""
+def retrieveStudyGuide(mysql, study_guide_num, account_num, folder_num):
+    """Return the guide text as a simple string (no wrapper object)."""
     try:
         conn = mysql.connect()
         cursor = conn.cursor()
-        query = f"SELECT StudyGuideText, StudyGuideName FROM StudyGuide WHERE AccountNum = %s AND FolderNum = %s AND StudyGuideNum = %s;"
-        cursor.execute(query, (AccountNum,FolderNum,StudyGuideNum))
-        data = cursor.fetchall()
-        StudyGuideJson = {}
-        for row in data:
-            Text, Name = row
-            StudyGuideJson['study_guide'] = Text
-        return StudyGuideJson
+        cursor.execute(
+            """
+            SELECT StudyGuideText
+            FROM   StudyGuide
+            WHERE  AccountNum   = %s
+              AND  FolderNum    = %s
+              AND  StudyGuideNum = %s;
+            """,
+            (account_num, folder_num, study_guide_num),
+        )
+
+        row = cursor.fetchone()          # only one row expected
+        return row[0] if row else None   # plain string or None
+
     except Exception as err:
-        print(f"Error retrieving StudyGuide {StudyGuideNum}: {err}")
+        print(f"Error retrieving StudyGuide {study_guide_num}: {err}")
         return None
+
     finally:
-        cursor.close()
-        conn.close()
+        try:    cursor.close()
+        except Exception: pass
+        try:    conn.close()
+        except Exception: pass
 def retrievePracticeTest(mysql, PracticeTestNum, AccountNum, FolderNum):
     """"returns the the name and text of the Practice Test (summary, name)"""
     try:
