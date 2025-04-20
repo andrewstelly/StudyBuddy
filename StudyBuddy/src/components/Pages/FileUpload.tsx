@@ -151,6 +151,7 @@ const FileUpload: React.FC = () => {
     } finally {
       setIsLoading(false);
       setShowCompleteMessage(true);
+      await fetchFolders();
     }
   };
 

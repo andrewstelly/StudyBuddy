@@ -189,7 +189,6 @@ def upload_file():
         except (json.JSONDecodeError, ValueError) as e:
             print(f"Error decoding flashcards JSON: {e}")
             results["flashcards"] = []
-        print("Flashcards:", results["flashcards"])  # Log flashcards
         if(session.get("account_num")!= None):
             storeFlashcards(mysql, results["flashcards"],session.get("account_num"),transcription_num,session.get("folder_num"))  
         # Delete the file after processing
