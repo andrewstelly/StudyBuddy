@@ -1,65 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { IconContext } from "react-icons";
-import { FaFolder } from "react-icons/fa";
+import React, { useState } from "react";
 import WhackAMoleGame from "../LoadingGames/WhackAMoleGame";
 import ProcessComplete from "../ProcessComplete";
 import "../Styling/FileUpload.scss";
 
-interface Folder {
-  FolderName: string;
-  FolderNum: number;
-}
-
 const FileUpload: React.FC = () => {
-  // -------- folder state & helpers -----------------------------------------
-  // folder state
-  const [folders, setFolders] = useState<Folder[]>([]);
-  const [folderError, setFolderError] = useState<string | null>(null);
-  const [noFolders, setNoFolders] = useState(false);   // 👈 NEW
-
-
-  const fetchFolders = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/folders", {credentials: "include", });
-      const data = await res.json();
-  
-      if (Array.isArray(data.folder) && data.folder.length > 0) {
-        setFolders(data.folder);
-        setNoFolders(false);            // folders exist
-      } else {
-        setFolders([]);                 // empty array or bad shape
-        setNoFolders(true);
-      }
-      setFolderError(null);
-    } catch (err) {
-      console.error("Could not load folders:", err);
-      setFolderError("Unable to load folders right now.");
-      setNoFolders(false);
-    }
-  };
-  
-  useEffect(() => {
-    fetchFolders();
-  }, []);
-
-  const handleFolderClick = async (folderNum: number) => {
-    try {
-      const response = await fetch("http://localhost:5000/select_folder", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ folderNum }),
-      });
-      localStorage.setItem("currentFolderNum", folderNum.toString());
-      const data = await response.json();  
-      localStorage.setItem("generatedContent", JSON.stringify(data));
-    } catch (err) {
-      console.error("Failed to notify server:", err);
-      alert("Sorry, couldn’t select that folder." + err);
-    }
-  };
-
-  // -------- original upload state & helpers --------------------------------
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showCompleteMessage, setShowCompleteMessage] = useState(false);
@@ -81,7 +25,9 @@ const FileUpload: React.FC = () => {
     setIsDragOver(true);
   };
 
-  const handleDragLeave = () => setIsDragOver(false);
+  const handleDragLeave = () => {
+    setIsDragOver(false);
+  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -95,7 +41,9 @@ const FileUpload: React.FC = () => {
       const mediaRecorder = new MediaRecorder(stream);
       const audioChunks: Blob[] = [];
 
-      mediaRecorder.ondataavailable = (event) => audioChunks.push(event.data);
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
 
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
@@ -139,13 +87,10 @@ const FileUpload: React.FC = () => {
       const response = await fetch("http://localhost:5000/upload", {
         method: "POST",
         body: formData,
-        credentials: "include",
       });
+
       const data = await response.json();
       localStorage.setItem("generatedContent", JSON.stringify(data));
-
-      // refresh folders after successful upload
-      await fetchFolders();
     } catch (error) {
       console.error("Error uploading file:", error);
     } finally {
@@ -155,11 +100,8 @@ const FileUpload: React.FC = () => {
     }
   };
 
-  // ──────────────────────────────────────────────────────────────────────────
   return (
     <div className="file-upload-wrapper">
-
-      {/* ---------- Upload interface ---------- */}
       {isLoading ? (
         <div className="loading-screen">
           <WhackAMoleGame />
@@ -219,41 +161,19 @@ const FileUpload: React.FC = () => {
       {showCompleteMessage && (
         <ProcessComplete onComplete={() => setShowCompleteMessage(false)} />
       )}
-      {/* ---------- Folder area ---------- */}
-      {folderError && <p className="error">{folderError}</p>}
-
-      {noFolders && !folderError && (
-        <p className="empty-message">No folders found yet. Upload a file or create a folder to get started.</p>
-      )}
-
-      {folders.length > 0 && (
-        <>
-          <h2 className="folder-header">Folders</h2>
-          <div className="folder-grid">
-            {folders.map((f) => (
-              <button
-                key={f.FolderNum}
-                className="folder-tile"
-                onClick={() => handleFolderClick(f.FolderNum)}
-              >
-                <IconContext.Provider value={{ className: "folder-icon", size: "36" }}>
-                  <FaFolder />
-                </IconContext.Provider>
-                <span>{f.FolderName}</span>
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-
+      
       <div
-        className="watermark"
-        style={{ position: "fixed", bottom: "10px", right: "10px", zIndex: 999 }}
+      className="watermark"
+      style={{
+        position: "fixed",
+        bottom: "10px",
+        right: "10px",
+        zIndex: 999,
+      }}
       >
         © 2025 StudyBuddy, Inc.
       </div>
     </div>
-    
   );
 };
 

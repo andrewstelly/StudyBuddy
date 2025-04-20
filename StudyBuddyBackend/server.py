@@ -18,15 +18,17 @@ client = openai.OpenAI(api_key=api_key)
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)  # Enable CORS for all routes
-app.secret_key = os.getenv('FLASK_SECRET_KEY')
+
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 app.config['MYSQL_DATABASE_HOST'] = 'study-buddy-database.co3kew2gkyw2.us-east-1.rds.amazonaws.com' # Specify Endpoint
 app.config['MYSQL_DATABASE_USER'] = 'admin' # Specify Master username
 app.config['MYSQL_DATABASE_PASSWORD'] = 'StudyBuddy!' # Specify Master password
 app.config['MYSQL_DATABASE_DB'] = 'study_buddy_database' # Specify database name
 
 mysql = MySQL(app)
+app.accountNum = None
 
 
 # Handle preflight OPTIONS request for CORS
@@ -65,18 +67,7 @@ def register():
     finally:
         cursor.close()
         conn.close()
-@app.route('/folders', methods=['GET'])
-def sendFolders():
-    try:
-        if(session.get("account_num")== None):
-            return jsonify({"folders":[]}), 200
-        else:
-            folder_data = retrieveAllFolders(mysql,session.get("account_num"))
-            #print(f"Retrieved folder data: {folder_data}")  # Debugging log
-            return jsonify({"folder": folder_data}), 200
-    except Exception as e:
-        print(f"Error retrieving folders: {e}")
-        return jsonify({"error": str(e)}), 500
+
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -86,13 +77,13 @@ def login():
     if not email or not password:
         return jsonify({'error': 'Missing fields'}), 400
     elif email == "1@1.com" and password == "1":
-        session["account_num"]= None
+        app.accountNum = None
         return jsonify({'message': 'Login successful'}), 200
     else:
         try:
             conn = mysql.connect()
             cursor = conn.cursor()
-            verified, session["account_num"] = verifyPassword(cursor, email, password) #add password login functionality
+            verified, app.accountNum = verifyPassword(cursor, email, password) #add password login functionality
             if verified:  # assuming password is at index 2
                 cursor.close()
                 conn.close()
@@ -138,9 +129,9 @@ def upload_file():
             print(f"Translating transcription directly into {target_language}...")
             transcription_text = translate_text(transcription_text, target_language)
             print(f"Transcription in {target_language} completed.")
-        if(session.get("account_num") != None):
-           session['folder_num']= storeFolder(mysql, "Test Folder", session.get("account_num"))
-           transcription_num = storeTranscription(mysql,"Transcription Name", transcription_text,session.get("account_num"),session.get("folder_num") )
+        if(app.accountNum != None):
+           app.folder_num = storeFolder(mysql, "Test Folder", app.accountNum)
+           transcription_num = storeTranscription(mysql,"Transcription Name", transcription_text,app.accountNum,app.folder_num )
         # Add transcription to results
         results = {
             "transcription": transcription_text  # This will be in the target language if translation is selected
@@ -149,8 +140,8 @@ def upload_file():
         # Always create study guide
         results["study_guide"] = create_study_guide(transcription_text)
         print("Study Guide:", results["study_guide"])  # Log study guide
-        if(session.get("account_num") != None):
-            storeStudyGuide(mysql, "StudyGuide Name", results["study_guide"], session.get("account_num"), transcription_num, session.get("folder_num") )
+        if(app.accountNum != None):
+            storeStudyGuide(mysql, "StudyGuide Name", results["study_guide"], app.accountNum, transcription_num, app.folder_num )
         # Always create practice test
         raw_practice_test = create_practice_test(transcription_text)
         print("Raw practice test output:", raw_practice_test)  # Debugging log
@@ -165,8 +156,8 @@ def upload_file():
             
             # Parse the practice test JSON
             results["practice_test"] = json.loads(raw_practice_test)
-            if (session.get("account_num") != None):
-                storePracticeTest(mysql,results["practice_test"],"Test Practice Test",session.get("account_num"),transcription_num,session.get("folder_num"))
+            if (app.accountNum != None):
+                storePracticeTest(mysql,results["practice_test"],"Test Practice Test",app.accountNum,transcription_num,app.folder_num)
         except (json.JSONDecodeError, ValueError) as e:
             print(f"Error decoding practice test JSON: {e}")
             results["practice_test"] = {"error": "Failed to generate practice test"}
@@ -221,35 +212,11 @@ def retrieve_folders():
     app.config['MYSQL_DATABASE_PASSWORD'] = 'StudyBuddy!' # Specify Master password
     app.config['MYSQL_DATABASE_DB'] = 'study_buddy_database' # Specify database name
     mysql = MySQL(app)
-    folder_data = retrieveAllFolders(MySQL,session.get("account_num"))
+    folder_data = retrieveAllFolders(MySQL,app.accountNum)
     with open("folder_data.json", "w") as file:
         json.dump(folder_data, file, indent=4) # indent for pretty printing
     file_path = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(file_path)
-@app.route('/select_folder', methods=['POST'])
-def select_folder():
-    data = request.get_json()
-    session['folder_num'] = data.get('folderNum')
-    if not session.get("folder_num"):
-        return jsonify({"error": "No folder number provided"}), 400
-    transcription, studyGuide, flashcardSet, PracticeTest = None, None, None, None
-    for file in retrieveAllFilesInFolder(mysql, session.get("account_num"), session.get("folder_num")):
-        if( file['FileType'] == 'Transcription'):
-            transcription = retrieveFile(mysql, file['FileType'], file['Num'], session.get("account_num"), session.get("folder_num"))
-        elif( file['FileType'] == 'StudyGuide'):
-            studyGuide = retrieveFile(mysql, file['FileType'], file['Num'], session.get("account_num"), session.get("folder_num"))
-        elif( file['FileType'] == 'FlashcardSet'):
-            flashcardSet = retrieveFile(mysql, file['FileType'], file['Num'], session.get("account_num"), session.get("folder_num"))
-        elif( file['FileType'] == 'PracticeTest'):
-            PracticeTest = retrieveFile(mysql, file['FileType'], file['Num'], session.get("account_num"), session.get("folder_num"))
-    response = jsonify({
-        "message": "File uploaded and processed successfully",
-        "transcription": transcription,
-        "study_guide": studyGuide,
-        "flashcards": flashcardSet,
-        "practice_test": PracticeTest
-    })
-    return response, 200
 @app.route('/download-transcription', methods=['GET'])
 def download_transcription():
     """Serve the transcription file for download."""
