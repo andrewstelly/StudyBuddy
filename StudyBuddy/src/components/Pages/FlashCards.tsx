@@ -1,100 +1,55 @@
-// components/Pages/FlashCards.tsx
 import React, { useEffect, useState } from "react";
+import useGeneratedContent from "../hooks/useGeneratedContent";      // ← keep
 import Flashcard from "../UI/Flashcard";
 import { ArrowLeftCircle, ArrowRightCircle } from "lucide-react";
 
-type FlashcardType = {
-  term: string;
-  definition: string;
-};
+type FlashcardType = { term: string; definition: string };
 
 const FlashCards: React.FC = () => {
-  const [flashcards, setFlashcards] = useState<FlashcardType[]>([]);
+  const content = useGeneratedContent();          // LIVE payload
+  const [flashcards,   setFlashcards]   = useState<FlashcardType[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loadingMessage, setLoadingMessage] = useState("Loading...");
+  const [loadingMsg,   setLoadingMsg]   = useState("Loading…");
 
+  /* refresh when content changes ------------------------------------ */
   useEffect(() => {
-    const storedContent = localStorage.getItem("generatedContent");
-    if (storedContent) {
-      try {
-        const parsedContent = JSON.parse(storedContent);
-        const flashcardsData = parsedContent.flashcards;
-
-        if (Array.isArray(flashcardsData)) {
-          const formattedFlashcards = flashcardsData.map((fc: any) => ({
-            term: fc.question,
-            definition: fc.answer,
-          }));
-          setFlashcards(formattedFlashcards);
-          setLoadingMessage("");
-        } else {
-          setLoadingMessage("No flashcards available.");
-        }
-      } catch (e) {
-        console.error("Error parsing flashcards:", e);
-        setLoadingMessage("Error loading flashcards.");
-      }
+    if (Array.isArray(content?.flashcards)) {
+      const formatted = content.flashcards.map(fc => ({
+        term:        fc.question,
+        definition:  fc.answer,
+      }));
+      setFlashcards(formatted);
+      setLoadingMsg("");
+      setCurrentIndex(0);                       // reset to first card
     } else {
-      setLoadingMessage("No flashcards available.");
+      setFlashcards([]);
+      setLoadingMsg("No flashcards available.");
     }
-  }, []);
+  }, [content]);                                // ← dependency!
 
-  const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : flashcards.length - 1));
-  };
-
-  const goToNext = () => {
-    setCurrentIndex((prev) => (prev < flashcards.length - 1 ? prev + 1 : 0));
-  };
-
-  const currentCard = flashcards[currentIndex];
+  /* ---------------------------------------------------------------- */
+  const goPrev = () => setCurrentIndex(i => (i > 0 ? i - 1 : flashcards.length - 1));
+  const goNext = () => setCurrentIndex(i => (i < flashcards.length - 1 ? i + 1 : 0));
+  const current = flashcards[currentIndex];
 
   return (
     <div className="flashcards-container" style={{ textAlign: "center", padding: "2rem" }}>
-      {loadingMessage ? (
-        <p>{loadingMessage}</p>
+      {loadingMsg ? (
+        <p>{loadingMsg}</p>
       ) : (
         <>
           <div
             className="flashcard-wrapper"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "2rem",
-            }}
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "2rem" }}
           >
-              <ArrowLeftCircle
-              size={48}
-              strokeWidth={2.5}
-              onClick={goToPrevious}
-              className="arrow-icon"
-            />
-            <Flashcard
-              term={currentCard.term}
-              definition={currentCard.definition}
-              key={currentIndex} 
-            />
-          
-
-            <ArrowRightCircle
-              size={48}
-              strokeWidth={2.5}
-              onClick={goToNext}
-              className="arrow-icon"
-            />
-
+            <ArrowLeftCircle size={48} strokeWidth={2.5} onClick={goPrev}  className="arrow-icon" />
+            <Flashcard term={current.term} definition={current.definition} key={currentIndex} />
+            <ArrowRightCircle size={48} strokeWidth={2.5} onClick={goNext} className="arrow-icon" />
           </div>
-
-          <p className="card-counter" style={{ marginTop: "1rem" }}>
-            {currentIndex + 1} / {flashcards.length}
-          </p>
+          <p style={{ marginTop: "1rem" }}>{currentIndex + 1} / {flashcards.length}</p>
         </>
       )}
-    {/* Watermark */}
-    <div className="watermark">
-     © 2025 StudyBuddy, Inc.
-    </div>
+      <div className="watermark">© 2025 StudyBuddy, Inc.</div>
     </div>
   );
 };

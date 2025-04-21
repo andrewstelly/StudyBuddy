@@ -1,163 +1,179 @@
 import React, { useEffect, useState } from "react";
-import '../Styling/fonts.css';
-
+import "../Styling/fonts.css";
+import useGeneratedContent from "../hooks/useGeneratedContent";   // ✅ correct path
 
 const Notes: React.FC = () => {
-    const [studyGuide, setStudyGuide] = useState<string>("Loading...");
-    const [fontSize, setFontSize] = useState<number>(16); // Default font size
-    const [fontFamily, setFontFamily] = useState<string>("Arial"); // Default font type
-    const [isSpeaking, setIsSpeaking] = useState<boolean>(false); // Track if TTS is active
-    const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]); // Available voices
-    const [selectedVoice, setSelectedVoice] = useState<string>(""); // Selected voice
+  /* ------------------------------------------------------------------ */
+  /* live payload shared across the app                                  */
+  /* ------------------------------------------------------------------ */
+  const content = useGeneratedContent();           // hook keeps itself updated
 
-    useEffect(() => {
-        const storedContent = localStorage.getItem("generatedContent");
-        console.log("Retrieved from localStorage (Study Guide):", storedContent);
+  /* page state */
+  const [studyGuide, setStudyGuide] = useState("Loading…");
+  const [fontSize,   setFontSize]  = useState<number>(16);
+  const [fontFamily, setFontFamily] = useState<string>("Arial");
 
-        if (storedContent) {
-            try {
-                const parsedContent = JSON.parse(storedContent);
-                if (parsedContent.study_guide) {
-                    setStudyGuide(parsedContent.study_guide);
-                } else {
-                    setStudyGuide("No study guide available.");
-                }
-            } catch (error) {
-                console.error("Error parsing stored content:", error);
-                setStudyGuide("Error loading study guide.");
-            }
-        } else {
-            setStudyGuide("No study guide found.");
-        }
+  /* text‑to‑speech state */
+  const [isSpeaking,    setIsSpeaking]    = useState(false);
+  const [voices,        setVoices]        = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoice, setSelectedVoice] = useState("");
 
-        // Fetch available voices
-        const fetchVoices = () => {
-            const availableVoices = window.speechSynthesis.getVoices();
-            setVoices(availableVoices);
-            if (availableVoices.length > 0) {
-                setSelectedVoice(availableVoices[0].name); // Default to the first voice
-            }
-        };
+  /* refresh study‑guide whenever the shared payload changes */
+  useEffect(() => {
+    if (content?.study_guide) {
+      setStudyGuide(content.study_guide);
+    } else {
+      setStudyGuide("No study guide available.");
+    }
+  }, [content]);
 
-        // Fetch voices when they are loaded
-        fetchVoices();
-        window.speechSynthesis.onvoiceschanged = fetchVoices;
-    }, []);
-
-    // ✅ Handle user input
-    const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setStudyGuide(event.target.value);
+  /* one‑time voice list setup */
+  useEffect(() => {
+    const fetchVoices = () => {
+      const v = window.speechSynthesis.getVoices();
+      setVoices(v);
+      if (v.length) setSelectedVoice(v[0].name);
     };
+    fetchVoices();
+    window.speechSynthesis.onvoiceschanged = fetchVoices;
+    return () => { window.speechSynthesis.onvoiceschanged = null; };
+  }, []);
 
-    // ✅ Text-to-Speech Functionality
-    const handleTextToSpeech = () => {
-        if (isSpeaking) {
-            // Stop speech if already speaking
-            window.speechSynthesis.cancel();
-            setIsSpeaking(false);
-        } else {
-            // Start speech
-            const utterance = new SpeechSynthesisUtterance(studyGuide);
-            utterance.voice = voices.find((voice) => voice.name === selectedVoice) || null; // Set selected voice
-            utterance.onend = () => setIsSpeaking(false); // Reset state when speech ends
-            window.speechSynthesis.speak(utterance);
-            setIsSpeaking(true);
-        }
-    };
+  /* handlers */
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) =>
+    setStudyGuide(e.target.value);
 
-    return (
-        <div className="page-layout">
-            <div style={{ width: "90%", maxWidth: "900px", height: "80vh", display: "flex", flexDirection: "column" }}>
+  const handleTextToSpeech = () => {
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+    const ut = new SpeechSynthesisUtterance(studyGuide);
+    ut.voice = voices.find(v => v.name === selectedVoice) || null;
+    ut.onend = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(ut);
+    setIsSpeaking(true);
+  };
 
-                {/* ✅ Font Controls - Side by Side */}
-                <div style={{ display: "flex", justifyContent: "space-between", gap: "20px", marginBottom: "10px" }}>
-                    
-                    {/* Font Size Selector */}
-                    <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        Font Size:
-                        <select value={fontSize} onChange={(e) => setFontSize(parseInt(e.target.value))} style={{ padding: "5px" }}>
-                            <option value={12}>12px</option>
-                            <option value={14}>14px</option>
-                            <option value={16}>16px (Default)</option>
-                            <option value={18}>18px</option>
-                            <option value={20}>20px</option>
-                            <option value={24}>24px</option>
-                            <option value={28}>28px</option>
-                        </select>
-                    </label>
+  /* ------------------------------------------------------------------ */
+  /* UI                                                                  */
+  /* ------------------------------------------------------------------ */
+  return (
+    <div className="page-layout">
+      <div
+        style={{
+          width: "90%",
+          maxWidth: 900,
+          height: "80vh",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* font / family controls */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 20,
+            marginBottom: 10,
+          }}
+        >
+          <label style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            Font Size:
+            <select
+              value={fontSize}
+              onChange={e => setFontSize(parseInt(e.target.value))}
+              style={{ padding: 5 }}
+            >
+              {[12, 14, 16, 18, 20, 24, 28].map(sz => (
+                <option key={sz} value={sz}>
+                  {sz}px{sz === 16 ? " (Default)" : ""}
+                </option>
+              ))}
+            </select>
+          </label>
 
-                    {/* Font Type Selector */}
-                    <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        Font Type:
-                        <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} style={{ padding: "5px" }}>
-                            <option value="Arial">Arial</option>
-                            <option value="Courier New">Courier New</option>
-                            <option value="Georgia">Georgia</option>
-                            <option value="Times New Roman">Times New Roman</option>
-                            <option value="Verdana">Verdana</option>
-                            <option value="OpenDyslexic">OpenDyslexic</option>
-                        </select>
-                    </label>
-                </div>
-
-                {/* ✅ Voice Selector */}
-                <label style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}>
-                    Voice:
-                    <select
-                        value={selectedVoice}
-                        onChange={(e) => setSelectedVoice(e.target.value)}
-                        style={{ padding: "5px" }}
-                    >
-                        {voices.map((voice) => (
-                            <option key={voice.name} value={voice.name}>
-                                {voice.name} ({voice.lang})
-                            </option>
-                        ))}
-                    </select>
-                </label>
-
-            {/* ✅ Text-to-Speech Button */}
-            <div style={{ display: "flex", justifyContent: "center" }}>
-                <button
-                    onClick={handleTextToSpeech}
-                    style={{
-                        marginBottom: "10px",
-                        padding: "10px 20px",
-                        backgroundColor: isSpeaking ? "red" : "green",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "5px",
-                        cursor: "pointer",
-                        width: "200px"
-                    }}
-                >
-                    {isSpeaking ? "Stop Speaking" : "Read Aloud"}
-                </button>
-            </div>
-
-                <textarea 
-                    className="text-box"
-                    value={studyGuide}
-                    onChange={handleChange}
-                    style={{
-                        fontSize: `${fontSize}px`,
-                        fontFamily: fontFamily,
-                        resize: "none", // Disable resizing
-                        flexGrow: 1, // Allow the textarea to grow and fill available space
-                        width: "100%", // Ensure it spans the full width
-                        border: "1px solid #ccc",
-                        borderRadius: "5px",
-                        padding: "10px",
-                        boxSizing: "border-box", // Include padding in width/height calculations
-                    }}
-                />
-            </div>
-        {/* Watermark */}
-        <div className="watermark">
-            © 2025 StudyBuddy, Inc.
+          <label style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            Font Type:
+            <select
+              value={fontFamily}
+              onChange={e => setFontFamily(e.target.value)}
+              style={{ padding: 5 }}
+            >
+              {[
+                "Arial",
+                "Courier New",
+                "Georgia",
+                "Times New Roman",
+                "Verdana",
+                "OpenDyslexic",
+              ].map(f => (
+                <option key={f} value={f}>
+                  {f}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
+
+        {/* voice selector */}
+        <label style={{ marginBottom: 10, display: "flex", alignItems: "center", gap: 10 }}>
+          Voice:
+          <select
+            value={selectedVoice}
+            onChange={e => setSelectedVoice(e.target.value)}
+            style={{ padding: 5 }}
+          >
+            {voices.map(v => (
+              <option key={v.name} value={v.name}>
+                {v.name} ({v.lang})
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {/* text‑to‑speech button */}
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <button
+            onClick={handleTextToSpeech}
+            style={{
+              marginBottom: 10,
+              padding: "10px 20px",
+              backgroundColor: isSpeaking ? "red" : "green",
+              color: "white",
+              border: "none",
+              borderRadius: 5,
+              cursor: "pointer",
+              width: 200,
+            }}
+          >
+            {isSpeaking ? "Stop Speaking" : "Read Aloud"}
+          </button>
         </div>
-    );
+
+        {/* study‑guide textarea */}
+        <textarea
+          className="text-box"
+          value={studyGuide}
+          onChange={handleChange}
+          style={{
+            flexGrow: 1,
+            width: "100%",
+            fontSize: `${fontSize}px`,
+            fontFamily,
+            resize: "none",
+            border: "1px solid #ccc",
+            borderRadius: 5,
+            padding: 10,
+            boxSizing: "border-box",
+          }}
+        />
+      </div>
+
+      <div className="watermark">© 2025 StudyBuddy, Inc.</div>
+    </div>
+  );
 };
 
 export default Notes;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import useGeneratedContent from "../hooks/useGeneratedContent";;
 interface Question {
   type: string;
   question: string;
@@ -8,24 +8,29 @@ interface Question {
 }
 
 const PracticeTest: React.FC = () => {
+  const content = useGeneratedContent();          // ← NEW
   const [practiceTest, setPracticeTest] = useState<Question[]>([]);
-  const [responses, setResponses] = useState<any[]>([]);
+  const [responses,   setResponses]   = useState<any[]>([]);
   const [gradedResults, setGradedResults] = useState<any | null>(null);
-  const [grade, setGrade] = useState<string | null>(null); // New state for grade
+  const [grade, setGrade] = useState<string | null>(null);
   const [fontSize, setFontSize] = useState<number>(16);
   const [fontFamily, setFontFamily] = useState<string>("Arial");
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const storedContent = localStorage.getItem("generatedContent");
-    if (storedContent) {
-      const parsedContent = JSON.parse(storedContent);
-      if (parsedContent.practice_test && parsedContent.practice_test.questions) {
-        setPracticeTest(parsedContent.practice_test.questions);
-        setResponses(new Array(parsedContent.practice_test.questions.length).fill(null));
-      }
+    if (content?.practice_test?.questions) {
+      const q = content.practice_test.questions;
+      setPracticeTest(q);
+      setResponses(Array(q.length).fill(null));
+      setGradedResults(null);
+      setGrade(null);
+    } else {
+      setPracticeTest([]);
+      setResponses([]);
+      setGradedResults(null);
+      setGrade(null);
     }
-  }, []);
+  }, [content]);
 
   const handleResponseChange = (index: number, value: any) => {
     const updatedResponses = [...responses];
