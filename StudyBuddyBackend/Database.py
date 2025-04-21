@@ -11,8 +11,6 @@ def retrieveAllFolders(mysql, AccountNum):
         cursor = conn.cursor()
         cursor.execute("SELECT FolderNum, FolderName FROM Folders WHERE AccountNum = %s", (AccountNum))
         data = cursor.fetchall()
-        cursor.close()
-        conn.close()
         folderFromAccounts = []
         for row in data:
             FolderNum, FolderName = row
@@ -22,11 +20,14 @@ def retrieveAllFolders(mysql, AccountNum):
             })
         return folderFromAccounts
     except Exception as err:
+        
         print(f"Error fetching Folder {FolderNum}:", err)
         return None
     finally:
-        cursor.close()
-        conn.close()
+        if cursor.connection.open:
+            cursor.close()
+        if conn.open:
+            conn.close()
 def retrieveAllFilesInFolder(mysql, AccountNum,FolderNum):
     """Retrieves all of the Files in a Folder (Name, FileType, Num)"""
     tables = [
@@ -105,10 +106,10 @@ def retrieveStudyGuide(mysql, StudyGuideNum, AccountNum, FolderNum):
         query = f"SELECT StudyGuideText, StudyGuideName FROM StudyGuide WHERE AccountNum = %s AND FolderNum = %s AND StudyGuideNum = %s;"
         cursor.execute(query, (AccountNum,FolderNum,StudyGuideNum))
         data = cursor.fetchall()
-        StudyGuideJson = {}
+        StudyGuideJson = ""
         for row in data:
             Text, Name = row
-            StudyGuideJson['study_guide'] = Text
+            StudyGuideJson = Text
         return StudyGuideJson
     except Exception as err:
         print(f"Error retrieving StudyGuide {StudyGuideNum}: {err}")
@@ -672,7 +673,7 @@ def reset_database(mysql):
             'PracticeTest',
             'Transcription',
             'Folders',
-            'Accounts'
+            #'Accounts'
         ]
     try:
         conn = mysql.connect()
