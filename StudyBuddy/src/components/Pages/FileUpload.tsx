@@ -98,7 +98,20 @@ const FileUpload: React.FC = () => {
     else if (selectedFile) formData.append("file", selectedFile);
     formData.append("translate", String(translate));
     formData.append("targetLanguage", targetLanguage);
-
+    const fetchFolders = async () => {
+      try {
+        const res = await fetch(`${API}/folders`, {
+          method: "GET",
+          credentials: "include",          // send session cookie
+        });
+        const json = await res.json();
+        setFolders(json.folder ?? []);     // server returns { folder: [...] }
+      } catch (err) {
+        console.error("Error fetching folders:", err);
+      } finally {
+        setFoldersLoading(false);
+      }
+    };
     setIsLoading(true);
     try {
       const res  = await fetch(`${API}/upload`, {
@@ -109,9 +122,8 @@ const FileUpload: React.FC = () => {
       const data = await res.json();
       console.log("writing LS")
       localStorage.setItem("generatedContent", JSON.stringify(data));
-      new Promise(resolve => setTimeout(resolve, 10000));
       window.dispatchEvent(new Event("generatedContentUpdated"));
-
+      fetchFolders();
     } 
       catch (err) {
       console.error(err);
