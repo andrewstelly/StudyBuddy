@@ -1,7 +1,6 @@
-// components/Pages/FlashCards.tsx
 import React, { useEffect, useState } from "react";
-import Flashcard from "../UI/Flashcard";
 import { ArrowLeftCircle, ArrowRightCircle } from "lucide-react";
+import Flashcard from "../UI/Flashcard";
 
 type FlashcardType = {
   term: string;
@@ -14,6 +13,9 @@ const FlashCards: React.FC = () => {
   const [loadingMessage, setLoadingMessage] = useState("Loading...");
 
   useEffect(() => {
+    // Cancel any lingering TTS
+    window.speechSynthesis.cancel();
+
     const storedContent = localStorage.getItem("generatedContent");
     if (storedContent) {
       try {
@@ -40,17 +42,34 @@ const FlashCards: React.FC = () => {
   }, []);
 
   const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : flashcards.length - 1));
+    const newIndex = currentIndex > 0 ? currentIndex - 1 : flashcards.length - 1;
+    setCurrentIndex(newIndex);
   };
 
   const goToNext = () => {
-    setCurrentIndex((prev) => (prev < flashcards.length - 1 ? prev + 1 : 0));
+    const newIndex = currentIndex < flashcards.length - 1 ? currentIndex + 1 : 0;
+    setCurrentIndex(newIndex);
   };
 
   const currentCard = flashcards[currentIndex];
 
   return (
-    <div className="flashcards-container" style={{ textAlign: "center", padding: "2rem" }}>
+    <div className="flashcards-container" style={{ textAlign: "center", padding: "2rem", userSelect: "none" }}>
+      <div
+        style={{
+          borderBottom: "3px solid #7ea3dc",
+          fontWeight: "bold",
+          fontSize: "24px",
+          textAlign: "left",
+          paddingBottom: "6px",
+          marginBottom: "40px",
+          color: "#264653",
+          userSelect: "none",
+        }}
+      >
+        Flashcards
+      </div>
+
       {loadingMessage ? (
         <p>{loadingMessage}</p>
       ) : (
@@ -64,7 +83,7 @@ const FlashCards: React.FC = () => {
               gap: "2rem",
             }}
           >
-              <ArrowLeftCircle
+            <ArrowLeftCircle
               size={48}
               strokeWidth={2.5}
               onClick={goToPrevious}
@@ -73,17 +92,14 @@ const FlashCards: React.FC = () => {
             <Flashcard
               term={currentCard.term}
               definition={currentCard.definition}
-              key={currentIndex} 
+              key={currentIndex}
             />
-          
-
             <ArrowRightCircle
               size={48}
               strokeWidth={2.5}
               onClick={goToNext}
               className="arrow-icon"
             />
-
           </div>
 
           <p className="card-counter" style={{ marginTop: "1rem" }}>
@@ -91,10 +107,7 @@ const FlashCards: React.FC = () => {
           </p>
         </>
       )}
-    {/* Watermark */}
-    <div className="watermark">
-     © 2025 StudyBuddy, Inc.
-    </div>
+      <div className="watermark">© 2025 StudyBuddy, Inc.</div>
     </div>
   );
 };
