@@ -26,7 +26,7 @@ app.config['MYSQL_DATABASE_PASSWORD'] = 'StudyBuddy!' # Specify Master password
 app.config['MYSQL_DATABASE_DB'] = 'study_buddy_database' # Specify database name
 
 mysql = MySQL(app)
-reset_database(mysql)  # Reset the database at startup
+
 
 # Handle preflight OPTIONS request for CORS
 @app.route('/upload', methods=['OPTIONS'])
