@@ -146,17 +146,17 @@ const PracticeTest: React.FC = () => {
           </label>
 
           <button
-  onClick={regenerateTest}
-  className={`regen-test-button ${loading ? "loading" : ""}`}
-  style={{
-    width: "200px",
-    height: "40px",
-    marginTop: "0px",
-  }}
-  disabled={loading}
->
-  {loading ? "Regenerating..." : "Regenerate Test"}
-</button>
+            onClick={regenerateTest}
+            className={`regen-test-button ${loading ? "loading" : ""}`}
+            style={{
+              width: "200px",
+              height: "40px",
+              marginTop: "0px",
+            }}
+            disabled={loading}
+          >
+            {loading ? "Regenerating..." : "Regenerate Test"}
+          </button>
 
 
 
