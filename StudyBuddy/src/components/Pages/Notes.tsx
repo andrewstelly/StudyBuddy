@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
 import '../Styling/fonts.css';
 
-
 const Notes: React.FC = () => {
     const [studyGuide, setStudyGuide] = useState<string>("Loading...");
-    const [fontSize, setFontSize] = useState<number>(16); // Default font size
-    const [fontFamily, setFontFamily] = useState<string>("Arial"); // Default font type
-    const [isSpeaking, setIsSpeaking] = useState<boolean>(false); // Track if TTS is active
-    const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]); // Available voices
-    const [selectedVoice, setSelectedVoice] = useState<string>(""); // Selected voice
+    const [fontSize, setFontSize] = useState<number>(16);
+    const [fontFamily, setFontFamily] = useState<string>("Arial");
+    const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
 
     useEffect(() => {
         const storedContent = localStorage.getItem("generatedContent");
@@ -29,49 +26,82 @@ const Notes: React.FC = () => {
         } else {
             setStudyGuide("No study guide found.");
         }
-
-        // Fetch available voices
-        const fetchVoices = () => {
-            const availableVoices = window.speechSynthesis.getVoices();
-            setVoices(availableVoices);
-            if (availableVoices.length > 0) {
-                setSelectedVoice(availableVoices[0].name); // Default to the first voice
-            }
-        };
-
-        // Fetch voices when they are loaded
-        fetchVoices();
-        window.speechSynthesis.onvoiceschanged = fetchVoices;
     }, []);
 
-    // ✅ Handle user input
     const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         setStudyGuide(event.target.value);
     };
 
-    // ✅ Text-to-Speech Functionality
     const handleTextToSpeech = () => {
         if (isSpeaking) {
-            // Stop speech if already speaking
             window.speechSynthesis.cancel();
             setIsSpeaking(false);
         } else {
-            // Start speech
+            const voiceName = localStorage.getItem("preferredVoice");
             const utterance = new SpeechSynthesisUtterance(studyGuide);
-            utterance.voice = voices.find((voice) => voice.name === selectedVoice) || null; // Set selected voice
-            utterance.onend = () => setIsSpeaking(false); // Reset state when speech ends
-            window.speechSynthesis.speak(utterance);
+
+            const matchedVoice = window.speechSynthesis
+                .getVoices()
+                .find((v) => v.name === voiceName);
+
+            if (matchedVoice) {
+                utterance.voice = matchedVoice;
+            }
+
+            utterance.onend = () => {
+                setIsSpeaking(false);
+            };
+
             setIsSpeaking(true);
+
+            if (window.speechSynthesis.getVoices().length === 0) {
+                window.speechSynthesis.onvoiceschanged = () => {
+                    const retryVoice = window.speechSynthesis
+                        .getVoices()
+                        .find((v) => v.name === voiceName);
+                    if (retryVoice) {
+                        utterance.voice = retryVoice;
+                    }
+                    window.speechSynthesis.speak(utterance);
+                };
+            } else {
+                window.speechSynthesis.speak(utterance);
+            }
         }
     };
 
     return (
         <div className="page-layout">
-            <div style={{ width: "90%", maxWidth: "900px", height: "80vh", display: "flex", flexDirection: "column" }}>
+            <div style={{ width: "90%", maxWidth: "900px", height: "80vh", display: "flex", flexDirection: "column"}}>
 
-                {/* ✅ Font Controls - Side by Side */}
-                <div style={{ display: "flex", justifyContent: "space-between", gap: "20px", marginBottom: "10px" }}>
-                    
+            <div style={{
+                borderBottom: "3px solid #7ea3dc",
+                fontWeight: "bold",
+                fontSize: "24px",
+                textAlign: "left",
+                paddingBottom: "6px",
+                marginBottom: "14px",
+                color: "#264653",
+            }}>
+                Notes
+             </div>
+
+                {/* Control Container */}
+                <div
+                    style={{
+                        backgroundColor: "#ebf6ff",
+                        border: "1px solid #ccc",
+                        borderRadius: "8px",
+                        padding: "16px",
+                        marginBottom: "20px",
+                        boxShadow: "0 2px 5px rgba(0, 0, 0, 0.05)",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: "20px",
+                        flexWrap: "wrap",
+                    }}
+                >
                     {/* Font Size Selector */}
                     <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         Font Size:
@@ -85,6 +115,20 @@ const Notes: React.FC = () => {
                             <option value={28}>28px</option>
                         </select>
                     </label>
+
+                    {/* Read Aloud Button */}
+                    <button
+                    onClick={handleTextToSpeech}
+                    className={`read-button ${isSpeaking ? "recording" : ""}`}
+                    style={{
+                        width: "200px",
+                        height: "40px",
+                        marginTop: "0px",
+                    }}
+                    >
+                    {isSpeaking ? "Stop Speaking" : "Read Aloud"}
+                    </button>
+
 
                     {/* Font Type Selector */}
                     <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -100,62 +144,30 @@ const Notes: React.FC = () => {
                     </label>
                 </div>
 
-                {/* ✅ Voice Selector */}
-                <label style={{ marginBottom: "10px", display: "flex", alignItems: "center", gap: "10px" }}>
-                    Voice:
-                    <select
-                        value={selectedVoice}
-                        onChange={(e) => setSelectedVoice(e.target.value)}
-                        style={{ padding: "5px" }}
-                    >
-                        {voices.map((voice) => (
-                            <option key={voice.name} value={voice.name}>
-                                {voice.name} ({voice.lang})
-                            </option>
-                        ))}
-                    </select>
-                </label>
-
-            {/* ✅ Text-to-Speech Button */}
-            <div style={{ display: "flex", justifyContent: "center" }}>
-                <button
-                    onClick={handleTextToSpeech}
-                    style={{
-                        marginBottom: "10px",
-                        padding: "10px 20px",
-                        backgroundColor: isSpeaking ? "red" : "green",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "5px",
-                        cursor: "pointer",
-                        width: "200px"
-                    }}
-                >
-                    {isSpeaking ? "Stop Speaking" : "Read Aloud"}
-                </button>
-            </div>
-
-                <textarea 
+                {/* Textarea */}
+                <textarea
                     className="text-box"
                     value={studyGuide}
                     onChange={handleChange}
                     style={{
                         fontSize: `${fontSize}px`,
                         fontFamily: fontFamily,
-                        resize: "none", // Disable resizing
-                        flexGrow: 1, // Allow the textarea to grow and fill available space
-                        width: "100%", // Ensure it spans the full width
+                        resize: "none",
+                        flexGrow: 1,
+                        width: "100%",
                         border: "1px solid #ccc",
                         borderRadius: "5px",
                         padding: "10px",
-                        boxSizing: "border-box", // Include padding in width/height calculations
+                        boxSizing: "border-box",
+                        backgroundColor: "#ebf6ff",
                     }}
                 />
             </div>
-        {/* Watermark */}
-        <div className="watermark">
-            © 2025 StudyBuddy, Inc.
-        </div>
+
+            {/* Watermark */}
+            <div className="watermark">
+                © 2025 StudyBuddy, Inc.
+            </div>
         </div>
     );
 };

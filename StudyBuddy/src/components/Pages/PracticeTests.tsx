@@ -11,7 +11,7 @@ const PracticeTest: React.FC = () => {
   const [practiceTest, setPracticeTest] = useState<Question[]>([]);
   const [responses, setResponses] = useState<any[]>([]);
   const [gradedResults, setGradedResults] = useState<any | null>(null);
-  const [grade, setGrade] = useState<string | null>(null); // New state for grade
+  const [grade, setGrade] = useState<string | null>(null);
   const [fontSize, setFontSize] = useState<number>(16);
   const [fontFamily, setFontFamily] = useState<string>("Arial");
   const [loading, setLoading] = useState<boolean>(false);
@@ -44,14 +44,9 @@ const PracticeTest: React.FC = () => {
 
       if (response.ok) {
         setGradedResults(data.graded_results);
-
-        // Calculate the number of correct answers
         const correctAnswers = data.graded_results.filter((result: any) => result.correct).length;
-
-        // Set the grade to display on the screen
         setGrade(`You got ${correctAnswers} out of 9 correct!`);
-
-        setPracticeTest([]); // Clear the practice test
+        setPracticeTest([]);
       } else {
         console.error("Error grading practice test:", data.error);
       }
@@ -83,8 +78,8 @@ const PracticeTest: React.FC = () => {
       if (response.ok && data.practice_test) {
         setPracticeTest(data.practice_test.questions);
         setResponses(new Array(data.practice_test.questions.length).fill(null));
-        setGradedResults(null); // Clear previous results
-        setGrade(null); // Clear the grade
+        setGradedResults(null);
+        setGrade(null);
         console.log("Practice test regenerated successfully.");
       } else {
         console.error("Error regenerating practice test:", data.error);
@@ -105,17 +100,36 @@ const PracticeTest: React.FC = () => {
           height: "80vh",
           display: "flex",
           flexDirection: "column",
-        }}
-      >
-        {/* Font Controls */}
+        }}>
+
+        <div style={{
+          borderBottom: "3px solid #7ea3dc",
+          fontWeight: "bold",
+          fontSize: "24px",
+          textAlign: "left",
+          paddingBottom: "6px",
+          marginBottom: "14px",
+          color: "#264653",
+        }}>
+          Practice Tests
+        </div>
+
         <div
           style={{
+            backgroundColor: "#ebf6ff",
+            border: "1px solid #ccc",
+            borderRadius: "8px",
+            padding: "16px",
+            marginBottom: "20px",
+            boxShadow: "0 2px 5px rgba(0, 0, 0, 0.05)",
             display: "flex",
             justifyContent: "space-between",
+            alignItems: "center",
             gap: "20px",
-            marginBottom: "10px",
+            flexWrap: "wrap",
           }}
         >
+
           <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             Font Size:
             <select
@@ -131,22 +145,20 @@ const PracticeTest: React.FC = () => {
             </select>
           </label>
 
-          {/* Regenerate Test Button */}
           <button
-            onClick={regenerateTest}
-            style={{
-              padding: "10px 20px",
-              backgroundColor: "blue",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-              width: "200px",
-            }}
-            disabled={loading}
-          >
-            {loading ? "Regenerating..." : "Regenerate Test"}
-          </button>
+  onClick={regenerateTest}
+  className={`regen-test-button ${loading ? "loading" : ""}`}
+  style={{
+    width: "200px",
+    height: "40px",
+    marginTop: "0px",
+  }}
+  disabled={loading}
+>
+  {loading ? "Regenerating..." : "Regenerate Test"}
+</button>
+
+
 
           <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             Font Type:
@@ -155,18 +167,16 @@ const PracticeTest: React.FC = () => {
               onChange={(e) => setFontFamily(e.target.value)}
               style={{ padding: "5px" }}
             >
-              {["Arial", "Courier New", "Georgia", "Times New Roman", "Verdana"].map(
-                (font) => (
-                  <option key={font} value={font}>
-                    {font}
-                  </option>
-                )
-              )}
+              <option value="Arial">Arial</option>
+              <option value="Courier New">Courier New</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Times New Roman">Times New Roman</option>
+              <option value="Verdana">Verdana</option>
+              <option value="OpenDyslexic">OpenDyslexic</option>
             </select>
           </label>
         </div>
 
-        {/* Scrollable Content */}
         <div
           style={{
             flex: 1,
@@ -176,11 +186,26 @@ const PracticeTest: React.FC = () => {
             padding: "10px",
             fontSize: `${fontSize}px`,
             fontFamily: fontFamily,
+            backgroundColor: "#ebf6ff",
           }}
         >
+
           {gradedResults ? (
             <div style={{ marginTop: "20px" }}>
-              <h2>Graded Results</h2>
+              {grade && (
+                <div
+                  style={{
+                    marginBottom: "5px",
+                    textAlign: "center",
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                    color: "#265798",
+                  }}
+                >
+                  {grade}
+                </div>
+              )}
+              <h2 style={{ textAlign: "center", marginBottom: "10px" }}>Graded Results</h2>
               <div>
                 {gradedResults.map((result: any, index: number) => (
                   <div
@@ -243,7 +268,7 @@ const PracticeTest: React.FC = () => {
                       <label
                         key={i}
                         style={{
-                          display: "block", // Use flexbox for horizontal alignment
+                          display: "block",
                           marginBottom: "5px",
                           marginLeft: "-565px",
                         }}
@@ -254,15 +279,15 @@ const PracticeTest: React.FC = () => {
                           value={option}
                           onChange={() => handleResponseChange(index, option)}
                           style={{
-                            transform: "scale(1.35)", // Make the radio buttons bigger
-                            marginRight: "-340px", // Remove spacing between the button and the text
-                            paddingLeft: "0px", // Remove unnecessary padding
+                            transform: "scale(1.35)",
+                            marginRight: "-340px",
+                            paddingLeft: "0px",
                           }}
                         />
                         <span
                           style={{
-                            textAlign: "left", // Align text to the left
-                            width: "90%", // Allow the text to take up the remaining space
+                            textAlign: "left",
+                            width: "90%",
                             marginLeft: "-285px",
                           }}
                         >
@@ -277,10 +302,10 @@ const PracticeTest: React.FC = () => {
                   <div>
                     <label
                       style={{
-                        display: "Block", // Use flexbox for horizontal alignment
-                          alignItems: "center", // Vertically center the text and radio button
-                          marginBottom: "5px",
-                          marginLeft: "-564px",
+                        display: "Block",
+                        alignItems: "center",
+                        marginBottom: "5px",
+                        marginLeft: "-564px",
                       }}
                     >
                       <input
@@ -289,24 +314,17 @@ const PracticeTest: React.FC = () => {
                         value="true"
                         onChange={() => handleResponseChange(index, true)}
                         style={{
-                          transform: "scale(1.35)", // Make the radio buttons bigger
-                          marginRight: "-625px", // Remove spacing between the button and the text
-                          paddingLeft: "0px", // Remove unnecessary padding
+                          transform: "scale(1.35)",
+                          marginRight: "-625px",
+                          paddingLeft: "0px",
                         }}
                       />
-                      <span
-                        style={{
-                          textAlign: "left", // Align text to the left
-                          width: "90%", // Allow the text to take up the remaining space
-                        }}
-                      >
-                        True
-                      </span>
+                      <span style={{ textAlign: "left", width: "90%" }}>True</span>
                     </label>
                     <label
                       style={{
-                        display: "block", // Use flexbox for horizontal alignment
-                        alignItems: "center", // Vertically center the text and radio button
+                        display: "block",
+                        alignItems: "center",
                         marginBottom: "5px",
                         marginLeft: "-564px",
                       }}
@@ -317,19 +335,12 @@ const PracticeTest: React.FC = () => {
                         value="false"
                         onChange={() => handleResponseChange(index, false)}
                         style={{
-                          transform: "scale(1.35)", // Make the radio buttons bigger
-                          marginRight: "-625px", // Remove spacing between the button and the text
-                          paddingLeft: "0px", // Remove unnecessary padding
+                          transform: "scale(1.35)",
+                          marginRight: "-625px",
+                          paddingLeft: "0px",
                         }}
                       />
-                      <span
-                        style={{
-                          textAlign: "left", // Align text to the left
-                          width: "90%", // Allow the text to take up the remaining space
-                        }}
-                      >
-                        False
-                      </span>
+                      <span style={{ textAlign: "left", width: "90%" }}>False</span>
                     </label>
                   </div>
                 )}
@@ -348,44 +359,22 @@ const PracticeTest: React.FC = () => {
           )}
         </div>
 
-        {/* Submit Button */}
         <div style={{ display: "flex", justifyContent: "center", gap: "20px" }}>
           <button
             onClick={handleSubmit}
+            className="submit-button"
             style={{
-              marginTop: "10px",
-              padding: "10px 20px",
-              backgroundColor: "green",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
+              marginTop: "20px",
+              marginBottom: "-50px",
               width: "200px",
             }}
           >
             Submit Test
           </button>
         </div>
+      </div>
 
-        {/* Display Grade */}
-        {grade && (
-          <div
-            style={{
-              marginTop: "20px",
-              textAlign: "center",
-              fontSize: "18px",
-              color: "blue",
-              fontWeight: "bold",
-            }}
-          >
-            {grade}
-          </div>
-        )}
-      </div>
-      {/* Watermark */}
-      <div className="watermark">
-        © 2025 StudyBuddy, Inc.
-      </div>
+      <div className="watermark">© 2025 StudyBuddy, Inc.</div>
     </div>
   );
 };
