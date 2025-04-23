@@ -20,7 +20,12 @@ const FlashCards: React.FC = () => {
     if (storedContent) {
       try {
         const parsedContent = JSON.parse(storedContent);
-        const flashcardsData = parsedContent.flashcards;
+
+        // Check if flashcards is a string and parse it if necessary
+        const flashcardsData =
+          typeof parsedContent.flashcards === "string"
+            ? JSON.parse(parsedContent.flashcards) // Parse stringified JSON
+            : parsedContent.flashcards; // Use as-is if already an object
 
         if (Array.isArray(flashcardsData)) {
           const formattedFlashcards = flashcardsData.map((fc: any) => ({
@@ -54,7 +59,10 @@ const FlashCards: React.FC = () => {
   const currentCard = flashcards[currentIndex];
 
   return (
-    <div className="flashcards-container" style={{ textAlign: "center", padding: "2rem", userSelect: "none" }}>
+    <div
+      className="flashcards-container"
+      style={{ textAlign: "center", padding: "2rem", userSelect: "none" }}
+    >
       <div
         style={{
           borderBottom: "3px solid #7ea3dc",

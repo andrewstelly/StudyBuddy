@@ -6,7 +6,7 @@ import bcrypt
 from flask import Flask, request, jsonify, send_file,session, make_response
 from flask_cors import CORS  # Import CORS
 from flaskext.mysql import MySQL
-from WhisperDev import transcribe_mp3, create_study_guide, create_practice_test, translate_text, create_flashcards  # Removed generate_summary
+from WhisperDev import transcribe_mp3, create_study_guide, create_practice_test, create_flashcards  # Removed generate_summary
 from Database import verifyPassword, retrieveAllFilesInFolder, retrieveFile, createTranscription, createFolder, createAccount,retrieveAllFolders, combine_into_json, createFlashcard, createFlashcardSet, createStudyGuide, createPracticeTest, createQuestion, createAnswer,read_database,reset_database
 
 # Add the directory containing WhisperDev.py to the Python path
@@ -116,73 +116,53 @@ def upload_file():
         print(f"File saved to {file_path}")
 
         # Read form data flags
-        translate_flag = request.form.get("translate") == "true"
-        target_language = request.form.get("targetLanguage")
+        target_language = request.form.get("targetLanguage", "English")  # Default to English if no language is selected
 
-         # Transcribe audio
+        # Transcribe audio
         print("Starting transcription...")
         transcription_text = transcribe_mp3(file_path)  # Transcribe in the original language
         print("Transcription completed.")
 
-        # Translate transcription if translation is selected
-        if translate_flag and target_language:
-            print(f"Translating transcription directly into {target_language}...")
-            transcription_text = translate_text(transcription_text, target_language)
-            print(f"Transcription in {target_language} completed.")
-        if(app.accountNum != None):
-           app.folder_num = storeFolder(mysql, "Test Folder", app.accountNum)
-           transcription_num = storeTranscription(mysql,"Transcription Name", transcription_text,app.accountNum,app.folder_num )
+        # Store folder and transcription in the database if logged in
+        if app.accountNum is not None:
+            app.folder_num = storeFolder(mysql, "Test Folder", app.accountNum)
+            transcription_num = storeTranscription(mysql, "Transcription Name", transcription_text, app.accountNum, app.folder_num)
+
         # Add transcription to results
         results = {
-            "transcription": transcription_text  # This will be in the target language if translation is selected
+            "transcription": transcription_text  # This will always be in the original language
         }
 
-        # Always create study guide
-        results["study_guide"] = create_study_guide(transcription_text)
-        print("Study Guide:", results["study_guide"])  # Log study guide
-        if(app.accountNum != None):
-            storeStudyGuide(mysql, "StudyGuide Name", results["study_guide"], app.accountNum, transcription_num, app.folder_num )
-        # Always create practice test
-        raw_practice_test = create_practice_test(transcription_text)
-        print("Raw practice test output:", raw_practice_test)  # Debugging log
+        # Generate study guide
         try:
-            # Check if the raw practice test is empty
-            if not raw_practice_test.strip():
-                raise ValueError("Practice test generation returned an empty response.")
+            results["study_guide"] = create_study_guide(transcription_text, target_language)
+            print("Study Guide:", results["study_guide"])  # Log study guide
+            if app.accountNum is not None:
+                storeStudyGuide(mysql, "StudyGuide Name", results["study_guide"], app.accountNum, transcription_num, app.folder_num)
+        except Exception as e:
+            print(f"Error generating study guide: {e}")
+            results["study_guide"] = {"error": "Failed to generate study guide"}
 
-            # Clean up the raw practice test string if it starts with ```json
-            if raw_practice_test.startswith("```json"):
-                raw_practice_test = raw_practice_test.strip("```json").strip("```").strip()
-            
-            # Parse the practice test JSON
-            results["practice_test"] = json.loads(raw_practice_test)
-            if (app.accountNum != None):
-                storePracticeTest(mysql,results["practice_test"],"Test Practice Test",app.accountNum,transcription_num,app.folder_num)
-        except (json.JSONDecodeError, ValueError) as e:
-            print(f"Error decoding practice test JSON: {e}")
+        # Generate practice test
+        try:
+            results["practice_test"] = create_practice_test(transcription_text, target_language)
+            print("Practice Test:", results["practice_test"])  # Log practice test
+            if app.accountNum is not None:
+                storePracticeTest(mysql, results["practice_test"], "Test Practice Test", app.accountNum, transcription_num, app.folder_num)
+        except Exception as e:
+            print(f"Error generating practice test: {e}")
             results["practice_test"] = {"error": "Failed to generate practice test"}
-        print("Practice Test:", results["practice_test"])  # Log practice test
 
-        # Always create flashcards
-        raw_flashcards = create_flashcards(transcription_text)
-        print("Raw flashcards output:", raw_flashcards)  # Debugging log
+        # Generate flashcards
         try:
-            # Check if the raw flashcards are empty
-            if not raw_flashcards.strip():
-                raise ValueError("Flashcards generation returned an empty response.")
-
-            # Clean up the flashcards data
-            if raw_flashcards.startswith("```json"):
-                raw_flashcards = raw_flashcards.strip("```json").strip("```").strip()
-            
-            # Parse the cleaned flashcards string into a Python object
-            results["flashcards"] = json.loads(raw_flashcards)
-        except (json.JSONDecodeError, ValueError) as e:
-            print(f"Error decoding flashcards JSON: {e}")
+            results["flashcards"] = create_flashcards(transcription_text, target_language)
+            print("Flashcards:", results["flashcards"])  # Log flashcards
+            if app.accountNum is not None:
+                storeFlashcards(mysql, results["flashcards"], app.accountNum, transcription_num, app.folder_num)
+        except Exception as e:
+            print(f"Error generating flashcards: {e}")
             results["flashcards"] = []
-        print("Flashcards:", results["flashcards"])  # Log flashcards
-        if(app.accountNum != None):
-            storeFlashcards(mysql, results["flashcards"],app.accountNum,transcription_num,app.folder_num)  
+
         # Delete the file after processing
         os.remove(file_path)
         print(f"File {file_path} deleted")
@@ -206,6 +186,7 @@ def upload_file():
         response = jsonify({"error": str(e)})
         response.headers.add("Access-Control-Allow-Origin", "*")  # Allow CORS on error response
         return response, 500
+
 @app.route('/retrieve-folders', methods=['POST'])
 def retrieve_folders():
     app.config['MYSQL_DATABASE_HOST'] = 'study-buddy-database.co3kew2gkyw2.us-east-1.rds.amazonaws.com' # Specify Endpoint
