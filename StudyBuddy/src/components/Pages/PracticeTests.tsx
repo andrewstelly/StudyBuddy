@@ -20,9 +20,18 @@ const PracticeTest: React.FC = () => {
     const storedContent = localStorage.getItem("generatedContent");
     if (storedContent) {
       const parsedContent = JSON.parse(storedContent);
-      if (parsedContent.practice_test && parsedContent.practice_test.questions) {
-        setPracticeTest(parsedContent.practice_test.questions);
-        setResponses(new Array(parsedContent.practice_test.questions.length).fill(null));
+
+      // Check if practice_test is a string and parse it
+      if (parsedContent.practice_test) {
+        const practiceTestData =
+          typeof parsedContent.practice_test === "string"
+            ? JSON.parse(parsedContent.practice_test) // Parse stringified JSON
+            : parsedContent.practice_test; // Use as-is if already an object
+
+        if (practiceTestData.questions) {
+          setPracticeTest(practiceTestData.questions);
+          setResponses(new Array(practiceTestData.questions.length).fill(null));
+        }
       }
     }
   }, []);
@@ -76,11 +85,18 @@ const PracticeTest: React.FC = () => {
       const data = await response.json();
 
       if (response.ok && data.practice_test) {
-        setPracticeTest(data.practice_test.questions);
-        setResponses(new Array(data.practice_test.questions.length).fill(null));
-        setGradedResults(null);
-        setGrade(null);
-        console.log("Practice test regenerated successfully.");
+        const practiceTestData =
+          typeof data.practice_test === "string"
+            ? JSON.parse(data.practice_test) // Parse stringified JSON
+            : data.practice_test; // Use as-is if already an object
+
+        if (practiceTestData.questions) {
+          setPracticeTest(practiceTestData.questions);
+          setResponses(new Array(practiceTestData.questions.length).fill(null));
+          setGradedResults(null);
+          setGrade(null);
+          console.log("Practice test regenerated successfully.");
+        }
       } else {
         console.error("Error regenerating practice test:", data.error);
       }

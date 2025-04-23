@@ -26,46 +26,70 @@ def transcribe_mp3(file_path):
     result = model.transcribe(file_path)
     return result["text"]
 
-def create_study_guide(transcription):
-    """Creates a study guide from the transcribed text."""
+def create_study_guide(transcription, target_language="English"):
+    """Generates a study guide from the transcribed text."""
+    prompt_language = f"Generate the study guide in {target_language}."
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "You are an AI that creates detailed study guides."},
-            {"role": "user", "content": f"Create a study guide and do not use any markdown formatting such as hashtags, asterisks, or backticks. Instead, organize the guide using clear, indented sections and line breaks:\n\n{transcription}"}
+            {"role": "system", "content": "You are an AI that generates study guides. you do not need to have filler words or confirmation sentences in your response, just generate what is asked of you."},
+            {"role": "user", "content": f"{prompt_language} Create a study guide and do not use any markdown formatting such as hashtags, asterisks, or backticks. Instead, organize the guide using clear, indented sections and line breaks:\n\n{transcription}"}
         ],
     )
     return response.choices[0].message.content
 
-def create_practice_test(transcription):
-    """Generates a practice test with multiple-choice, true/false, and discussion questions."""
+def create_practice_test(transcription, target_language="English"):
+    """Generates a practice test from the transcribed text."""
+    prompt_language = f"Generate the practice test in {target_language}."
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "You are an AI that generates practice tests."},
-            {"role": "user", "content": f"Create a practice test based on the following text. The test should include at least 5 multiple-choice questions, 3 true/false questions, and 1 discussion question. Return the test in JSON format with the following structure: {{'questions': [{{'type': 'multiple_choice', 'question': '...', 'options': ['...'], 'correct_answer': '...'}}, {{'type': 'true_false', 'question': '...', 'correct_answer': true/false}}, {{'type': 'discussion', 'question': '...', 'correct_answer': '...'}}]}}:\n\n{transcription}"}
+            {"role": "system", "content": "You are an AI that generates practice tests. you do not need to have filler words or confirmation sentences in your response, just generate what is asked of you and do not translate the specified json format, just do the content."},
+            {"role": "user", "content": f"""{prompt_language} Create a practice test based on the following text. The test should include at least 5 multiple-choice questions, 3 true/false questions, and 1 discussion question. Return the test in JSON format with the following structure:
+{{
+    "questions": [
+        {{
+            "type": "multiple_choice",
+            "question": "Question text here",
+            "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+            "correct_answer": "Correct option here"
+        }},
+        {{
+            "type": "true_false",
+            "question": "Question text here",
+            "correct_answer": true/false
+        }},
+        {{
+            "type": "discussion",
+            "question": "Question text here",
+            "correct_answer": "Discussion answer here"
+        }}
+    ]
+}}:
+\n\n{transcription}"""}
         ],
     )
     return response.choices[0].message.content
 
-def translate_text(text, target_language):
-    """Translates text into the target language."""
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "You are an AI translator."},
-            {"role": "user", "content": f"Translate this text to {target_language}:\n\n{text}"}
-        ],
-    )
-    return response.choices[0].message.content
-
-def create_flashcards(transcription):
+def create_flashcards(transcription, target_language="English"):
     """Generates flashcards from the transcribed text."""
+    prompt_language = f"Generate the flashcards in {target_language}."
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "You are an AI that generates flashcards."},
-            {"role": "user", "content": f"Create flashcards from the following text. Each flashcard should have a question and an answer. Return the flashcards in JSON format as an array of objects, where each object has 'question' and 'answer' keys:\n\n{transcription}"}
+            {"role": "system", "content": "You are an AI that generates flashcards. you do not need to have filler words or confirmation sentences in your response, just generate what is asked of you. for json format, do not translate the specified json format, just do the content."},
+            {"role": "user", "content": f"""{prompt_language} Create flashcards from the following text. Each flashcard should have a question and an answer. Return the flashcards in JSON format as an array of objects, where each object has 'question' and 'answer' keys. The structure should look like this:
+[
+    {{
+        "question": "Question text here",
+        "answer": "Answer text here"
+    }},
+    {{
+        "question": "Question text here",
+        "answer": "Answer text here"
+    }}
+]:
+\n\n{transcription}"""}
         ],
     )
     return response.choices[0].message.content
@@ -80,7 +104,7 @@ def upload_file():
 
         # Read user selections from form data
         translate_flag = request.form.get("translate") == "true"
-        target_language = request.form.get("targetLanguage", "")
+        target_language = request.form.get("targetLanguage", "English")
 
         # Log received data
         print("\nReceived form data:")
@@ -89,45 +113,39 @@ def upload_file():
         temp_file_path = "temp_audio.wav"
         file.save(temp_file_path)
 
-        # Transcribe audio directly into the target language if translation is selected
-        if translate_flag and target_language:
-            print(f"Transcribing directly into {target_language}...")
-            transcription = transcribe_mp3(temp_file_path)  # Transcribe in the original language
-            transcription = translate_text(transcription, target_language)  # Translate directly
-            print(f"Transcription in {target_language} completed.")
-        else:
-            print("Transcribing in the original language...")
-            transcription = transcribe_mp3(temp_file_path)
-            print("Transcription completed.")
+    
+        print("Transcribing in the original language...")
+        transcription = transcribe_mp3(temp_file_path)
+        print("Transcription completed.")
 
         # Generate results using the transcription (already in the target language if translation is selected)
         results = {
             "transcription": transcription,  # This will be in the target language if translation is selected
-            "study_guide": create_study_guide(transcription),
+            "study_guide": create_study_guide(transcription, target_language),
         }
 
         # Generate practice test
         try:
-            raw_practice_test = create_practice_test(transcription)
+            raw_practice_test = create_practice_test(transcription, target_language)
             print("Raw practice test:", raw_practice_test)
 
             # Clean and parse the practice test JSON
             if raw_practice_test.startswith("```json"):
                 raw_practice_test = raw_practice_test.strip("```json").strip("```").strip()
-            results["practice_test"] = json.loads(raw_practice_test)
+            results["practice_test"] = json.loads(raw_practice_test)  # Parse into JSON object
         except json.JSONDecodeError as e:
             print(f"Error decoding practice test JSON: {e}")
             results["practice_test"] = {"error": "Failed to generate practice test"}
 
         # Generate flashcards
         try:
-            raw_flashcards = create_flashcards(transcription)
+            raw_flashcards = create_flashcards(transcription, target_language)
             print("Raw flashcards:", raw_flashcards)
 
             # Clean and parse the flashcards JSON
             if raw_flashcards.startswith("```json"):
                 raw_flashcards = raw_flashcards.strip("```json").strip("```").strip()
-            results["flashcards"] = json.loads(raw_flashcards)
+            results["flashcards"] = json.loads(raw_flashcards)  # Parse into JSON object
         except json.JSONDecodeError as e:
             print(f"Error decoding flashcards JSON: {e}")
             results["flashcards"] = []
