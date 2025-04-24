@@ -140,9 +140,9 @@ def upload_file():
         #    print(f"Translating transcription directly into {target_language}...")
         #    transcription_text = translate_text(transcription_text, target_language)
         #    print(f"Transcription in {target_language} completed.")
-        #if(session.get("account_num") != None):
-        #   session['folder_num']= storeFolder(mysql, "Test Folder", session.get("account_num"))
-        #  transcription_num = storeTranscription(mysql,"Transcription Name", transcription_text,session.get("account_num"),session.get("folder_num") )
+        if(session.get("account_num") != None):
+           session['folder_num']= storeFolder(mysql, "Test Folder", session.get("account_num"))
+           transcription_num = storeTranscription(mysql,"Transcription Name", transcription_text,session.get("account_num"),session.get("folder_num") )
 
         # Add transcription to results
         results = {
