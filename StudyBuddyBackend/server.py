@@ -164,14 +164,7 @@ def upload_file():
         try:
             results["study_guide"] = create_study_guide(transcription_text, target_language)
             print("Study Guide:", results["study_guide"])  # Log study guide
-            if app.accountNum is not None:
-                storeStudyGuide(mysql, "StudyGuide Name", results["study_guide"], app.accountNum, transcription_num, app.folder_num)
-        except Exception as e:
-            print(f"Error generating study guide: {e}")
-            results["study_guide"] = {"error": "Failed to generate study guide"}
-
-
-            # Clean up the raw practice test string if it starts with ```json
+             # Clean up the raw practice test string if it starts with ```json
             if raw_practice_test.startswith("```json"):
                 raw_practice_test = raw_practice_test.strip("```json").strip("```").strip()
             
@@ -179,23 +172,21 @@ def upload_file():
             results["practice_test"] = json.loads(raw_practice_test)
             if (session.get("account_num") != None):
                 storePracticeTest(mysql,results["practice_test"],"Test Practice Test",session.get("account_num"),transcription_num,session.get("folder_num"))
-        except (json.JSONDecodeError, ValueError) as e:
-            print(f"Error decoding practice test JSON: {e}")
-
-            results["practice_test"] = {"error": "Failed to generate practice test"}
+        except Exception as e:
+            print(f"Error generating study guide: {e}")
+            results["study_guide"] = {"error": "Failed to generate study guide"}
 
         # Generate flashcards
         try:
             results["flashcards"] = create_flashcards(transcription_text, target_language)
             print("Flashcards:", results["flashcards"])  # Log flashcards
-            if app.accountNum is not None:
-                storeFlashcards(mysql, results["flashcards"], app.accountNum, transcription_num, app.folder_num)
+            if(session.get("account_num")!= None):
+                storeFlashcards(mysql, results["flashcards"],session.get("account_num"),transcription_num,session.get("folder_num")) 
         except Exception as e:
             print(f"Error generating flashcards: {e}")
             results["flashcards"] = []
 
-        if(session.get("account_num")!= None):
-            storeFlashcards(mysql, results["flashcards"],session.get("account_num"),transcription_num,session.get("folder_num"))  
+         
 
         # Delete the file after processing
         os.remove(file_path)
