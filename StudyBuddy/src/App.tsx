@@ -1,11 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import {BrowserRouter as Router, Route, Routes, useLocation, useNavigate, } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Navigation from "./components/Pages/Navigation";
 import Cookies from "js-cookie";
