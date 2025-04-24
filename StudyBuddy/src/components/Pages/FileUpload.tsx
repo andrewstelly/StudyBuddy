@@ -1,4 +1,6 @@
+
 import React, { useState, useEffect } from "react";
+
 import WhackAMoleGame from "../LoadingGames/WhackAMoleGame";
 import ProcessComplete from "../ProcessComplete";
 import "../Styling/FileUpload.scss";
@@ -21,6 +23,10 @@ const FileUpload: React.FC = () => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordedAudio, setRecordedAudio] = useState<Blob | null>(null);
+  const [shake, setShake] = useState(false);
+
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   /* ---------- new state ---------- */
   const [folders, setFolders] = useState<Folder[]>([]);
@@ -50,35 +56,70 @@ const FileUpload: React.FC = () => {
     e.preventDefault();
     setIsDragOver(false);
     const droppedFile = e.dataTransfer.files[0];
+
+    if (selectedFile) {
+      setShake(true);
+      setTimeout(() => setShake(false), 1500);
+      return;
+    }
+
     if (droppedFile) setSelectedFile(droppedFile);
   };
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragOver(true);
   };
-  const handleDragLeave = () => setIsDragOver(false);
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (selectedFile) {
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      return;
+    }
+
     if (file) setSelectedFile(file);
   };
 
-  /* ---------- audio recording ---------- */
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setRecordedAudio(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleRecordAudio = async () => {
     if (!isRecording) {
-      setIsRecording(true);
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      const chunks: Blob[] = [];
-      mediaRecorder.ondataavailable = (ev) => chunks.push(ev.data);
-      mediaRecorder.onstop = () => {
-        setRecordedAudio(new Blob(chunks, { type: "audio/wav" }));
-        setIsRecording(false);
-      };
-      mediaRecorder.start();
-      (window as any).mediaRecorder = mediaRecorder;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        const audioChunks: Blob[] = [];
+
+        mediaRecorder.ondataavailable = (event) => {
+          audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+          setRecordedAudio(audioBlob);
+          setIsRecording(false);
+        };
+
+        mediaRecorderRef.current = mediaRecorder;
+        mediaRecorder.start();
+        setIsRecording(true);
+      } catch (err) {
+        console.error("Recording failed:", err);
+        alert("Microphone access denied or not supported.");
+      }
     } else {
-      const mr = (window as any).mediaRecorder;
-      if (mr && mr.state !== "inactive") mr.stop();
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+        mediaRecorderRef.current.stop();
+      }
+
     }
   };
 
@@ -159,6 +200,23 @@ const FileUpload: React.FC = () => {
   /* ---------- UI ---------- */
   return (
     <div className="file-upload-wrapper">
+      <div
+        style={{
+          borderBottom: "3px solid #7ea3dc",
+          fontWeight: "bold",
+          width: "100%",
+          fontSize: "28px",
+          textAlign: "center",
+          paddingBottom: "6px",
+          marginBottom: "40px",
+          marginTop: "-50px",
+          color: "#264653",
+          userSelect: "none",
+        }}
+      >
+        Home
+      </div>
+
       {isLoading ? (
         <div className="loading-screen">
           <WhackAMoleGame />
@@ -167,7 +225,7 @@ const FileUpload: React.FC = () => {
         <>
           {/* --------------- upload box --------------- */}
           <div
-            className={`drag-drop-box ${isDragOver ? "highlight" : ""}`}
+            className={`drag-drop-box ${isDragOver ? "highlight" : ""} ${shake ? "shake-box" : ""}`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -175,14 +233,30 @@ const FileUpload: React.FC = () => {
             <h1 className="file-upload-header">File Upload</h1>
             <p>Drag &amp; Drop file here or</p>
             <label className="file-input-label">
-              <input type="file" onChange={handleFileChange} />
+              <input ref={fileInputRef} type="file" onChange={handleFileChange} />
               Choose File
             </label>
-            {selectedFile && <p className="file-name">{selectedFile.name}</p>}
+            {selectedFile && (
+              <p className="file-name">
+                {selectedFile.name}
+                <button
+                  onClick={handleRemoveFile}
+                  className="remove-file-button"
+                  title="Remove file"
+                >
+                  ✖
+                </button>
+              </p>
+            )}
+            {shake && <p className="warning-text">Cannot upload file — one is already selected.</p>}
           </div>
 
-          <button onClick={handleRecordAudio}>
-            {isRecording ? "Stop Recording" : "Record Audio"}
+          <button
+            onClick={handleRecordAudio}
+            disabled={!!selectedFile}
+            className={`record-button ${isRecording ? "recording" : ""}`}
+          >
+            {isRecording ? "Stop Recording" : " Record Audio"}
           </button>
 
           {/* --------------- options --------------- */}
@@ -239,10 +313,17 @@ const FileUpload: React.FC = () => {
         <ProcessComplete onComplete={() => setShowCompleteMessage(false)} />
       )}
 
-      {/* --------------- watermark --------------- */}
+
+
+
       <div
         className="watermark"
-        style={{ position: "fixed", bottom: 10, right: 10, zIndex: 999 }}
+        style={{
+          position: "fixed",
+          bottom: "10px",
+          right: "10px",
+          zIndex: 999,
+        }}
       >
         © 2025 StudyBuddy, Inc.
       </div>

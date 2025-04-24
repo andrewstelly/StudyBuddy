@@ -4,10 +4,12 @@ import FileUpload from "./FileUpload";
 import Settings from "./Settings";
 import Notes from "../Pages/Notes";
 import PracticeTests from "../Pages/PracticeTests";
-import FlashCards from "../Pages/FlashCards";
+import FlashCards from "./FlashCards";
 import FileUploadLayout from "../FileUploadLayout";
 import PageLayout from "../PageLayout";
 import SignIn from "../SignIn";
+import SettingsPageLayout from "../SettingsLayout";
+import FlashcardLayout from "../FlashcardLayout";
 
 const Navigation: React.FC = () => {
   return (
@@ -76,41 +78,51 @@ const Navigation: React.FC = () => {
       <Route
         path="/flash-cards"
         element={
-          <PageLayout
+          <FlashcardLayout
             title={
               <>
                 <img
                   src="/Images/StudyBuddyLogo.png"
                   alt="StudyBuddy Logo"
-                  style={{ width: "42px", height: "42px", marginRight: "1px", position: 'relative',
-                  top: '8px' }}
+                  style={{
+                    width: "42px",
+                    height: "42px",
+                    marginRight: "1px",
+                    position: "relative",
+                    top: "8px",
+                  }}
                 />
                 StudyBuddy
               </>
             }
           >
             <FlashCards />
-          </PageLayout>
+          </FlashcardLayout>
         }
       />
       <Route
         path="/settings"
         element={
-          <PageLayout
+          <SettingsPageLayout
             title={
               <>
                 <img
                   src="/Images/StudyBuddyLogo.png"
                   alt="StudyBuddy Logo"
-                  style={{ width: "42px", height: "42px", marginRight: "1px", position: 'relative',
-                  top: '8px' }}
+                  style={{
+                    width: "42px",
+                    height: "42px",
+                    marginRight: "1px",
+                    position: "relative",
+                    top: "8px",
+                  }}
                 />
                 StudyBuddy
               </>
             }
           >
             <Settings />
-          </PageLayout>
+          </SettingsPageLayout>
         }
       />
     </Routes>
