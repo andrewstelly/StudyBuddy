@@ -140,47 +140,48 @@ const FileUpload: React.FC = () => {
           textAlign: "center",
           paddingBottom: "6px",
           marginBottom: "40px",
-          marginTop: "-50px",
+          marginTop: "-10px",
           color: "#264653",
           userSelect: "none",
         }}
       >
         Home
       </div>
-
+          
       {isLoading ? (
         <div className="loading-screen">
           <WhackAMoleGame />
         </div>
       ) : (
         <>
-          <div
-            className={`drag-drop-box ${isDragOver ? "highlight" : ""} ${shake ? "shake-box" : ""}`}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-          >
-            <h1 className="file-upload-header">File Upload</h1>
-            <p>Drag & Drop file here or</p>
-            <label className="file-input-label">
-              <input ref={fileInputRef} type="file" onChange={handleFileChange} />
-              Choose File
-            </label>
-            {selectedFile && (
-              <p className="file-name">
-                {selectedFile.name}
-                <button
-                  onClick={handleRemoveFile}
-                  className="remove-file-button"
-                  title="Remove file"
-                >
-                  ✖
-                </button>
-              </p>
-            )}
-            {shake && <p className="warning-text">Cannot upload file — one is already selected.</p>}
-          </div>
-
+        <div
+          className={`drag-drop-box ${isDragOver ? "highlight" : ""} ${shake ? "shake-box" : ""}`}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+        >
+          <div className="file-upload-header">File Upload</div>
+          <p>Drag & Drop file here or</p>
+          <label className="file-input-label">
+            <input ref={fileInputRef} type="file" onChange={handleFileChange} />
+            Choose File
+          </label>
+          {selectedFile && (
+            <p className="file-name">
+              {selectedFile.name}
+              <button
+                onClick={handleRemoveFile}
+                className="remove-file-button"
+                title="Remove file"
+              >
+                ✖
+              </button>
+            </p>
+          )}
+          <p className={`warning-text ${shake ? "visible" : ""}`}>
+            Cannot upload file — one is already selected.
+          </p>
+        </div>
           <button
             onClick={handleRecordAudio}
             disabled={!!selectedFile}
@@ -223,19 +224,8 @@ const FileUpload: React.FC = () => {
       {showCompleteMessage && (
         <ProcessComplete onComplete={() => setShowCompleteMessage(false)} />
       )}
-
-      <div
-        className="watermark"
-        style={{
-          position: "fixed",
-          bottom: "10px",
-          right: "10px",
-          zIndex: 999,
-        }}
-      >
-        © 2025 StudyBuddy, Inc.
-      </div>
     </div>
+    
   );
 };
 
