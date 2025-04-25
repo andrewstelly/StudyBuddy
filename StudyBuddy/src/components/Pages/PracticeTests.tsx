@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import useGeneratedContent from "../hooks/useGeneratedContent";;
+import useGeneratedContent from "../hooks/useGeneratedContent";
+
 interface Question {
   type: string;
   question: string;
@@ -8,96 +9,78 @@ interface Question {
 }
 
 const PracticeTest: React.FC = () => {
-  const content = useGeneratedContent();          // ← NEW
+  const content = useGeneratedContent();
+
   const [practiceTest, setPracticeTest] = useState<Question[]>([]);
-  const [responses,   setResponses]   = useState<any[]>([]);
-  const [gradedResults, setGradedResults] = useState<any | null>(null);
+  const [responses, setResponses] = useState<any[]>([]);
+  const [gradedResults, setGradedResults] = useState<any[] | null>(null);
   const [grade, setGrade] = useState<string | null>(null);
   const [fontSize, setFontSize] = useState<number>(16);
   const [fontFamily, setFontFamily] = useState<string>("Arial");
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    if (content?.practice_test?.questions) {
-      const q = content.practice_test.questions;
-      setPracticeTest(q);
-      setResponses(Array(q.length).fill(null));
-      setGradedResults(null);
-      setGrade(null);
-    } else {
+    const pt = content?.practice_test;
+    if (!pt || !Array.isArray(pt.questions)) {
       setPracticeTest([]);
       setResponses([]);
       setGradedResults(null);
       setGrade(null);
+      return;
     }
+    setPracticeTest(pt.questions);
+    setResponses(new Array(pt.questions.length).fill(null));
+    setGradedResults(null);
+    setGrade(null);
   }, [content]);
 
-  const handleResponseChange = (index: number, value: any) => {
-    const updatedResponses = [...responses];
-    updatedResponses[index] = value;
-    setResponses(updatedResponses);
+  const handleResponseChange = (i: number, v: any) => {
+    const next = [...responses];
+    next[i] = v;
+    setResponses(next);
   };
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch("http://localhost:5000/grade-test", {
+      const res = await fetch("http://localhost:5000/grade-test", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ responses, practice_test: { questions: practiceTest } }),
       });
-      const data = await response.json();
-
-      if (response.ok) {
-        setGradedResults(data.graded_results);
-        const correctAnswers = data.graded_results.filter((result: any) => result.correct).length;
-        setGrade(`You got ${correctAnswers} out of 9 correct!`);
-        setPracticeTest([]);
-      } else {
-        console.error("Error grading practice test:", data.error);
-      }
-    } catch (error) {
-      console.error("Error submitting practice test:", error);
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || "grading failed");
+      setGradedResults(body.graded_results);
+      const correctCount = body.graded_results.filter((r: any) => r.correct).length;
+      setGrade(`You got ${correctCount} out of ${practiceTest.length} correct!`);
+      setPracticeTest([]); // clear questions after submission
+    } catch (e) {
+      console.error(e);
     }
   };
 
   const regenerateTest = async () => {
     setLoading(true);
     try {
-      const storedContent = localStorage.getItem("generatedContent");
-      if (!storedContent) {
-        console.error("No transcription available to regenerate the test.");
-        return;
-      }
-
-      const parsedContent = JSON.parse(storedContent);
-      const transcription = parsedContent.transcription;
-
-      const response = await fetch("http://localhost:5000/regenerate-practice-test", {
+      const transcription = content?.transcription;
+      if (!transcription) return console.error("no transcription");
+      const res = await fetch("http://localhost:5000/regenerate-practice-test", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transcription }),
       });
-
-      const data = await response.json();
-
-      if (response.ok && data.practice_test) {
-        const practiceTestData =
-          typeof data.practice_test === "string"
-            ? JSON.parse(data.practice_test) // Parse stringified JSON
-            : data.practice_test; // Use as-is if already an object
-
-        if (practiceTestData.questions) {
-          setPracticeTest(practiceTestData.questions);
-          setResponses(new Array(practiceTestData.questions.length).fill(null));
-          setGradedResults(null);
-          setGrade(null);
-          console.log("Practice test regenerated successfully.");
-        }
-      } else {
-        console.error("Error regenerating practice test:", data.error);
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || "regeneration failed");
+      const pt = typeof body.practice_test === "string"
+        ? JSON.parse(body.practice_test)
+        : body.practice_test;
+      if (Array.isArray(pt.questions)) {
+        setPracticeTest(pt.questions);
+        setResponses(new Array(pt.questions.length).fill(null));
+        setGradedResults(null);
+        setGrade(null);
       }
-    } catch (error) {
-      console.error("Error regenerating practice test:", error);
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }
@@ -112,8 +95,10 @@ const PracticeTest: React.FC = () => {
           height: "80vh",
           display: "flex",
           flexDirection: "column",
-        }}>
+        }}
+      >
 
+        {/* Top Controls */}
         <div style={{
           borderBottom: "3px solid #7ea3dc",
           fontWeight: "bold",
@@ -141,7 +126,6 @@ const PracticeTest: React.FC = () => {
             flexWrap: "wrap",
           }}
         >
-
           <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             Font Size:
             <select
@@ -170,8 +154,6 @@ const PracticeTest: React.FC = () => {
             {loading ? "Regenerating..." : "Regenerate Test"}
           </button>
 
-
-
           <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             Font Type:
             <select
@@ -189,6 +171,7 @@ const PracticeTest: React.FC = () => {
           </label>
         </div>
 
+        {/* Main Test Area */}
         <div
           style={{
             flex: 1,
@@ -201,7 +184,6 @@ const PracticeTest: React.FC = () => {
             backgroundColor: "#ebf6ff",
           }}
         >
-
           {gradedResults ? (
             <div style={{ marginTop: "20px" }}>
               {grade && (
@@ -275,84 +257,43 @@ const PracticeTest: React.FC = () => {
                 </p>
 
                 {question.type === "multiple_choice" && question.options && (
-                  <div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginLeft: "10px" }}>
                     {question.options.map((option, i) => (
-                      <label
-                        key={i}
-                        style={{
-                          display: "block",
-                          marginBottom: "5px",
-                          marginLeft: "-565px",
-                        }}
-                      >
+                      <label key={i} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <input
                           type="radio"
                           name={`question-${index}`}
                           value={option}
                           onChange={() => handleResponseChange(index, option)}
-                          style={{
-                            transform: "scale(1.35)",
-                            marginRight: "-340px",
-                            paddingLeft: "0px",
-                          }}
+                          style={{ transform: "scale(1.25)" }}
                         />
-                        <span
-                          style={{
-                            textAlign: "left",
-                            width: "90%",
-                            marginLeft: "-285px",
-                          }}
-                        >
-                          {option}
-                        </span>
+                        {option}
                       </label>
                     ))}
                   </div>
                 )}
 
                 {question.type === "true_false" && (
-                  <div>
-                    <label
-                      style={{
-                        display: "Block",
-                        alignItems: "center",
-                        marginBottom: "5px",
-                        marginLeft: "-564px",
-                      }}
-                    >
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginLeft: "10px" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <input
                         type="radio"
                         name={`question-${index}`}
                         value="true"
                         onChange={() => handleResponseChange(index, true)}
-                        style={{
-                          transform: "scale(1.35)",
-                          marginRight: "-625px",
-                          paddingLeft: "0px",
-                        }}
+                        style={{ transform: "scale(1.25)" }}
                       />
-                      <span style={{ textAlign: "left", width: "90%" }}>True</span>
+                      True
                     </label>
-                    <label
-                      style={{
-                        display: "block",
-                        alignItems: "center",
-                        marginBottom: "5px",
-                        marginLeft: "-564px",
-                      }}
-                    >
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <input
                         type="radio"
                         name={`question-${index}`}
                         value="false"
                         onChange={() => handleResponseChange(index, false)}
-                        style={{
-                          transform: "scale(1.35)",
-                          marginRight: "-625px",
-                          paddingLeft: "0px",
-                        }}
+                        style={{ transform: "scale(1.25)" }}
                       />
-                      <span style={{ textAlign: "left", width: "90%" }}>False</span>
+                      False
                     </label>
                   </div>
                 )}
@@ -360,7 +301,14 @@ const PracticeTest: React.FC = () => {
                 {question.type === "discussion" && (
                   <textarea
                     placeholder="Type your answer here..."
-                    style={{ width: "100%", height: "100px", marginTop: "10px" }}
+                    style={{
+                      width: "100%",
+                      height: "100px",
+                      marginTop: "10px",
+                      borderRadius: "6px",
+                      padding: "8px",
+                      fontSize: "14px",
+                    }}
                     onChange={(e) => handleResponseChange(index, e.target.value)}
                   />
                 )}
@@ -371,6 +319,7 @@ const PracticeTest: React.FC = () => {
           )}
         </div>
 
+        {/* Submit Button */}
         <div style={{ display: "flex", justifyContent: "center", gap: "20px" }}>
           <button
             onClick={handleSubmit}
@@ -386,7 +335,9 @@ const PracticeTest: React.FC = () => {
         </div>
       </div>
 
-      <div className="watermark">© 2025 StudyBuddy, Inc.</div>
+      <div className="watermark" style={{ textAlign: "center", marginTop: "20px" }}>
+        © 2025 StudyBuddy, Inc.
+      </div>
     </div>
   );
 };
