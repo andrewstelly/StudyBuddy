@@ -13,6 +13,8 @@
   }
   
   .drag-drop-box {
+    position: relative;
+    padding-top: 3rem;
     border: 2px dashed #7ea3dc;
     border-radius: 0.5rem;
     width: 100%;
@@ -106,13 +108,17 @@
   }
 
   .file-upload-header {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #000000;
-  margin-bottom: 1rem;
-  text-align: center;
-  margin-top: -6rem;
-}
+    position: absolute;
+    top: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #000000;
+    text-align: center;
+    pointer-events: none;
+    user-select: none;
+  }
 
 .shake-box {
   animation: shake 0.4s ease;
@@ -127,9 +133,18 @@
 }
 
 .warning-text {
+  min-height: 1.5rem;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease;
   color: red;
   font-weight: bold;
   margin-top: 10px;
+}
+
+.warning-text.visible {
+  visibility: visible;
+  opacity: 1;
 }
 
 .remove-file-button {

@@ -118,15 +118,18 @@ const PracticeTest: React.FC = () => {
           flexDirection: "column",
         }}>
 
-        <div style={{
-          borderBottom: "3px solid #7ea3dc",
-          fontWeight: "bold",
-          fontSize: "24px",
-          textAlign: "left",
-          paddingBottom: "6px",
-          marginBottom: "14px",
-          color: "#264653",
-        }}>
+        <div
+          style={{
+            width: "100%",
+            borderBottom: "0.1875rem solid #7ea3dc",
+            fontWeight: "bold",
+            fontSize: "1.5rem",
+            textAlign: "left",
+            paddingBottom: "0.375rem",
+            marginBottom: "0.875rem",
+            color: "#264653",
+          }}
+        >
           Practice Tests
         </div>
 
@@ -375,19 +378,17 @@ const PracticeTest: React.FC = () => {
           )}
         </div>
 
-        <div style={{ display: "flex", justifyContent: "center", gap: "20px" }}>
-          <button
-            onClick={handleSubmit}
-            className="submit-button"
-            style={{
-              marginTop: "20px",
-              marginBottom: "-50px",
-              width: "200px",
-            }}
-          >
-            Submit Test
-          </button>
-        </div>
+        <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginTop: "20px" }}>
+        <button
+          onClick={handleSubmit}
+          className="submit-button"
+          style={{
+            width: "200px",
+          }}
+        >
+          Submit Test
+        </button>
+      </div>
       </div>
 
       <div className="watermark">© 2025 StudyBuddy, Inc.</div>

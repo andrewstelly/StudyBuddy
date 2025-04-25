@@ -74,18 +74,20 @@ const Notes: React.FC = () => {
         <div className="page-layout">
             <div style={{ width: "90%", maxWidth: "900px", height: "80vh", display: "flex", flexDirection: "column"}}>
 
-            <div style={{
-                borderBottom: "3px solid #7ea3dc",
+            <div
+            style={{
+                width: "100%",
+                borderBottom: "0.1875rem solid #7ea3dc",
                 fontWeight: "bold",
-                fontSize: "24px",
+                fontSize: "1.5rem",
                 textAlign: "left",
-                paddingBottom: "6px",
-                marginBottom: "14px",
+                paddingBottom: "0.375rem",
+                marginBottom: "0.875rem",
                 color: "#264653",
-            }}>
-                Notes
-             </div>
-
+            }}
+            >
+            Notes
+            </div>
                 {/* Control Container */}
                 <div
                     style={{

@@ -65,12 +65,13 @@ const FlashCards: React.FC = () => {
     >
       <div
         style={{
-          borderBottom: "3px solid #7ea3dc",
+          width: "100%",
+          borderBottom: "0.1875rem solid #7ea3dc",
           fontWeight: "bold",
-          fontSize: "24px",
+          fontSize: "1.5rem",
           textAlign: "left",
-          paddingBottom: "6px",
-          marginBottom: "40px",
+          paddingBottom: "0.375rem",
+          marginBottom: "2.5rem",
           color: "#264653",
           userSelect: "none",
         }}
