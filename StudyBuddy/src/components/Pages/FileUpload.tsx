@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import WhackAMoleGame from "../LoadingGames/WhackAMoleGame";
 import ProcessComplete from "../ProcessComplete";
-import { Folder as FolderIcon } from "lucide-react"; 
+import { Folder as FolderIcon } from "lucide-react"; // <--- ICON
 import "../Styling/FileUpload.scss";
 
 const API = "http://localhost:5000";
@@ -143,7 +143,7 @@ const FileUpload: React.FC = () => {
     } finally {
       setIsLoading(false);
       setShowCompleteMessage(true);
-      setSelectedFile(null);
+      setSelectedFile(null);  // clear uploaded file
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
@@ -191,6 +191,7 @@ const FileUpload: React.FC = () => {
         </div>
       ) : (
         <>
+          {/* File Upload Section */}
           <div
             className={`drag-drop-box ${isDragOver ? "highlight" : ""} ${shake ? "shake-box" : ""}`}
             onDrop={handleDrop}
@@ -220,7 +221,7 @@ const FileUpload: React.FC = () => {
             </p>
           </div>
 
-          {/* Controls */}
+          {/* Top Controls */}
           <div
             style={{
               backgroundColor: "#ebf6ff",
@@ -232,6 +233,7 @@ const FileUpload: React.FC = () => {
               boxShadow: "0 2px 5px rgba(0, 0, 0, 0.05)",
               display: "flex",
               justifyContent: "center",
+              alignItems: "flex-start",
               flexWrap: "wrap",
               gap: "20px",
               width: "90%",
@@ -292,7 +294,7 @@ const FileUpload: React.FC = () => {
             </div>
           </div>
 
-          {/* Folders */}
+          {/* Folders Section */}
           <div
             style={{
               backgroundColor: "#ebf6ff",
@@ -329,7 +331,7 @@ const FileUpload: React.FC = () => {
                 style={{
                   display: "flex",
                   flexWrap: "wrap",
-                  justifyContent: "center",
+                  justifyContent: "center",  // <-- Center folders dynamically
                   gap: "1rem",
                 }}
               >
@@ -344,13 +346,14 @@ const FileUpload: React.FC = () => {
                       minWidth: "200px",
                       maxWidth: "220px",
                       minHeight: "60px",
+                      textAlign: "center",
+                      fontSize: "1rem",
+                      fontWeight: "bold",
+                      color: "#264653",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       gap: "10px",
-                      fontSize: "1rem",
-                      fontWeight: "bold",
-                      color: "#264653",
                       cursor: "pointer",
                       transition: "background-color 0.3s ease",
                     }}
@@ -365,6 +368,7 @@ const FileUpload: React.FC = () => {
             )}
           </div>
 
+          {/* PROCESS COMPLETE */}
           {showCompleteMessage && (
             <ProcessComplete onComplete={() => setShowCompleteMessage(false)} />
           )}

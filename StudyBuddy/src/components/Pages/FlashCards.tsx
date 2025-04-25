@@ -58,7 +58,8 @@ const FlashCards: React.FC = () => {
           fontSize: "1.5rem",
           textAlign: "left",
           paddingBottom: "0.375rem",
-          marginBottom: "2.5rem",
+          marginBottom: "4rem",
+          marginTop: "-3rem",
           color: "#264653",
           userSelect: "none",
         }}
@@ -107,7 +108,7 @@ const FlashCards: React.FC = () => {
       ) : (
         <p>No flashcards available.</p>
       )}
-
+      
       <div className="watermark" style={{ marginTop: "2rem" }}>
         © 2025 StudyBuddy, Inc.
       </div>
