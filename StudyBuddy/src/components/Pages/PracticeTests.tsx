@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import useGeneratedContent from "../hooks/useGeneratedContent";
 
 interface Question {
   type: string;
@@ -9,78 +8,99 @@ interface Question {
 }
 
 const PracticeTest: React.FC = () => {
-  const content = useGeneratedContent();
-
   const [practiceTest, setPracticeTest] = useState<Question[]>([]);
   const [responses, setResponses] = useState<any[]>([]);
-  const [gradedResults, setGradedResults] = useState<any[] | null>(null);
+  const [gradedResults, setGradedResults] = useState<any | null>(null);
   const [grade, setGrade] = useState<string | null>(null);
   const [fontSize, setFontSize] = useState<number>(16);
   const [fontFamily, setFontFamily] = useState<string>("Arial");
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const pt = content?.practice_test;
-    if (!pt || !Array.isArray(pt.questions)) {
-      setPracticeTest([]);
-      setResponses([]);
-      setGradedResults(null);
-      setGrade(null);
-      return;
-    }
-    setPracticeTest(pt.questions);
-    setResponses(new Array(pt.questions.length).fill(null));
-    setGradedResults(null);
-    setGrade(null);
-  }, [content]);
+    const storedContent = localStorage.getItem("generatedContent");
+    if (storedContent) {
+      const parsedContent = JSON.parse(storedContent);
 
-  const handleResponseChange = (i: number, v: any) => {
-    const next = [...responses];
-    next[i] = v;
-    setResponses(next);
+      if (parsedContent.practice_test) {
+        const practiceTestData =
+          typeof parsedContent.practice_test === "string"
+            ? JSON.parse(parsedContent.practice_test)
+            : parsedContent.practice_test;
+
+        if (practiceTestData.questions) {
+          setPracticeTest(practiceTestData.questions);
+          setResponses(new Array(practiceTestData.questions.length).fill(null));
+        }
+      }
+    }
+  }, []);
+
+  const handleResponseChange = (index: number, value: any) => {
+    const updatedResponses = [...responses];
+    updatedResponses[index] = value;
+    setResponses(updatedResponses);
   };
 
   const handleSubmit = async () => {
     try {
-      const res = await fetch("http://localhost:5000/grade-test", {
+      const response = await fetch("http://localhost:5000/grade-test", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ responses, practice_test: { questions: practiceTest } }),
       });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.error || "grading failed");
-      setGradedResults(body.graded_results);
-      const correctCount = body.graded_results.filter((r: any) => r.correct).length;
-      setGrade(`You got ${correctCount} out of ${practiceTest.length} correct!`);
-      setPracticeTest([]); // clear questions after submission
-    } catch (e) {
-      console.error(e);
+      const data = await response.json();
+
+      if (response.ok) {
+        setGradedResults(data.graded_results);
+        const correctAnswers = data.graded_results.filter((result: any) => result.correct).length;
+        setGrade(`You got ${correctAnswers} out of ${practiceTest.length} correct!`);
+        // No more setPracticeTest([]) here
+      } else {
+        console.error("Error grading practice test:", data.error);
+      }
+    } catch (error) {
+      console.error("Error submitting practice test:", error);
     }
   };
 
   const regenerateTest = async () => {
     setLoading(true);
     try {
-      const transcription = content?.transcription;
-      if (!transcription) return console.error("no transcription");
-      const res = await fetch("http://localhost:5000/regenerate-practice-test", {
+      const storedContent = localStorage.getItem("generatedContent");
+      if (!storedContent) {
+        console.error("No transcription available to regenerate the test.");
+        return;
+      }
+
+      const parsedContent = JSON.parse(storedContent);
+      const transcription = parsedContent.transcription;
+
+      const response = await fetch("http://localhost:5000/regenerate-practice-test", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transcription }),
       });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.error || "regeneration failed");
-      const pt = typeof body.practice_test === "string"
-        ? JSON.parse(body.practice_test)
-        : body.practice_test;
-      if (Array.isArray(pt.questions)) {
-        setPracticeTest(pt.questions);
-        setResponses(new Array(pt.questions.length).fill(null));
-        setGradedResults(null);
-        setGrade(null);
+
+      const data = await response.json();
+
+      if (response.ok && data.practice_test) {
+        const practiceTestData =
+          typeof data.practice_test === "string"
+            ? JSON.parse(data.practice_test)
+            : data.practice_test;
+
+        if (practiceTestData.questions) {
+          setPracticeTest(practiceTestData.questions);
+          setResponses(new Array(practiceTestData.questions.length).fill(null));
+          setGradedResults(null);
+          setGrade(null);
+          console.log("Practice test regenerated successfully.");
+        }
+      } else {
+        console.error("Error regenerating practice test:", data.error);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error("Error regenerating practice test:", error);
     } finally {
       setLoading(false);
     }

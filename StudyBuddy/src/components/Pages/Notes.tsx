@@ -56,124 +56,108 @@ const Notes: React.FC = () => {
     setIsSpeaking(true);
   };
 
-  /* ------------------------------------------------------------------ */
-  /* UI                                                                  */
-  /* ------------------------------------------------------------------ */
   return (
     <div className="page-layout">
-      <div
-        style={{
-          width: "90%",
-          maxWidth: 900,
-          height: "80vh",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        {/* font / family controls */}
+        <div style={{ width: "90%", maxWidth: "900px", height: "80vh", display: "flex", flexDirection: "column"}}>
+
         <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 20,
-            marginBottom: 10,
-          }}
-        >
-          <label style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            Font Size:
-            <select
-              value={fontSize}
-              onChange={e => setFontSize(parseInt(e.target.value))}
-              style={{ padding: 5 }}
-            >
-              {[12, 14, 16, 18, 20, 24, 28].map(sz => (
-                <option key={sz} value={sz}>
-                  {sz}px{sz === 16 ? " (Default)" : ""}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            Font Type:
-            <select
-              value={fontFamily}
-              onChange={e => setFontFamily(e.target.value)}
-              style={{ padding: 5 }}
-            >
-              {[
-                "Arial",
-                "Courier New",
-                "Georgia",
-                "Times New Roman",
-                "Verdana",
-                "OpenDyslexic",
-              ].map(f => (
-                <option key={f} value={f}>
-                  {f}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        {/* voice selector */}
-        <label style={{ marginBottom: 10, display: "flex", alignItems: "center", gap: 10 }}>
-          Voice:
-          <select
-            value={selectedVoice}
-            onChange={e => setSelectedVoice(e.target.value)}
-            style={{ padding: 5 }}
-          >
-            {voices.map(v => (
-              <option key={v.name} value={v.name}>
-                {v.name} ({v.lang})
-              </option>
-            ))}
-          </select>
-        </label>
-
-        {/* text‑to‑speech button */}
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <button
-            onClick={handleTextToSpeech}
-            style={{
-              marginBottom: 10,
-              padding: "10px 20px",
-              backgroundColor: isSpeaking ? "red" : "green",
-              color: "white",
-              border: "none",
-              borderRadius: 5,
-              cursor: "pointer",
-              width: 200,
-            }}
-          >
-            {isSpeaking ? "Stop Speaking" : "Read Aloud"}
-          </button>
-        </div>
-
-        {/* study‑guide textarea */}
-        <textarea
-          className="text-box"
-          value={studyGuide}
-          onChange={handleChange}
-          style={{
-            flexGrow: 1,
+        style={{
             width: "100%",
-            fontSize: `${fontSize}px`,
-            fontFamily,
-            resize: "none",
-            border: "1px solid #ccc",
-            borderRadius: 5,
-            padding: 10,
-            boxSizing: "border-box",
-          }}
-        />
-      </div>
+            borderBottom: "0.1875rem solid #7ea3dc",
+            fontWeight: "bold",
+            fontSize: "1.5rem",
+            textAlign: "left",
+            paddingBottom: "0.375rem",
+            marginBottom: "0.875rem",
+            color: "#264653",
+        }}
+        >
+        Notes
+        </div>
+            {/* Control Container */}
+            <div
+                style={{
+                    backgroundColor: "#ebf6ff",
+                    border: "1px solid #ccc",
+                    borderRadius: "8px",
+                    padding: "16px",
+                    marginBottom: "20px",
+                    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.05)",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "20px",
+                    flexWrap: "wrap",
+                }}
+            >
+                {/* Font Size Selector */}
+                <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    Font Size:
+                    <select value={fontSize} onChange={(e) => setFontSize(parseInt(e.target.value))} style={{ padding: "5px" }}>
+                        <option value={12}>12px</option>
+                        <option value={14}>14px</option>
+                        <option value={16}>16px (Default)</option>
+                        <option value={18}>18px</option>
+                        <option value={20}>20px</option>
+                        <option value={24}>24px</option>
+                        <option value={28}>28px</option>
+                    </select>
+                </label>
 
-      <div className="watermark">© 2025 StudyBuddy, Inc.</div>
+                {/* Read Aloud Button */}
+                <button
+                onClick={handleTextToSpeech}
+                className={`read-button ${isSpeaking ? "recording" : ""}`}
+                style={{
+                    width: "200px",
+                    height: "40px",
+                    marginTop: "0px",
+                }}
+                >
+                {isSpeaking ? "Stop Speaking" : "Read Aloud"}
+                </button>
+
+
+                {/* Font Type Selector */}
+                <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    Font Type:
+                    <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} style={{ padding: "5px" }}>
+                        <option value="Arial">Arial</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="OpenDyslexic">OpenDyslexic</option>
+                    </select>
+                </label>
+            </div>
+
+            {/* Textarea */}
+            <textarea
+                className="text-box"
+                value={studyGuide}
+                onChange={handleChange}
+                style={{
+                    fontSize: `${fontSize}px`,
+                    fontFamily: fontFamily,
+                    resize: "none",
+                    flexGrow: 1,
+                    width: "100%",
+                    border: "1px solid #ccc",
+                    borderRadius: "5px",
+                    padding: "10px",
+                    boxSizing: "border-box",
+                    backgroundColor: "#ebf6ff",
+                }}
+            />
+        </div>
+
+        {/* Watermark */}
+        <div className="watermark">
+            © 2025 StudyBuddy, Inc.
+        </div>
     </div>
-  );
+);
 };
 
 export default Notes;
