@@ -162,12 +162,6 @@ def upload_file():
         # Generate study guide
 
         try:
-            results["study_guide"] = create_study_guide(transcription_text, target_language)
-            print("Study Guide:", results["study_guide"])  # Log study guide
-             # Clean up the raw practice test string if it starts with ```json
-            if raw_practice_test.startswith("```json"):
-                raw_practice_test = raw_practice_test.strip("```json").strip("```").strip()
-            
             # Parse the practice test JSON
             results["practice_test"] = json.loads(raw_practice_test)
             if (session.get("account_num") != None):
@@ -178,7 +172,7 @@ def upload_file():
 
         # Generate flashcards
         try:
-            results["flashcards"] = create_flashcards(transcription_text, target_language)
+            results["flashcards"] = json.loads(create_flashcards(transcription_text, target_language))
             print("Flashcards:", results["flashcards"])  # Log flashcards
             if(session.get("account_num")!= None):
                 storeFlashcards(mysql, results["flashcards"],session.get("account_num"),transcription_num,session.get("folder_num")) 
