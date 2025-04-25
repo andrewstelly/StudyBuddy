@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import '../components/Styling/SignIn.css'; 
+import '../components/Styling/SignIn.css';
 import { Link } from "react-router-dom";
 
 export default function SignIn() {
@@ -10,33 +10,29 @@ export default function SignIn() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    console.log("Form submitted!")
-  
+    e.preventDefault();
+
     try {
       const response = await fetch("http://localhost:5000/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", // Include cookies for session management
         body: JSON.stringify({ email, password }),
-      })
-  
-      const data = await response.json()
-  
+      });
+
+      const data = await response.json();
+
       if (response.ok) {
-        // Only on 2xx:
-        Cookies.set("auth", "true", { expires: 7 })
-        navigate("/home")
+        Cookies.set("auth", "true", { expires: 7 });
+        navigate("/home");
       } else {
-        // Stay on this page for 4xx/5xx
-        alert(data.error || `Login failed (${response.status})`)
+        alert(data.error || `Login failed (${response.status})`);
       }
     } catch (error) {
-      console.error("Error during sign-in:", error)
-      alert("Network error – please try again.")
+      console.error("Error during sign-in:", error);
+      alert("Network error – please try again.");
     }
   };
-  
 
   return (
     <div className="signin-page">

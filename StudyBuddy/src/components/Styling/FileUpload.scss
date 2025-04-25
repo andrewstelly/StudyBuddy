@@ -1,3 +1,5 @@
+/* FileUpload.scss */
+
 .file-upload-wrapper {
   position: relative;
   display: flex;
@@ -33,6 +35,12 @@
   background-color: #e6f1ff;
 }
 
+.drag-drop-box.highlight {
+  background-color: #d0e6ff;
+  border-color: #2c5bb5;
+  box-shadow: 0 0 0 4px rgba(44, 91, 181, 0.2);
+}
+
 .file-input-label {
   cursor: pointer;
   font-weight: bold;
@@ -62,13 +70,12 @@
   display: flex;
   align-items: center;
   gap: 0.2rem;
-  cursor: pointer; 
+  cursor: pointer;
 }
 
 .options input[type="checkbox"] {
   cursor: pointer;
 }
-
 
 .upload-button {
   padding: 0.75rem 1.5rem;
@@ -102,12 +109,6 @@
   z-index: 10;
 }
 
-.drag-drop-box.highlight {
-  background-color: #d0e6ff;
-  border-color: #2c5bb5;
-  box-shadow: 0 0 0 4px rgba(44, 91, 181, 0.2);
-}
-
 .file-upload-header {
   position: absolute;
   top: 3rem;
@@ -122,75 +123,75 @@
 }
 
 .shake-box {
-animation: shake 0.4s ease;
+  animation: shake 0.4s ease;
 }
 
 @keyframes shake {
-0% { transform: translateX(0); }
-25% { transform: translateX(-6px); }
-50% { transform: translateX(6px); }
-75% { transform: translateX(-6px); }
-100% { transform: translateX(0); }
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
+  75% { transform: translateX(-6px); }
+  100% { transform: translateX(0); }
 }
 
 .warning-text {
-min-height: 1.5rem;
-visibility: hidden;
-opacity: 0;
-transition: opacity 0.3s ease;
-color: red;
-font-weight: bold;
-margin-top: 10px;
+  min-height: 1.5rem;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
 }
 
 .warning-text.visible {
-visibility: visible;
-opacity: 1;
+  visibility: visible;
+  opacity: 1;
 }
 
 .remove-file-button {
-background: transparent;
-border: none;
-color: #d9534f;
-font-size: 1.2rem;
-margin-left: 5px;
-cursor: pointer;
-transition: transform 0.2s ease;
+  background: transparent;
+  border: none;
+  color: #d9534f;
+  font-size: 1.2rem;
+  margin-left: 5px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
 
-&:hover {
+.remove-file-button:hover {
   color: #c9302c;
   transform: scale(1.2);
 }
-}
 
 .record-button {
-background-color: #f0ad4e;
-border: none;
-color: white;
-font-weight: bold;
-padding: 0.75rem 1.5rem;
-border-radius: 0.5rem;
-margin-top: 1rem;
-cursor: pointer;
-transition: background-color 0.3s ease;
+  background-color: #f0ad4e;
+  border: none;
+  color: white;
+  font-weight: bold;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
 
-&:hover {
+.record-button:hover {
   background-color: #ec971f;
 }
 
-&:disabled {
+.record-button:disabled {
   background-color: #ddd;
   cursor: not-allowed;
 }
 
-&.recording {
+.record-button.recording {
   background-color: #d9534f;
   animation: pulse 1s infinite;
 }
-}
 
 @keyframes pulse {
-0% { box-shadow: 0 0 0 0 rgba(217, 83, 79, 0.7); }
-70% { box-shadow: 0 0 0 10px rgba(217, 83, 79, 0); }
-100% { box-shadow: 0 0 0 0 rgba(217, 83, 79, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(217, 83, 79, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(217, 83, 79, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(217, 83, 79, 0); }
 }
