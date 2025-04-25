@@ -2,7 +2,6 @@ import sys
 import os
 import json
 import openai
-import bcrypt
 from flask import Flask, request, jsonify, send_file,session, make_response
 from flask_cors import CORS  # Import CORS
 from flaskext.mysql import MySQL
@@ -18,17 +17,15 @@ client = openai.OpenAI(api_key=api_key)
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)  # Enable CORS for all routes
-
+app.secret_key = os.getenv('FLASK_SECRET_KEY')
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 app.config['MYSQL_DATABASE_HOST'] = 'study-buddy-database.co3kew2gkyw2.us-east-1.rds.amazonaws.com' # Specify Endpoint
 app.config['MYSQL_DATABASE_USER'] = 'admin' # Specify Master username
 app.config['MYSQL_DATABASE_PASSWORD'] = 'StudyBuddy!' # Specify Master password
 app.config['MYSQL_DATABASE_DB'] = 'study_buddy_database' # Specify database name
 
 mysql = MySQL(app)
-app.accountNum = None
 
 
 # Handle preflight OPTIONS request for CORS
@@ -67,7 +64,21 @@ def register():
     finally:
         cursor.close()
         conn.close()
-
+@app.route('/folders', methods=['GET'])
+def sendFolders():
+    try:
+        print("Current session:", dict(session))   # Debugging log
+        if(session.get("account_num")== None):
+            print("Account number is None, returning empty folders list")  # Debugging log
+            return jsonify({"folders":[]}), 200
+        else:
+            print("Retrieving folders for account:", session.get("account_num"))  # Debugging log
+            folder_data = retrieveAllFolders(mysql,session.get("account_num"))
+            print(f"Retrieved folder data: {folder_data}")  # Debugging log
+            return jsonify({"folder": folder_data}), 200
+    except Exception as e:
+        print(f"Error retrieving folders: {e}")
+        return jsonify({"error": str(e)}), 500
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -77,13 +88,14 @@ def login():
     if not email or not password:
         return jsonify({'error': 'Missing fields'}), 400
     elif email == "1@1.com" and password == "1":
-        app.accountNum = None
+        session["account_num"]= None
         return jsonify({'message': 'Login successful'}), 200
     else:
         try:
             conn = mysql.connect()
             cursor = conn.cursor()
-            verified, app.accountNum = verifyPassword(cursor, email, password) #add password login functionality
+            verified, session["account_num"] = verifyPassword(cursor, email, password) #add password login functionality
+            print("Current session:", dict(session))# Debugging log
             if verified:  # assuming password is at index 2
                 cursor.close()
                 conn.close()
@@ -123,45 +135,52 @@ def upload_file():
         transcription_text = transcribe_mp3(file_path)  # Transcribe in the original language
         print("Transcription completed.")
 
-        # Store folder and transcription in the database if logged in
-        if app.accountNum is not None:
-            app.folder_num = storeFolder(mysql, "Test Folder", app.accountNum)
-            transcription_num = storeTranscription(mysql, "Transcription Name", transcription_text, app.accountNum, app.folder_num)
+        # Translate transcription if translation is selected
+        #if translate_flag and target_language:
+        #    print(f"Translating transcription directly into {target_language}...")
+        #    transcription_text = translate_text(transcription_text, target_language)
+        #    print(f"Transcription in {target_language} completed.")
+        if(session.get("account_num") != None):
+           session['folder_num']= storeFolder(mysql, "Test Folder", session.get("account_num"))
+           transcription_num = storeTranscription(mysql,"Transcription Name", transcription_text,session.get("account_num"),session.get("folder_num") )
 
         # Add transcription to results
         results = {
             "transcription": transcription_text  # This will always be in the original language
         }
 
+
+        # Always create study guide
+        results["study_guide"] = create_study_guide(transcription_text)
+        print("Study Guide:", results["study_guide"])  # Log study guide
+        if(session.get("account_num") != None):
+            storeStudyGuide(mysql, "StudyGuide Name", results["study_guide"], session.get("account_num"), transcription_num, session.get("folder_num") )
+        # Always create practice test
+        raw_practice_test = create_practice_test(transcription_text)
+        print("Raw practice test output:", raw_practice_test)  # Debugging log
+
         # Generate study guide
+
         try:
-            results["study_guide"] = create_study_guide(transcription_text, target_language)
-            print("Study Guide:", results["study_guide"])  # Log study guide
-            if app.accountNum is not None:
-                storeStudyGuide(mysql, "StudyGuide Name", results["study_guide"], app.accountNum, transcription_num, app.folder_num)
+            # Parse the practice test JSON
+            results["practice_test"] = json.loads(raw_practice_test)
+            if (session.get("account_num") != None):
+                storePracticeTest(mysql,results["practice_test"],"Test Practice Test",session.get("account_num"),transcription_num,session.get("folder_num"))
         except Exception as e:
             print(f"Error generating study guide: {e}")
             results["study_guide"] = {"error": "Failed to generate study guide"}
 
-        # Generate practice test
-        try:
-            results["practice_test"] = create_practice_test(transcription_text, target_language)
-            print("Practice Test:", results["practice_test"])  # Log practice test
-            if app.accountNum is not None:
-                storePracticeTest(mysql, results["practice_test"], "Test Practice Test", app.accountNum, transcription_num, app.folder_num)
-        except Exception as e:
-            print(f"Error generating practice test: {e}")
-            results["practice_test"] = {"error": "Failed to generate practice test"}
-
         # Generate flashcards
         try:
-            results["flashcards"] = create_flashcards(transcription_text, target_language)
+            results["flashcards"] = json.loads(create_flashcards(transcription_text, target_language))
             print("Flashcards:", results["flashcards"])  # Log flashcards
-            if app.accountNum is not None:
-                storeFlashcards(mysql, results["flashcards"], app.accountNum, transcription_num, app.folder_num)
+            if(session.get("account_num")!= None):
+                storeFlashcards(mysql, results["flashcards"],session.get("account_num"),transcription_num,session.get("folder_num")) 
         except Exception as e:
             print(f"Error generating flashcards: {e}")
             results["flashcards"] = []
+
+         
 
         # Delete the file after processing
         os.remove(file_path)
@@ -173,9 +192,7 @@ def upload_file():
             "message": "File uploaded and processed successfully",
             **results
         })
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
-        response.headers.add("Access-Control-Allow-Methods", "POST,GET,OPTIONS")
+
 
         print("Final JSON response to frontend:", response.get_json())  # Debug log
 
@@ -187,18 +204,43 @@ def upload_file():
         response.headers.add("Access-Control-Allow-Origin", "*")  # Allow CORS on error response
         return response, 500
 
-@app.route('/retrieve-folders', methods=['POST'])
-def retrieve_folders():
-    app.config['MYSQL_DATABASE_HOST'] = 'study-buddy-database.co3kew2gkyw2.us-east-1.rds.amazonaws.com' # Specify Endpoint
-    app.config['MYSQL_DATABASE_USER'] = 'admin' # Specify Master username
-    app.config['MYSQL_DATABASE_PASSWORD'] = 'StudyBuddy!' # Specify Master password
-    app.config['MYSQL_DATABASE_DB'] = 'study_buddy_database' # Specify database name
-    mysql = MySQL(app)
-    folder_data = retrieveAllFolders(MySQL,app.accountNum)
-    with open("folder_data.json", "w") as file:
-        json.dump(folder_data, file, indent=4) # indent for pretty printing
-    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
-    file.save(file_path)
+    
+@app.route('/select_folder', methods=['POST'])
+def select_folder():
+    data = request.get_json()
+    session["folder_num"] = data.get("folderNum")
+    if not session.get("folder_num"):
+        return jsonify({"error": "No folder number provided"}), 400
+
+    transcription_text = None
+    study_guide_text  = None
+    flashcards_data   = None
+    practice_test_obj = None
+
+    for f in retrieveAllFilesInFolder(
+        mysql, session["account_num"], session["folder_num"]
+    ):
+        ft = f["FileType"]
+        if   ft == "Transcription":
+            transcription_text = str(retrieveFile(mysql, ft, f["Num"], session["account_num"], session["folder_num"])) # ← unwrap
+        elif ft == "StudyGuide":
+            study_guide_text  = str(retrieveFile(mysql, ft, f["Num"], session["account_num"], session["folder_num"]))     # ← unwrap
+            print(study_guide_text)
+        
+        elif ft == "FlashcardSet":
+            flashcards_data   =  retrieveFile(mysql, ft, f["Num"],
+                           session["account_num"], session["folder_num"])         # already a list
+        elif ft == "PracticeTest":
+            practice_test_obj =  retrieveFile(mysql, ft, f["Num"],
+                           session["account_num"], session["folder_num"])       # already JSON‑like
+    return jsonify({
+        "message":       "Folder contents loaded",
+        "transcription": transcription_text,
+        "study_guide":   study_guide_text,
+        "flashcards":    flashcards_data,
+        "practice_test": practice_test_obj,
+    }), 200
+
 @app.route('/download-transcription', methods=['GET'])
 def download_transcription():
     """Serve the transcription file for download."""

@@ -16,6 +16,7 @@ export default function SignIn() {
       const response = await fetch("http://localhost:5000/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // Include cookies for session management
         body: JSON.stringify({ email, password }),
       });
 

@@ -20,7 +20,7 @@ const EulaModal: React.FC<EulaModalProps> = ({ onClose }) => {
   return (
     <Dialog.Root open>
       <Dialog.Portal>
-        {/* 🔥 Actual translucent + blurred backdrop */}
+        {/* Actual translucent + blurred backdrop */}
         <div className="custom-eula-backdrop" />
 
         <Dialog.Content

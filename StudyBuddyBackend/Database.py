@@ -11,8 +11,6 @@ def retrieveAllFolders(mysql, AccountNum):
         cursor = conn.cursor()
         cursor.execute("SELECT FolderNum, FolderName FROM Folders WHERE AccountNum = %s", (AccountNum))
         data = cursor.fetchall()
-        cursor.close()
-        conn.close()
         folderFromAccounts = []
         for row in data:
             FolderNum, FolderName = row
@@ -22,11 +20,14 @@ def retrieveAllFolders(mysql, AccountNum):
             })
         return folderFromAccounts
     except Exception as err:
+        
         print(f"Error fetching Folder {FolderNum}:", err)
         return None
     finally:
-        cursor.close()
-        conn.close()
+        if cursor.connection.open:
+            cursor.close()
+        if conn.open:
+            conn.close()
 def retrieveAllFilesInFolder(mysql, AccountNum,FolderNum):
     """Retrieves all of the Files in a Folder (Name, FileType, Num)"""
     tables = [
@@ -105,10 +106,10 @@ def retrieveStudyGuide(mysql, StudyGuideNum, AccountNum, FolderNum):
         query = f"SELECT StudyGuideText, StudyGuideName FROM StudyGuide WHERE AccountNum = %s AND FolderNum = %s AND StudyGuideNum = %s;"
         cursor.execute(query, (AccountNum,FolderNum,StudyGuideNum))
         data = cursor.fetchall()
-        StudyGuideJson = {}
+        StudyGuideJson = ""
         for row in data:
             Text, Name = row
-            StudyGuideJson['study_guide'] = Text
+            StudyGuideJson = Text
         return StudyGuideJson
     except Exception as err:
         print(f"Error retrieving StudyGuide {StudyGuideNum}: {err}")
@@ -205,7 +206,6 @@ def createAccount(cursor, conn, Email, Username, Password, Joindate=None):
                        (Email, Username, hashed_password , Joindate))
         # Commit the transaction
         conn.commit()
-        print("Account created successfully with AccountNum:", cursor.lastrowid)
         return cursor.lastrowid  # Return the generated AccountNum
     
     except Exception as err:
@@ -248,7 +248,6 @@ def createFolder(cursor, conn, FolderName, AccountNum):
         cursor.execute("INSERT INTO Folders (FolderName, AccountNum) VALUES (%s, %s)", (FolderName, AccountNum))
         conn.commit()
         folder_num = cursor.lastrowid
-        print(f"Folder created successfully with FolderNum: {folder_num}")
         return folder_num
     except Exception as err:
         print("Error:", err)
@@ -297,7 +296,6 @@ def createTranscription(cursor, conn, TranscriptionName, TranscriptionText, Acco
         cursor.execute("INSERT INTO Transcription (TranscriptionName, TranscriptionText, AccountNum, FolderNum) VALUES (%s, %s, %s,%s)", (TranscriptionName, TranscriptionText, AccountNum, FolderNum))
         conn.commit()
         transcription_num = cursor.lastrowid
-        print(f"Transcription created successfully with TranscriptionNum: {transcription_num}")
         return transcription_num
     except Exception as err:
         print("Error:", err)
@@ -344,7 +342,6 @@ def createPracticeTest(cursor, conn, PracticeTestName, AccountNum, Transcription
                        (PracticeTestName, AccountNum, TranscriptionNum, FolderNum))
         conn.commit()
         test_num = cursor.lastrowid
-        print(f"PracticeTest created successfully with TestNum: {test_num}")
         return test_num
     except Exception as err:
         print("Error:", err)
@@ -391,7 +388,6 @@ def createStudyGuide(cursor, conn, StudyGuideName, StudyGuideText, AccountNum, T
                        (StudyGuideName, StudyGuideText, AccountNum, TranscriptionNum, FolderNum))
         conn.commit()
         study_guide_num = cursor.lastrowid
-        print(f"StudyGuide created successfully with StudyGuideNum: {study_guide_num}")
         return study_guide_num
     except Exception as err:
         print("Error:", err)
@@ -437,7 +433,6 @@ def createFlashcardSet(cursor, conn, setName, AccountNum, TranscriptionNum, Fold
         cursor.execute("INSERT INTO FlashcardSet (FlashcardSetName, AccountNum, TranscriptionNum, FolderNum) VALUES (%s, %s,%s, %s)", (setName, AccountNum, TranscriptionNum, FolderNum))
         conn.commit()
         flashcardset_num = cursor.lastrowid
-        print(f"FlashcardSet created successfully with FlashcardSet: {flashcardset_num}")
         return flashcardset_num
     
     except Exception as err:
@@ -500,7 +495,6 @@ def createFlashcard(cursor, conn, FrontText, BackText, FlashcardSetNum):
                        (FrontText, BackText, FlashcardSetNum))
         conn.commit()  # Commit the transaction
         flashcard_num = cursor.lastrowid  # Get the last inserted ID for the flashcard
-        print(f"Flashcard created successfully with FlashcardNum: {flashcard_num}")
         return flashcard_num
     except Exception as err:
         print("Error:", err)
@@ -559,7 +553,6 @@ def createQuestion(cursor, conn, Type, Text, TestNum, TranscriptionNum):
                        (Type, Text, TestNum, TranscriptionNum))
         conn.commit()
         question_num = cursor.lastrowid
-        print(f"Question created successfully with QuestionNum: {question_num}")
         return question_num
     except Exception as err:
         print("Error:", err)
@@ -605,7 +598,6 @@ def createAnswer(cursor, conn, Text, QuestionNum, Correct):
         cursor.execute("INSERT INTO Answer (Text, QuestionNum, Correct) VALUES (%s, %s, %s)", (Text, str(QuestionNum), Correct))
         conn.commit()
         answer_num = cursor.lastrowid
-        print(f"Answer created successfully with AnswerNum: {str(answer_num)}")
         return answer_num
     except Exception as err:
         print("Error:", err)
@@ -681,7 +673,7 @@ def reset_database(mysql):
             'PracticeTest',
             'Transcription',
             'Folders',
-            'Accounts'
+            #'Accounts'
         ]
     try:
         conn = mysql.connect()

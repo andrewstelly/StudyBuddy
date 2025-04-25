@@ -20,13 +20,11 @@ const PracticeTest: React.FC = () => {
     const storedContent = localStorage.getItem("generatedContent");
     if (storedContent) {
       const parsedContent = JSON.parse(storedContent);
-
-      // Check if practice_test is a string and parse it
       if (parsedContent.practice_test) {
         const practiceTestData =
           typeof parsedContent.practice_test === "string"
-            ? JSON.parse(parsedContent.practice_test) // Parse stringified JSON
-            : parsedContent.practice_test; // Use as-is if already an object
+            ? JSON.parse(parsedContent.practice_test)
+            : parsedContent.practice_test;
 
         if (practiceTestData.questions) {
           setPracticeTest(practiceTestData.questions);
@@ -54,8 +52,7 @@ const PracticeTest: React.FC = () => {
       if (response.ok) {
         setGradedResults(data.graded_results);
         const correctAnswers = data.graded_results.filter((result: any) => result.correct).length;
-        setGrade(`You got ${correctAnswers} out of 9 correct!`);
-        setPracticeTest([]);
+        setGrade(`You got ${correctAnswers} out of ${practiceTest.length} correct!`);
       } else {
         console.error("Error grading practice test:", data.error);
       }
@@ -87,8 +84,8 @@ const PracticeTest: React.FC = () => {
       if (response.ok && data.practice_test) {
         const practiceTestData =
           typeof data.practice_test === "string"
-            ? JSON.parse(data.practice_test) // Parse stringified JSON
-            : data.practice_test; // Use as-is if already an object
+            ? JSON.parse(data.practice_test)
+            : data.practice_test;
 
         if (practiceTestData.questions) {
           setPracticeTest(practiceTestData.questions);
@@ -116,8 +113,9 @@ const PracticeTest: React.FC = () => {
           height: "80vh",
           display: "flex",
           flexDirection: "column",
-        }}>
-
+        }}
+      >
+        {/* Top Controls */}
         <div
           style={{
             width: "100%",
@@ -148,7 +146,6 @@ const PracticeTest: React.FC = () => {
             flexWrap: "wrap",
           }}
         >
-
           <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             Font Size:
             <select
@@ -177,8 +174,6 @@ const PracticeTest: React.FC = () => {
             {loading ? "Regenerating..." : "Regenerate Test"}
           </button>
 
-
-
           <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             Font Type:
             <select
@@ -196,6 +191,7 @@ const PracticeTest: React.FC = () => {
           </label>
         </div>
 
+        {/* Main Test Area */}
         <div
           style={{
             flex: 1,
@@ -208,7 +204,6 @@ const PracticeTest: React.FC = () => {
             backgroundColor: "#ebf6ff",
           }}
         >
-
           {gradedResults ? (
             <div style={{ marginTop: "20px" }}>
               {grade && (
@@ -282,84 +277,43 @@ const PracticeTest: React.FC = () => {
                 </p>
 
                 {question.type === "multiple_choice" && question.options && (
-                  <div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginLeft: "10px" }}>
                     {question.options.map((option, i) => (
-                      <label
-                        key={i}
-                        style={{
-                          display: "block",
-                          marginBottom: "5px",
-                          marginLeft: "-565px",
-                        }}
-                      >
+                      <label key={i} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <input
                           type="radio"
                           name={`question-${index}`}
                           value={option}
                           onChange={() => handleResponseChange(index, option)}
-                          style={{
-                            transform: "scale(1.35)",
-                            marginRight: "-340px",
-                            paddingLeft: "0px",
-                          }}
+                          style={{ transform: "scale(1.25)" }}
                         />
-                        <span
-                          style={{
-                            textAlign: "left",
-                            width: "90%",
-                            marginLeft: "-285px",
-                          }}
-                        >
-                          {option}
-                        </span>
+                        {option}
                       </label>
                     ))}
                   </div>
                 )}
 
                 {question.type === "true_false" && (
-                  <div>
-                    <label
-                      style={{
-                        display: "Block",
-                        alignItems: "center",
-                        marginBottom: "5px",
-                        marginLeft: "-564px",
-                      }}
-                    >
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginLeft: "10px" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <input
                         type="radio"
                         name={`question-${index}`}
                         value="true"
                         onChange={() => handleResponseChange(index, true)}
-                        style={{
-                          transform: "scale(1.35)",
-                          marginRight: "-625px",
-                          paddingLeft: "0px",
-                        }}
+                        style={{ transform: "scale(1.25)" }}
                       />
-                      <span style={{ textAlign: "left", width: "90%" }}>True</span>
+                      True
                     </label>
-                    <label
-                      style={{
-                        display: "block",
-                        alignItems: "center",
-                        marginBottom: "5px",
-                        marginLeft: "-564px",
-                      }}
-                    >
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <input
                         type="radio"
                         name={`question-${index}`}
                         value="false"
                         onChange={() => handleResponseChange(index, false)}
-                        style={{
-                          transform: "scale(1.35)",
-                          marginRight: "-625px",
-                          paddingLeft: "0px",
-                        }}
+                        style={{ transform: "scale(1.25)" }}
                       />
-                      <span style={{ textAlign: "left", width: "90%" }}>False</span>
+                      False
                     </label>
                   </div>
                 )}
@@ -367,7 +321,14 @@ const PracticeTest: React.FC = () => {
                 {question.type === "discussion" && (
                   <textarea
                     placeholder="Type your answer here..."
-                    style={{ width: "100%", height: "100px", marginTop: "10px" }}
+                    style={{
+                      width: "100%",
+                      height: "100px",
+                      marginTop: "10px",
+                      borderRadius: "6px",
+                      padding: "8px",
+                      fontSize: "14px",
+                    }}
                     onChange={(e) => handleResponseChange(index, e.target.value)}
                   />
                 )}
@@ -378,20 +339,23 @@ const PracticeTest: React.FC = () => {
           )}
         </div>
 
+        {/* Submit Button */}
         <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginTop: "20px" }}>
-        <button
-          onClick={handleSubmit}
-          className="submit-button"
-          style={{
-            width: "200px",
-          }}
-        >
-          Submit Test
-        </button>
-      </div>
+          <button
+            onClick={handleSubmit}
+            className="submit-button"
+            style={{
+              width: "200px",
+            }}
+          >
+            Submit Test
+          </button>
+        </div>
       </div>
 
-      <div className="watermark">© 2025 StudyBuddy, Inc.</div>
+      <div className="watermark" style={{ textAlign: "center", marginTop: "20px" }}>
+        © 2025 StudyBuddy, Inc.
+      </div>
     </div>
   );
 };
