@@ -1,5 +1,5 @@
 import sys
-import os
+import io, os
 import json
 import openai
 from flask import Flask, request, jsonify, send_file,session, make_response
@@ -225,11 +225,36 @@ def select_folder():
 def download_transcription():
     """Serve the transcription file for download."""
     try:
-        transcription_file_path = os.path.join(os.getcwd(), "transcription.txt")  # Ensure correct path
-        if not os.path.exists(transcription_file_path):
-            print("Transcription file does not exist.")  # Debug log
-            return jsonify({"error": "Transcription file not found"}), 404
-        return send_file(transcription_file_path, as_attachment=True)
+        if not session.get("account_num"):
+            transcription_file_path = os.path.join(os.getcwd(), "transcription.txt")  # Ensure correct path
+            if not os.path.exists(transcription_file_path):
+                print("Transcription file does not exist.")  # Debug log
+                return jsonify({"error": "Transcription file not found"}), 404
+            return send_file(transcription_file_path, as_attachment=True)
+        else:
+            # Retrieve the transcription file from the database
+            transcription_num = None
+            for file in retrieveAllFilesInFolder(mysql, session["account_num"], session["folder_num"]):
+                if file["FileType"] == "Transcription":
+                    transcription_num = file["Num"]
+                    break
+            if transcription_num is None:
+                print("No transcription file found in the selected folder.")
+                return jsonify({"error": "No transcription file found"}), 404
+            transcription_file = retrieveFile(mysql, "Transcription", transcription_num, session["account_num"], session["folder_num"])
+            if not transcription_file:
+                print("Transcription file not found in database.")
+            print("Transcription file content:", transcription_file)  # Debug log
+            buffer = io.BytesIO(transcription_file.encode("utf-8"))
+            buffer.seek(0)                           # important!
+
+            return send_file(
+                buffer,
+                as_attachment=True,
+                download_name="transcription.txt",   # pick any default name you like
+                mimetype="text/plain",
+            )
+        
     except Exception as e:
         print(f"Error serving transcription file: {e}")
         return jsonify({"error": "Failed to download transcription"}), 500
