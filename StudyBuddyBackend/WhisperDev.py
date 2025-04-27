@@ -104,7 +104,7 @@ def upload_file():
 
         # Read user selections from form data
         translate_flag = request.form.get("translate") == "true"
-        target_language = request.form.get("targetLanguage", "English")
+        target_language = request.form.get("targetLanguage", "English")  # Default to English
 
         # Log received data
         print("\nReceived form data:")
@@ -113,20 +113,20 @@ def upload_file():
         temp_file_path = "temp_audio.wav"
         file.save(temp_file_path)
 
-    
+        # Transcribe audio
         print("Transcribing in the original language...")
         transcription = transcribe_mp3(temp_file_path)
         print("Transcription completed.")
 
-        # Generate results using the transcription (already in the target language if translation is selected)
+        # Generate results using the transcription
         results = {
-            "transcription": transcription,  # This will be in the target language if translation is selected
-            "study_guide": create_study_guide(transcription, target_language),
+            "transcription": transcription,  # This will always be in the original language
+            "study_guide": create_study_guide(transcription, target_language),  # Pass target_language
         }
 
         # Generate practice test
         try:
-            raw_practice_test = create_practice_test(transcription, target_language)
+            raw_practice_test = create_practice_test(transcription, target_language)  # Pass target_language
             print("Raw practice test:", raw_practice_test)
 
             # Clean and parse the practice test JSON
@@ -139,7 +139,7 @@ def upload_file():
 
         # Generate flashcards
         try:
-            raw_flashcards = create_flashcards(transcription, target_language)
+            raw_flashcards = create_flashcards(transcription, target_language)  # Pass target_language
             print("Raw flashcards:", raw_flashcards)
 
             # Clean and parse the flashcards JSON
@@ -154,6 +154,7 @@ def upload_file():
         print("\nFinal Generated Content:")
         print(results)
 
+        # Clean up temporary file
         os.remove(temp_file_path)
 
         return jsonify(results)
