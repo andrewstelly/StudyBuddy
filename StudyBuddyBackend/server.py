@@ -16,7 +16,7 @@ client = openai.OpenAI(api_key=api_key)
 
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)  # Enable CORS for all routes
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)  # Enable CORS for all routes
 app.secret_key = os.getenv('FLASK_SECRET_KEY')
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -32,7 +32,7 @@ mysql = MySQL(app)
 @app.route('/upload', methods=['OPTIONS'])
 def options():
     response = jsonify({"message": "CORS Preflight OK"})
-    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Origin", "http://localhost:5173")
     response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
     response.headers.add("Access-Control-Allow-Methods", "POST,OPTIONS")
     return response, 200
@@ -224,6 +224,7 @@ def select_folder():
 @app.route('/download-transcription', methods=['GET'])
 def download_transcription():
     """Serve the transcription file for download."""
+    print("Current session:", dict(session))  # Debugging log
     try:
         if not session.get("account_num"):
             transcription_file_path = os.path.join(os.getcwd(), "transcription.txt")  # Ensure correct path

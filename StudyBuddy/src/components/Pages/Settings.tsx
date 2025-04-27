@@ -33,7 +33,10 @@ const Settings: React.FC = () => {
 
   const handleDownload = async () => {
     try {
-      const response = await fetch("http://localhost:5000/download-transcription");
+      const response = await fetch("http://localhost:5000/download-transcription", {
+        method: "GET",
+        credentials: "include",
+      });
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
