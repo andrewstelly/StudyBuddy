@@ -112,97 +112,77 @@ def login():
 def upload_file():
     """Handles file upload and content generation."""
     try:
-        if 'file' not in request.files:
-            response = jsonify({"error": "No file part"})
-            response.headers.add("Access-Control-Allow-Origin", "*")  # Allow CORS
-            return response, 400
+        file = request.files.get("file")
+        if not file:
+            return jsonify({"error": "No file provided"}), 400
 
-        file = request.files['file']
-        if file.filename == '':
-            response = jsonify({"error": "No selected file"})
-            response.headers.add("Access-Control-Allow-Origin", "*")  # Allow CORS
-            return response, 400
+        # Read user selections from form data
+        translate_flag = request.form.get("translate") == "true"
+        target_language = request.form.get("targetLanguage", "English")  # Default to English
 
-        file_path = os.path.join(UPLOAD_FOLDER, file.filename)
-        file.save(file_path)
-        print(f"File saved to {file_path}")
+        # Log received data
+        print("\nReceived form data:")
+        print(f"Translate: {translate_flag}, Language: {target_language}")
 
-        # Read form data flags
-        target_language = request.form.get("targetLanguage", "English")  # Default to English if no language is selected
+        temp_file_path = "temp_audio.wav"
+        file.save(temp_file_path)
 
         # Transcribe audio
-        print("Starting transcription...")
-        transcription_text = transcribe_mp3(file_path)  # Transcribe in the original language
+        print("Transcribing in the original language...")
+        transcription = transcribe_mp3(temp_file_path)
         print("Transcription completed.")
 
-        # Translate transcription if translation is selected
-        #if translate_flag and target_language:
-        #    print(f"Translating transcription directly into {target_language}...")
-        #    transcription_text = translate_text(transcription_text, target_language)
-        #    print(f"Transcription in {target_language} completed.")
+        # Generate results using the transcription
+        results = {
+            "transcription": transcription,  # This will always be in the original language
+            "study_guide": create_study_guide(transcription, target_language),  # Pass target_language
+        }
         if(session.get("account_num") != None):
            session['folder_num']= storeFolder(mysql, "Test Folder", session.get("account_num"))
-           transcription_num = storeTranscription(mysql,"Transcription Name", transcription_text,session.get("account_num"),session.get("folder_num") )
-
-        # Add transcription to results
-        results = {
-            "transcription": transcription_text  # This will always be in the original language
-        }
-
-
-        # Always create study guide
-        results["study_guide"] = create_study_guide(transcription_text)
-        print("Study Guide:", results["study_guide"])  # Log study guide
-        if(session.get("account_num") != None):
-            storeStudyGuide(mysql, "StudyGuide Name", results["study_guide"], session.get("account_num"), transcription_num, session.get("folder_num") )
-        # Always create practice test
-        raw_practice_test = create_practice_test(transcription_text)
-        print("Raw practice test output:", raw_practice_test)  # Debugging log
-
-        # Generate study guide
-
+           transcription_num = storeTranscription(mysql,"Transcription Name", transcription,session.get("account_num"),session.get("folder_num") )
+           storeStudyGuide(mysql, "StudyGuide Name", results["study_guide"], session.get("account_num"), transcription_num, session.get("folder_num") )
+        # Generate practice test
         try:
-            # Parse the practice test JSON
-            results["practice_test"] = json.loads(raw_practice_test)
-            if (session.get("account_num") != None):
+            raw_practice_test = create_practice_test(transcription, target_language)  # Pass target_language
+            print("Raw practice test:", raw_practice_test)
+
+            # Clean and parse the practice test JSON
+            if raw_practice_test.startswith("```json"):
+                raw_practice_test = raw_practice_test.strip("```json").strip("```").strip()
+            results["practice_test"] = json.loads(raw_practice_test)  # Parse into JSON object
+        except json.JSONDecodeError as e:
+            print(f"Error decoding practice test JSON: {e}")
+            results["practice_test"] = {"error": "Failed to generate practice test"}
+        if (session.get("account_num") != None):
                 storePracticeTest(mysql,results["practice_test"],"Test Practice Test",session.get("account_num"),transcription_num,session.get("folder_num"))
-        except Exception as e:
-            print(f"Error generating study guide: {e}")
-            results["study_guide"] = {"error": "Failed to generate study guide"}
 
         # Generate flashcards
         try:
-            results["flashcards"] = json.loads(create_flashcards(transcription_text, target_language))
-            print("Flashcards:", results["flashcards"])  # Log flashcards
-            if(session.get("account_num")!= None):
-                storeFlashcards(mysql, results["flashcards"],session.get("account_num"),transcription_num,session.get("folder_num")) 
-        except Exception as e:
-            print(f"Error generating flashcards: {e}")
+            raw_flashcards = create_flashcards(transcription, target_language)  # Pass target_language
+            print("Raw flashcards:", raw_flashcards)
+
+            # Clean and parse the flashcards JSON
+            if raw_flashcards.startswith("```json"):
+                raw_flashcards = raw_flashcards.strip("```json").strip("```").strip()
+            results["flashcards"] = json.loads(raw_flashcards)  # Parse into JSON object
+        except json.JSONDecodeError as e:
+            print(f"Error decoding flashcards JSON: {e}")
             results["flashcards"] = []
+        if (session.get("account_num") != None):
+            storePracticeTest(mysql,results["practice_test"],"Test Practice Test",session.get("account_num"),transcription_num,session.get("folder_num"))
 
-         
+        # Log final results
+        print("\nFinal Generated Content:")
+        print(results)
 
-        # Delete the file after processing
-        os.remove(file_path)
-        print(f"File {file_path} deleted")
+        # Clean up temporary file
+        os.remove(temp_file_path)
 
-        # Explicitly set CORS headers in response
-        print("Final results being sent to frontend:", results)  # Debug log
-        response = jsonify({
-            "message": "File uploaded and processed successfully",
-            **results
-        })
-
-
-        print("Final JSON response to frontend:", response.get_json())  # Debug log
-
-        return response, 200
+        return jsonify(results)
 
     except Exception as e:
         print(f"Error: {e}")
-        response = jsonify({"error": str(e)})
-        response.headers.add("Access-Control-Allow-Origin", "*")  # Allow CORS on error response
-        return response, 500
+        return jsonify({"error": str(e)}), 500
 
     
 @app.route('/select_folder', methods=['POST'])
