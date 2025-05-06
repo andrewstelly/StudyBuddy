@@ -201,7 +201,7 @@ const PracticeTest: React.FC = () => {
             padding: "10px",
             fontSize: `${fontSize}px`,
             fontFamily: fontFamily,
-            backgroundColor: "#abccf1",
+            backgroundColor: "white",
           }}
         >
           {gradedResults ? (
@@ -345,8 +345,8 @@ const PracticeTest: React.FC = () => {
             onClick={handleSubmit}
             className="submit-button"
             style={{
-              marginTop: "2rem",
-              marginBottom: "-3rem",
+              marginTop: "1.5rem",
+              marginBottom: "-2.5rem",
               width: "200px",
             }}
           >
