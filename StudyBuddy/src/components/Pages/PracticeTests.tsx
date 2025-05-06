@@ -133,8 +133,8 @@ const PracticeTest: React.FC = () => {
 
         <div
           style={{
-            backgroundColor: "#ebf6ff",
-            border: "1px solid #ccc",
+            backgroundColor: "#abccf1",
+            border: "1px solid gray",
             borderRadius: "8px",
             padding: "16px",
             marginBottom: "20px",
@@ -196,12 +196,12 @@ const PracticeTest: React.FC = () => {
           style={{
             flex: 1,
             overflowY: "auto",
-            border: "1px solid #ccc",
+            border: "1px solid gray",
             borderRadius: "5px",
             padding: "10px",
             fontSize: `${fontSize}px`,
             fontFamily: fontFamily,
-            backgroundColor: "#ebf6ff",
+            backgroundColor: "#abccf1",
           }}
         >
           {gradedResults ? (
@@ -225,9 +225,9 @@ const PracticeTest: React.FC = () => {
                   <div
                     key={index}
                     style={{
-                      marginBottom: "15px",
-                      padding: "10px",
-                      border: "1px solid #ccc",
+                      marginBottom: "2rem",
+                      padding: "0.5rem",
+                      border: "1px solid gray",
                       borderRadius: "5px",
                       backgroundColor: result.correct ? "#d4edda" : "#f8d7da",
                     }}
@@ -262,7 +262,7 @@ const PracticeTest: React.FC = () => {
                     )}
                     {result.evaluation && (
                       <p>
-                        ChatGPT Evaluation: <strong>{result.evaluation}</strong>
+                        Evaluation: <strong>{result.evaluation}</strong>
                       </p>
                     )}
                   </div>
@@ -340,13 +340,13 @@ const PracticeTest: React.FC = () => {
         </div>
 
         {/* Submit Button */}
-        <div style={{ display: "flex", justifyContent: "center", gap: "20px" }}>
+        <div style={{ display: "flex", justifyContent: "center", gap: "20px", paddingBottom: "20px" }}>
           <button
             onClick={handleSubmit}
             className="submit-button"
             style={{
-              marginTop: "20px",
-              marginBottom: "-50px",
+              marginTop: "2rem",
+              marginBottom: "-3rem",
               width: "200px",
             }}
           >

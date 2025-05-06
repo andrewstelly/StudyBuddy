@@ -4,7 +4,7 @@
   width: 100vw;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   padding-top: 5vh;
   padding-bottom: 5vh;
   background-color: #9bcaff;
@@ -30,7 +30,7 @@
 .signin-container {
   width: 100%;
   max-width: 480px;
-  background-color: rgba(185, 222, 255, 0.95);
+  background-color: rgba(102, 154, 201, 0.95);
   border-radius: 1rem;
   padding: 1.5rem 2rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);

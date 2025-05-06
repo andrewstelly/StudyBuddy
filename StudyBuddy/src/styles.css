@@ -28,7 +28,7 @@ body {
 }
 
 .content > div {
-  background-color: #ffffff;
+  background-color: #f0f8ff;
   padding: 2rem;
   border-radius: 0.5rem;
   box-shadow: 0 0.625rem 0.9375rem -0.1875rem rgba(0, 0, 0, 0.1),
@@ -134,7 +134,7 @@ body > div[class*="radix-portal"] > div {
 }
 
 .flashcard-content > div {
-  background-color: #ffffff;
+  background-color: #f0f8ff;
   padding: 2rem;
   border-radius: 0.5rem;
   box-shadow: 0 0.625rem 0.9375rem -0.1875rem rgba(0, 0, 0, 0.1),
@@ -150,7 +150,7 @@ body > div[class*="radix-portal"] > div {
 
 /* Settings */
 .settings-container {
-  background-color: #c5dfff;
+  background-color: #abccf1;
   padding: 2rem;
   border-radius: 0.5rem;
   box-shadow: 0 0.625rem 0.9375rem -0.1875rem rgba(0, 0, 0, 0.2),

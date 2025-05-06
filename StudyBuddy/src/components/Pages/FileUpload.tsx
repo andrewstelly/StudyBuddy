@@ -224,8 +224,8 @@ const FileUpload: React.FC = () => {
           {/* Top Controls */}
           <div
             style={{
-              backgroundColor: "#ebf6ff",
-              border: "1px solid #ccc",
+              backgroundColor: "#abccf1",
+              border: "1px solid gray",
               borderRadius: "8px",
               padding: "16px",
               marginTop: "20px",
@@ -297,8 +297,8 @@ const FileUpload: React.FC = () => {
           {/* Folders Section */}
           <div
             style={{
-              backgroundColor: "#ebf6ff",
-              border: "1px solid #ccc",
+              backgroundColor: "#abccf1",
+              border: "1px solid gray",
               borderRadius: "8px",
               padding: "16px",
               boxShadow: "0 2px 5px rgba(0, 0, 0, 0.05)",
