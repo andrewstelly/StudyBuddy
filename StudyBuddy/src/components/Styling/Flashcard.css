@@ -6,7 +6,7 @@
   border-radius: 10px;
   overflow: hidden;
   position: relative;
-  background-color: #e3f1ff; /* Match front background to eliminate flash */
+  background-color: #abccf1; /* Match front background to eliminate flash */
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
@@ -46,12 +46,12 @@
 }
 
 .front {
-  background-color: #e3f1ff;
+  background-color: #abccf1;
   z-index: 2;
 }
 
 .back {
-  background-color: #c4dce0;
+  background-color: #85abd3;
   transform: rotateY(180deg);
   z-index: 1;
 }

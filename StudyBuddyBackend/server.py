@@ -353,15 +353,22 @@ def grade_test():
                     "correct_answer": question["correct_answer"]
                 })
             elif question["type"] == "discussion":
-                # Use ChatGPT to evaluate discussion responses
-                evaluation_result = evaluate_discussion_response(response, question["correct_answer"])
-                graded_results.append({
-                    "question": question["question"],
-                    "user_response": response,
-                    "evaluation": evaluation_result["evaluation"],
-                    "correct": evaluation_result["correct"]
-                })
+                    # Use ChatGPT to evaluate discussion responses
+                    evaluation_result = evaluate_discussion_response(response, question["correct_answer"])
+                    full_eval = evaluation_result["evaluation"]
 
+                    if "Explanation:" in full_eval:
+                        explanation_only = full_eval.split("Explanation:", 1)[1].strip()
+                    else:
+                        explanation_only = full_eval.strip()
+
+                    graded_results.append({
+                        "question": question["question"],
+                        "user_response": response,
+                        "evaluation": explanation_only,
+                        "correct": evaluation_result["correct"]
+                    })
+                
         return jsonify({"graded_results": graded_results}), 200
     except Exception as e:
         print(f"Error grading test: {e}")

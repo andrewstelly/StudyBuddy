@@ -77,8 +77,8 @@ const Notes: React.FC = () => {
             {/* Control Container */}
             <div
                 style={{
-                    backgroundColor: "#ebf6ff",
-                    border: "1px solid #ccc",
+                    backgroundColor: "#abccf1",
+                    border: "1px solid gray",
                     borderRadius: "8px",
                     padding: "16px",
                     marginBottom: "20px",
@@ -143,11 +143,11 @@ const Notes: React.FC = () => {
                     resize: "none",
                     flexGrow: 1,
                     width: "100%",
-                    border: "1px solid #ccc",
+                    border: "1px solid gray",
                     borderRadius: "5px",
                     padding: "10px",
                     boxSizing: "border-box",
-                    backgroundColor: "#ebf6ff",
+                    backgroundColor: "white",
                 }}
             />
         </div>
