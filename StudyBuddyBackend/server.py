@@ -27,7 +27,6 @@ app.config['MYSQL_DATABASE_DB'] = 'study_buddy_database' # Specify database name
 
 mysql = MySQL(app)
 
-
 # Handle preflight OPTIONS request for CORS
 @app.route('/upload', methods=['OPTIONS'])
 def options():
@@ -67,17 +66,17 @@ def register():
 @app.route('/folders', methods=['GET'])
 def sendFolders():
     try:
-        #print("Current session:", dict(session))   # Debugging log
+        print("Current session:", dict(session))   # Debugging log
         if(session.get("account_num")== None):
-            #print("Account number is None, returning empty folders list")  # Debugging log
+            print("Account number is None, returning empty folders list")  # Debugging log
             return jsonify({"folders":[]}), 200
         else:
             print("Retrieving folders for account:", session.get("account_num"))  # Debugging log
             folder_data = retrieveAllFolders(mysql,session.get("account_num"))
-            #print(f"Retrieved folder data: {folder_data}")  # Debugging log
+            print(f"Retrieved folder data: {folder_data}")  # Debugging log
             return jsonify({"folder": folder_data}), 200
     except Exception as e:
-        #print(f"Error retrieving folders: {e}")
+        print(f"Error retrieving folders: {e}")
         return jsonify({"error": str(e)}), 500
 @app.route('/login', methods=['POST'])
 def login():
@@ -121,16 +120,16 @@ def upload_file():
         target_language = request.form.get("targetLanguage", "English")  # Default to English
 
         # Log received data
-        #print("\nReceived form data:")
-        #print(f"Translate: {translate_flag}, Language: {target_language}")
+        print("\nReceived form data:")
+        print(f"Translate: {translate_flag}, Language: {target_language}")
 
         temp_file_path = "temp_audio.wav"
         file.save(temp_file_path)
 
         # Transcribe audio
-        #print("Transcribing in the original language...")
+        print("Transcribing in the original language...")
         transcription = transcribe_mp3(temp_file_path)
-        #print("Transcription completed.")
+        print("Transcription completed.")
 
         # Generate results using the transcription
         results = {
@@ -144,7 +143,7 @@ def upload_file():
         # Generate practice test
         try:
             raw_practice_test = create_practice_test(transcription, target_language)  # Pass target_language
-            #print("Raw practice test:", raw_practice_test)
+            print("Raw practice test:", raw_practice_test)
 
             # Clean and parse the practice test JSON
             if raw_practice_test.startswith("```json"):
@@ -172,8 +171,8 @@ def upload_file():
             storeFlashcards(mysql,results["flashcards"],session.get("account_num"),transcription_num,session.get("folder_num"))
 
         # Log final results
-        #print("\nFinal Generated Content:")
-        #print(results)
+        print("\nFinal Generated Content:")
+        print(results)
 
         # Clean up temporary file
         os.remove(temp_file_path)
@@ -247,7 +246,7 @@ def download_transcription():
             transcription_file = retrieveFile(mysql, "Transcription", transcription_num, session["account_num"], session["folder_num"])
             if not transcription_file:
                 print("Transcription file not found in database.")
-            #print("Transcription file content:", transcription_file)  # Debug log
+            print("Transcription file content:", transcription_file)  # Debug log
             buffer = io.BytesIO(transcription_file.encode("utf-8"))
             buffer.seek(0)                           # important!
 
