@@ -51,7 +51,7 @@ def retrieveAllFilesInFolder(mysql, AccountNum,FolderNum):
                 "FileType" : table,
                 "Num": Num  
                 })
-
+        print(f"Printing all of the Files in Folder {FileList}:")
         return FileList
     except Exception as err:
         print(f"Error printing all of Files in Folder {FolderNum}: {err}")
@@ -67,7 +67,9 @@ def retrieveFile(mysql, tableName, Num, AccountNum, FolderNum):
         case "StudyGuide":
            return retrieveStudyGuide(mysql,Num,AccountNum,FolderNum)
         case "FlashcardSet":
-            return retrieveFlashcardSet(mysql,Num,AccountNum,FolderNum)
+            test = retrieveFlashcardSet(mysql,Num,AccountNum,FolderNum)
+            print(test)
+            return test
         case "PracticeTest":
             return retrievePracticeTest(mysql, Num, AccountNum, FolderNum)
 def combine_into_json(transcription, study_guide, practice_test, flashcards):
@@ -179,6 +181,7 @@ def retrieveFlashcardSet(mysql, FlashcardSetNum, AccountNum, FolderNum):
                 "answer": backtext
             }
             flashcard_Array.append(flashcard_data)
+        print(flashcard_Array)
         return flashcard_Array
     except Exception as err:
         print(f"Error retrieving FlashcardSetNum {FlashcardSetNum}: {err}")
